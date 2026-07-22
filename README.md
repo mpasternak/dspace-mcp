@@ -106,9 +106,23 @@ Every variable has a matching flag: `--base-url`, `--timeout`,
 
 ## Compatibility
 
-Verified against DSpace 7.2.1, 7.5, 7.6.5, 8.2, 8.4, 9.2, 10.1 and
-11.0-SNAPSHOT. The test suite runs against recorded responses from real
-instances of versions 7, 8, 10 and 11.
+Nothing here branches on a version number. The server asks each instance
+which search filters, sort fields and facets it supports and works from that
+answer, which is what actually varies between installations — two sites on the
+same DSpace version can differ more than two versions of the same site.
+
+The offline test suite runs against recorded responses from a live DSpace
+10.1-SNAPSHOT (`demo.dspace.org`), covering every endpoint the server touches,
+plus root and search responses from a vanilla 7.6.5, a DSpace-CRIS 8.2 and an
+11.0-SNAPSHOT for comparing response shape. The contract tests
+(`pytest -m live`) run against one instance at a time — `demo.dspace.org` by
+default, or point `DSPACE_TEST_URL` at your own.
+
+While the tool was being designed, its assumptions about the REST API were
+checked by hand against live instances of 7.2.1, 7.5, 7.6.5, 8.2, 8.4, 9.2,
+10.1 and 11.0-SNAPSHOT. That was a survey of the API, not a test run of this
+code. If it misbehaves on a version or a configuration I could not test,
+[a bug report](https://github.com/mpasternak/dspace-mcp/issues) is welcome.
 
 ## Development
 
