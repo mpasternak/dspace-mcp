@@ -1,0 +1,1357 @@
+{
+  "id" : null,
+  "scope" : null,
+  "query" : "cancer",
+  "appliedFilters" : null,
+  "sort" : null,
+  "configuration" : null,
+  "type" : "discover",
+  "uniqueType" : "discover.discover",
+  "_links" : {
+    "self" : {
+      "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item"
+    }
+  },
+  "_embedded" : {
+    "searchResult" : {
+      "_embedded" : {
+        "objects" : [ {
+          "hitHighlights" : {
+            "dc.title" : [ "Age- and tumor subtype-specific breast <em>cancer</em> risk estimates for CHEK2*1100delC carriers" ]
+          },
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "indexableObject" : {
+              "href" : "https://demo.dspace.org/server/api/core/items/0157eef4-2dc8-4ddd-8124-94cdabc15f6e"
+            }
+          },
+          "_embedded" : {
+            "indexableObject" : {
+              "id" : "0157eef4-2dc8-4ddd-8124-94cdabc15f6e",
+              "uuid" : "0157eef4-2dc8-4ddd-8124-94cdabc15f6e",
+              "name" : "Age- and tumor subtype-specific breast cancer risk estimates for CHEK2*1100delC carriers",
+              "handle" : "123456789/442",
+              "metadata" : {
+                "dc.contributor.author" : [ {
+                  "value" : "Schmidt, Marjanka K",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                }, {
+                  "value" : "Hogervorst, Frans",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 1
+                }, {
+                  "value" : "van, Hien Richard",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 2
+                }, {
+                  "value" : "Cornelissen, Sten",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 3
+                }, {
+                  "value" : "Broeks, Annegien",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 4
+                }, {
+                  "value" : "Adank, Muriel",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 5
+                }, {
+                  "value" : "Meijers, Hanne",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 6
+                }, {
+                  "value" : "Waisfisz, Quinten",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 7
+                }, {
+                  "value" : "Hollestelle, Antoinette",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 8
+                }, {
+                  "value" : "Schutte, Mieke",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 9
+                }, {
+                  "value" : "van, den Ouweland Ans",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 10
+                }, {
+                  "value" : "Hooning, Maartje",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 11
+                }, {
+                  "value" : "Andrulis, Irene L",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 12
+                }, {
+                  "value" : "Anton-Culver, Hoda",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 13
+                }, {
+                  "value" : "Antonenkova, Natalia N",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 14
+                }, {
+                  "value" : "Antoniou, Antonis",
+                  "language" : null,
+                  "authority" : "virtual::1019",
+                  "confidence" : -1,
+                  "place" : 15
+                }, {
+                  "value" : "Arndt, Volker",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 16
+                }, {
+                  "value" : "Bermisheva, Marina",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 17
+                }, {
+                  "value" : "Bogdanova, Natalia V",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 18
+                }, {
+                  "value" : "Bolla, Manjeet K",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 19
+                }, {
+                  "value" : "Brauch, Hiltrud",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 20
+                }, {
+                  "value" : "Brenner, Hermann",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 21
+                }, {
+                  "value" : "Brüning, Thomas",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 22
+                }, {
+                  "value" : "Burwinkel, Barbara",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 23
+                }, {
+                  "value" : "Chang-Claude, Jenny",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 24
+                }, {
+                  "value" : "Chenevix-Trench, Georgia",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 25
+                }, {
+                  "value" : "Couch, Fergus J",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 26
+                }, {
+                  "value" : "Cox, Angela",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 27
+                }, {
+                  "value" : "Cross, Simon S",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 28
+                }, {
+                  "value" : "Czene, Kamila",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 29
+                }, {
+                  "value" : "Dunning, Alison",
+                  "language" : null,
+                  "authority" : "virtual::1020",
+                  "confidence" : -1,
+                  "place" : 30
+                }, {
+                  "value" : "Fasching, Peter A",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 31
+                }, {
+                  "value" : "Figueroa, Jonine",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 32
+                }, {
+                  "value" : "Fletcher, Olivia",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 33
+                }, {
+                  "value" : "Flyger, Henrik",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 34
+                }, {
+                  "value" : "Galle, Eva",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 35
+                }, {
+                  "value" : "García-Closas, Montserrat",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 36
+                }, {
+                  "value" : "Giles, Graham G",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 37
+                }, {
+                  "value" : "Haeberle, Lothar",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 38
+                }, {
+                  "value" : "Hall, Per",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 39
+                }, {
+                  "value" : "Hillemanns, Peter",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 40
+                }, {
+                  "value" : "Hopper, John L",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 41
+                }, {
+                  "value" : "Jakubowska, Anna",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 42
+                }, {
+                  "value" : "John, Esther M",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 43
+                }, {
+                  "value" : "Jones, Michael",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 44
+                }, {
+                  "value" : "Khusnutdinova, Elza",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 45
+                }, {
+                  "value" : "Knight, Julia A",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 46
+                }, {
+                  "value" : "Kosma, Veli-Matti",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 47
+                }, {
+                  "value" : "Kristensen, Vessela",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 48
+                }, {
+                  "value" : "Lee, Andrew",
+                  "language" : null,
+                  "authority" : "virtual::1021",
+                  "confidence" : -1,
+                  "place" : 49
+                }, {
+                  "value" : "Lindblom, Annika",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 50
+                }, {
+                  "value" : "Lubinski, Jan",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 51
+                }, {
+                  "value" : "Mannermaa, Arto",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 52
+                }, {
+                  "value" : "Margolin, Sara",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 53
+                }, {
+                  "value" : "Meindl, Alfons",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 54
+                }, {
+                  "value" : "Milne, Roger L",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 55
+                }, {
+                  "value" : "Muranen, Taru A",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 56
+                }, {
+                  "value" : "NBCS, Investigators",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 57
+                }, {
+                  "value" : "Newcomb, Polly A",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 58
+                }, {
+                  "value" : "Offitt, Kenneth",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 59
+                }, {
+                  "value" : "Park-Simon, Tjoung-Won",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 60
+                }, {
+                  "value" : "Peto, Julian",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 61
+                }, {
+                  "value" : "Pharoah, Paul",
+                  "language" : null,
+                  "authority" : "virtual::1022",
+                  "confidence" : -1,
+                  "place" : 62
+                }, {
+                  "value" : "Robson, Mark",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 63
+                }, {
+                  "value" : "Rudolph, Anja",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 64
+                }, {
+                  "value" : "Sawyer, Elinor J",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 65
+                }, {
+                  "value" : "Schmutzler, Rita K",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 66
+                }, {
+                  "value" : "Seynaeve, Caroline",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 67
+                }, {
+                  "value" : "Soens, Julie",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 68
+                }, {
+                  "value" : "Southey, Melissa C",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 69
+                }, {
+                  "value" : "Spurdle, Amanda",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 70
+                }, {
+                  "value" : "Surowy, Harald",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 71
+                }, {
+                  "value" : "Swerdlow, Anthony",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 72
+                }, {
+                  "value" : "Tollenaar, Rob AEM",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 73
+                }, {
+                  "value" : "Tomlinson, Ian",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 74
+                }, {
+                  "value" : "Trentham-Dietz, Amy",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 75
+                }, {
+                  "value" : "Vachon, Celine",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 76
+                }, {
+                  "value" : "Wang, Qin",
+                  "language" : null,
+                  "authority" : "virtual::1023",
+                  "confidence" : -1,
+                  "place" : 77
+                }, {
+                  "value" : "Whittemore, Alice S",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 78
+                }, {
+                  "value" : "Ziogas, Argyrios",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 79
+                }, {
+                  "value" : "van, der Kolk Lizet",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 80
+                }, {
+                  "value" : "Nevanlinna, Heli",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 81
+                }, {
+                  "value" : "Dörk, Thilo",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 82
+                }, {
+                  "value" : "Bojesen, Stig",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 83
+                }, {
+                  "value" : "Easton, Douglas",
+                  "language" : null,
+                  "authority" : "virtual::1024",
+                  "confidence" : -1,
+                  "place" : 84
+                } ],
+                "dc.contributor.other" : [ {
+                  "value" : "Law Enforcement",
+                  "language" : null,
+                  "authority" : "virtual::1431",
+                  "confidence" : -1,
+                  "place" : 0
+                }, {
+                  "value" : "Law and Development",
+                  "language" : null,
+                  "authority" : "virtual::1432",
+                  "confidence" : -1,
+                  "place" : 1
+                }, {
+                  "value" : "Personal Rights & Property Rights",
+                  "language" : null,
+                  "authority" : "virtual::1433",
+                  "confidence" : -1,
+                  "place" : 2
+                }, {
+                  "value" : "Government & Law",
+                  "language" : null,
+                  "authority" : "virtual::1434",
+                  "confidence" : -1,
+                  "place" : 3
+                }, {
+                  "value" : "Business & Law",
+                  "language" : null,
+                  "authority" : "virtual::1435",
+                  "confidence" : -1,
+                  "place" : 4
+                } ],
+                "dc.date.accessioned" : [ {
+                  "value" : "2019-04-26T08:57:00Z",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.date.available" : [ {
+                  "value" : "2019-04-26T08:57:00Z",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.date.issued" : [ {
+                  "value" : "2016",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.description" : [ {
+                  "value" : "CHEK2*1100delC is a well-established breast cancer risk variant, most prevalent in European populations. However, there are limited data on risk of breast cancer by age and tumor subtype, limiting its usefulness in breast cancer risk prediction. We aimed to generate tumor subtype- and age-specific risk estimates using data from the Breast Cancer Association Consortium, including 44,777 breast cancer patients and 42,997 controls from 33 studies genotyped for CHEK2*1100delC. CHEK2*1100delC genotyping was mostly done by a custom Taqman assay. Breast cancer odds ratios (OR) for CHEK2*1100delC carriers versus non-carriers were estimated using logistic regression; adjusting for study (categorical) and age. Main analyses included invasive breast cancer patients from population- and hospital-based studies. The proportions of heterozygous CHEK2*1100delC carriers in controls, in breast cancer patients from population- and hospital-based studies, and in breast cancer patients from familial and clinical genetics center-based studies, were 0.5%, 1.3%, and 3.0% respectively. The estimated OR f or invasive breast cancer was 2.26 (95%CI:1.90-2.69; p=2.3x10^-20). The OR was higher f or estrogen receptor (ER)-positive disease 2.55 (95%CI:2.10-3.10; p=4.9x10^-21) than for ER-negative disease 1.32 (95%CI: 0.93-1.88; p=0.12) (p interaction=9.9x10^-4). The OR significantly declined with attained age for breast cancer overall (p=0.001) and for ER-positive tumors (p=0.001). Estimated cumulative risks for CHEK2*1100delC carriers for the development of ER-positive and ER-negative tumors by age 80 were respectively 20% and 3%, compared with 9% and 2% in the UK general population. These CHEK2*1100delC breast cancer risk estimates provide a basis for incorporating CHEK2*1100delC into breast cancer risk prediction models, and into guidelines for intensified screening and follow-up.",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.identifier.uri" : [ {
+                  "value" : "https://demo7.dspace.org/handle/123456789/442",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.language" : [ {
+                  "value" : "en",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.publisher" : [ {
+                  "value" : "American Society of Clinical Oncology",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.title" : [ {
+                  "value" : "Age- and tumor subtype-specific breast cancer risk estimates for CHEK2*1100delC carriers",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dspace.entity.type" : [ {
+                  "value" : "Publication",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dspace.relatedentity.type" : [ {
+                  "value" : "Person",
+                  "language" : null,
+                  "authority" : "virtual::1019",
+                  "confidence" : -1,
+                  "place" : 15
+                }, {
+                  "value" : "Person",
+                  "language" : null,
+                  "authority" : "virtual::1020",
+                  "confidence" : -1,
+                  "place" : 30
+                }, {
+                  "value" : "Person",
+                  "language" : null,
+                  "authority" : "virtual::1021",
+                  "confidence" : -1,
+                  "place" : 49
+                }, {
+                  "value" : "Person",
+                  "language" : null,
+                  "authority" : "virtual::1022",
+                  "confidence" : -1,
+                  "place" : 62
+                }, {
+                  "value" : "Person",
+                  "language" : null,
+                  "authority" : "virtual::1023",
+                  "confidence" : -1,
+                  "place" : 77
+                }, {
+                  "value" : "Person",
+                  "language" : null,
+                  "authority" : "virtual::1024",
+                  "confidence" : -1,
+                  "place" : 84
+                } ],
+                "relation.isAuthorOfPublication" : [ {
+                  "value" : "1b19bcc0-4f83-446d-95b7-ec0c806d1578",
+                  "language" : null,
+                  "authority" : "virtual::1019",
+                  "confidence" : -1,
+                  "place" : 15
+                }, {
+                  "value" : "03dce7cb-687d-44c8-8945-1b9b6623eecd",
+                  "language" : null,
+                  "authority" : "virtual::1020",
+                  "confidence" : -1,
+                  "place" : 30
+                }, {
+                  "value" : "9cec80a9-d7b3-49ce-a4a4-e37b2e81d36a",
+                  "language" : null,
+                  "authority" : "virtual::1021",
+                  "confidence" : -1,
+                  "place" : 49
+                }, {
+                  "value" : "96918e02-8dc9-4ece-9140-dbeb3bc29aaa",
+                  "language" : null,
+                  "authority" : "virtual::1022",
+                  "confidence" : -1,
+                  "place" : 62
+                }, {
+                  "value" : "3cbf7224-49c9-449a-9c33-a5e9c958cf18",
+                  "language" : null,
+                  "authority" : "virtual::1023",
+                  "confidence" : -1,
+                  "place" : 77
+                }, {
+                  "value" : "547c3420-fd21-40e1-b017-d76df7cba8cb",
+                  "language" : null,
+                  "authority" : "virtual::1024",
+                  "confidence" : -1,
+                  "place" : 84
+                } ],
+                "relation.isAuthorOfPublication.latestForDiscovery" : [ {
+                  "value" : "1b19bcc0-4f83-446d-95b7-ec0c806d1578",
+                  "language" : null,
+                  "authority" : "virtual::1019",
+                  "confidence" : -1,
+                  "place" : -1
+                } ],
+                "relation.isOrgUnitOfPublication" : [ {
+                  "value" : "17f528b5-cc95-4207-81c7-b7fce3b2ccfe",
+                  "language" : null,
+                  "authority" : "virtual::1431",
+                  "confidence" : -1,
+                  "place" : 0
+                }, {
+                  "value" : "9851674d-bd9a-467b-8d84-068deb568ccf",
+                  "language" : null,
+                  "authority" : "virtual::1432",
+                  "confidence" : -1,
+                  "place" : 1
+                }, {
+                  "value" : "dcd449c3-70be-4ff7-bc19-2baedc450a69",
+                  "language" : null,
+                  "authority" : "virtual::1433",
+                  "confidence" : -1,
+                  "place" : 2
+                }, {
+                  "value" : "3cc4a1e7-01ce-4ebb-a056-50db1fe2126b",
+                  "language" : null,
+                  "authority" : "virtual::1434",
+                  "confidence" : -1,
+                  "place" : 3
+                }, {
+                  "value" : "e685e940-3042-4618-b3b3-6cb4868be68d",
+                  "language" : null,
+                  "authority" : "virtual::1435",
+                  "confidence" : -1,
+                  "place" : 4
+                } ],
+                "relation.isOrgUnitOfPublication.latestForDiscovery" : [ {
+                  "value" : "17f528b5-cc95-4207-81c7-b7fce3b2ccfe",
+                  "language" : null,
+                  "authority" : "virtual::1431",
+                  "confidence" : -1,
+                  "place" : -1
+                } ],
+                "relation.isProjectOfPublication" : [ {
+                  "value" : "5c2a3eb8-022e-4242-8c25-364adfb6b7ee",
+                  "language" : null,
+                  "authority" : "virtual::1025",
+                  "confidence" : -1,
+                  "place" : 0
+                }, {
+                  "value" : "9fe73193-dff8-4087-9ce2-e83e8a46ca0b",
+                  "language" : null,
+                  "authority" : "virtual::1026",
+                  "confidence" : -1,
+                  "place" : 1
+                }, {
+                  "value" : "cf48be04-0d61-473d-a902-71d1e0cbd5a5",
+                  "language" : null,
+                  "authority" : "virtual::1027",
+                  "confidence" : -1,
+                  "place" : 2
+                } ],
+                "relation.isProjectOfPublication.latestForDiscovery" : [ {
+                  "value" : "5c2a3eb8-022e-4242-8c25-364adfb6b7ee",
+                  "language" : null,
+                  "authority" : "virtual::1025",
+                  "confidence" : -1,
+                  "place" : -1
+                } ]
+              },
+              "inArchive" : true,
+              "discoverable" : true,
+              "withdrawn" : false,
+              "lastModified" : "2021-04-07T16:30:12.019Z",
+              "entityType" : "Publication",
+              "type" : "item",
+              "uniqueType" : "core.item",
+              "_links" : {
+                "accessStatus" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/0157eef4-2dc8-4ddd-8124-94cdabc15f6e/accessStatus"
+                },
+                "bundles" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/0157eef4-2dc8-4ddd-8124-94cdabc15f6e/bundles"
+                },
+                "identifiers" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/0157eef4-2dc8-4ddd-8124-94cdabc15f6e/identifiers"
+                },
+                "mappedCollections" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/0157eef4-2dc8-4ddd-8124-94cdabc15f6e/mappedCollections"
+                },
+                "owningCollection" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/0157eef4-2dc8-4ddd-8124-94cdabc15f6e/owningCollection"
+                },
+                "relationships" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/0157eef4-2dc8-4ddd-8124-94cdabc15f6e/relationships"
+                },
+                "version" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/0157eef4-2dc8-4ddd-8124-94cdabc15f6e/version"
+                },
+                "templateItemOf" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/0157eef4-2dc8-4ddd-8124-94cdabc15f6e/templateItemOf"
+                },
+                "thumbnail" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/0157eef4-2dc8-4ddd-8124-94cdabc15f6e/thumbnail"
+                },
+                "submitter" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/0157eef4-2dc8-4ddd-8124-94cdabc15f6e/submitter"
+                },
+                "self" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/0157eef4-2dc8-4ddd-8124-94cdabc15f6e"
+                }
+              }
+            }
+          }
+        }, {
+          "hitHighlights" : {
+            "dc.description.abstract" : [ "DNA vaccines are an exciting development in vaccine technology which may have a special role in preventing viral infections and as &#x27;theracines&#x27; for <em>cancer</em>. Their use in preventing bacterial infections has, by comparison, been less well documented. While it is unlikely that traditional, highly successful and cheap vaccines for diseases such as diphtheria will be replaced by DNA vaccines, naked DNA may be particularly appropriate for preventing bacterial infections where cytotoxic T cells confer protection, or where a Th1 type T cell response mediates resistance. " ]
+          },
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "indexableObject" : {
+              "href" : "https://demo.dspace.org/server/api/core/items/8dfa3d48-5d54-4239-82ed-d521300313be"
+            }
+          },
+          "_embedded" : {
+            "indexableObject" : {
+              "id" : "8dfa3d48-5d54-4239-82ed-d521300313be",
+              "uuid" : "8dfa3d48-5d54-4239-82ed-d521300313be",
+              "name" : "DNA vaccines for bacterial infections",
+              "handle" : "123456789/72",
+              "metadata" : {
+                "dc.contributor.author" : [ {
+                  "value" : "Simmons, Cameron",
+                  "language" : null,
+                  "authority" : "virtual::1502",
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.date.accessioned" : [ {
+                  "value" : "2018-09-14T11:14:51Z",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.date.available" : [ {
+                  "value" : "2017-07-05T02:26:25Z",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                }, {
+                  "value" : "2018-09-14T11:14:51Z",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 1
+                } ],
+                "dc.date.issued" : [ {
+                  "value" : "1997-08-01",
+                  "language" : "en_US",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.description.abstract" : [ {
+                  "value" : "DNA vaccines are an exciting development in vaccine technology which may have a special role in preventing viral infections and as 'theracines' for cancer. Their use in preventing bacterial infections has, by comparison, been less well documented. While it is unlikely that traditional, highly successful and cheap vaccines for diseases such as diphtheria will be replaced by DNA vaccines, naked DNA may be particularly appropriate for preventing bacterial infections where cytotoxic T cells confer protection, or where a Th1 type T cell response mediates resistance. For example, DNA vaccines containing different mycobacterial antigens have been shown to inhibit overt infections by Mycobacterium tuberculosis in rodent models. The use of DNA vaccines in bacterial infections may be complicated by fundamental differences between prokaryotic and eukaryotic genes and gene products, including mRNA stability, codon bias, secondary structures surrounding native start sequences and glycosylation. These problems can be solved by re-synthesis of bacterial genes to produce 'new' sequences which are more highly expressed by eukaryotic cells.",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.identifier.uri" : [ {
+                  "value" : "https://demo7.dspace.org/handle/123456789/72",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.language" : [ {
+                  "value" : "English",
+                  "language" : "en_US",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.title" : [ {
+                  "value" : "DNA vaccines for bacterial infections",
+                  "language" : "en_US",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.type" : [ {
+                  "value" : "Journal Article",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dspace.entity.type" : [ {
+                  "value" : "Publication",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dspace.relatedentity.type" : [ {
+                  "value" : "Person",
+                  "language" : null,
+                  "authority" : "virtual::1502",
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "relation.isAuthorOfPublication" : [ {
+                  "value" : "b1b2c768-bda1-448a-a073-fc541e8b24d9",
+                  "language" : null,
+                  "authority" : "virtual::1502",
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "relation.isAuthorOfPublication.latestForDiscovery" : [ {
+                  "value" : "b1b2c768-bda1-448a-a073-fc541e8b24d9",
+                  "language" : null,
+                  "authority" : "virtual::1502",
+                  "confidence" : -1,
+                  "place" : -1
+                } ]
+              },
+              "inArchive" : true,
+              "discoverable" : true,
+              "withdrawn" : false,
+              "lastModified" : "2021-04-07T16:30:07.403Z",
+              "entityType" : "Publication",
+              "type" : "item",
+              "uniqueType" : "core.item",
+              "_links" : {
+                "accessStatus" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/8dfa3d48-5d54-4239-82ed-d521300313be/accessStatus"
+                },
+                "bundles" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/8dfa3d48-5d54-4239-82ed-d521300313be/bundles"
+                },
+                "identifiers" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/8dfa3d48-5d54-4239-82ed-d521300313be/identifiers"
+                },
+                "mappedCollections" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/8dfa3d48-5d54-4239-82ed-d521300313be/mappedCollections"
+                },
+                "owningCollection" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/8dfa3d48-5d54-4239-82ed-d521300313be/owningCollection"
+                },
+                "relationships" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/8dfa3d48-5d54-4239-82ed-d521300313be/relationships"
+                },
+                "version" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/8dfa3d48-5d54-4239-82ed-d521300313be/version"
+                },
+                "templateItemOf" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/8dfa3d48-5d54-4239-82ed-d521300313be/templateItemOf"
+                },
+                "thumbnail" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/8dfa3d48-5d54-4239-82ed-d521300313be/thumbnail"
+                },
+                "submitter" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/8dfa3d48-5d54-4239-82ed-d521300313be/submitter"
+                },
+                "self" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/8dfa3d48-5d54-4239-82ed-d521300313be"
+                }
+              }
+            }
+          }
+        } ]
+      },
+      "page" : {
+        "number" : 1,
+        "size" : 2,
+        "totalPages" : 11,
+        "totalElements" : 21
+      },
+      "_links" : {
+        "next" : {
+          "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&page=2&size=2"
+        },
+        "last" : {
+          "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&page=10&size=2"
+        },
+        "prev" : {
+          "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&page=0&size=2"
+        },
+        "self" : {
+          "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&page=1&size=2"
+        },
+        "first" : {
+          "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&page=0&size=2"
+        }
+      }
+    },
+    "facets" : [ {
+      "name" : "author",
+      "facetType" : "text",
+      "facetLimit" : 5,
+      "minValue" : "Abdominal and Paediatric Surgery",
+      "maxValue" : "Zwarenstein, Merrick",
+      "openByDefault" : true,
+      "uniqueType" : "discover.discover",
+      "page" : {
+        "number" : 0,
+        "size" : 5
+      },
+      "_links" : {
+        "next" : {
+          "href" : "https://demo.dspace.org/server/api/discover/facets/author?query=cancer&dsoType=item&page=1&size=5"
+        },
+        "self" : {
+          "href" : "https://demo.dspace.org/server/api/discover/facets/author?query=cancer&dsoType=item&size=5"
+        }
+      },
+      "_embedded" : {
+        "values" : [ {
+          "label" : "Adank, Muriel",
+          "count" : 1,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.author=Adank,%20Muriel,equals"
+            }
+          }
+        }, {
+          "label" : "Alhashem, Zainalabdeen Mohmammed",
+          "count" : 1,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.author=Alhashem,%20Zainalabdeen%20Mohmammed,equals"
+            }
+          }
+        }, {
+          "label" : "Andrulis, Irene L",
+          "count" : 1,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.author=Andrulis,%20Irene%20L,equals"
+            }
+          }
+        }, {
+          "label" : "Ang, Joo Chew",
+          "count" : 1,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.author=Ang,%20Joo%20Chew,equals"
+            }
+          }
+        }, {
+          "label" : "Ang, Joo Ern",
+          "count" : 1,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.author=Ang,%20Joo%20Ern,equals"
+            }
+          }
+        } ]
+      }
+    }, {
+      "name" : "subject",
+      "facetType" : "hierarchical",
+      "facetLimit" : 5,
+      "openByDefault" : false,
+      "uniqueType" : "discover.discover",
+      "page" : {
+        "number" : 0,
+        "size" : 5
+      },
+      "_links" : {
+        "next" : {
+          "href" : "https://demo.dspace.org/server/api/discover/facets/subject?query=cancer&dsoType=item&page=1&size=5"
+        },
+        "self" : {
+          "href" : "https://demo.dspace.org/server/api/discover/facets/subject?query=cancer&dsoType=item&size=5"
+        }
+      },
+      "_embedded" : {
+        "values" : [ {
+          "label" : "annuities",
+          "count" : 1,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.subject=annuities,equals"
+            }
+          }
+        }, {
+          "label" : "Biology",
+          "count" : 1,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.subject=Biology,equals"
+            }
+          }
+        }, {
+          "label" : "charitable gifts",
+          "count" : 1,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.subject=charitable%20gifts,equals"
+            }
+          }
+        }, {
+          "label" : "Chemistry",
+          "count" : 1,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.subject=Chemistry,equals"
+            }
+          }
+        }, {
+          "label" : "Diet",
+          "count" : 1,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.subject=Diet,equals"
+            }
+          }
+        } ]
+      }
+    }, {
+      "name" : "dateIssued",
+      "facetType" : "date",
+      "facetLimit" : 5,
+      "minValue" : "01/05/16",
+      "maxValue" : "31/05/16",
+      "openByDefault" : false,
+      "uniqueType" : "discover.discover",
+      "page" : {
+        "number" : 0,
+        "size" : 5
+      },
+      "_links" : {
+        "self" : {
+          "href" : "https://demo.dspace.org/server/api/discover/facets/dateIssued?query=cancer&dsoType=item&size=5"
+        }
+      },
+      "_embedded" : {
+        "values" : [ {
+          "label" : "1996 - 1999",
+          "count" : 1,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.dateIssued=%5B1996%20TO%201999%5D,equals"
+            }
+          }
+        }, {
+          "label" : "2010 - 2019",
+          "count" : 5,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.dateIssued=%5B2010%20TO%202019%5D,equals"
+            }
+          }
+        }, {
+          "label" : "2020 - 2026",
+          "count" : 4,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.dateIssued=%5B2020%20TO%202026%5D,equals"
+            }
+          }
+        } ]
+      }
+    }, {
+      "name" : "has_content_in_original_bundle",
+      "facetType" : "standard",
+      "facetLimit" : 2,
+      "openByDefault" : false,
+      "uniqueType" : "discover.discover",
+      "page" : {
+        "number" : 0,
+        "size" : 2
+      },
+      "_links" : {
+        "self" : {
+          "href" : "https://demo.dspace.org/server/api/discover/facets/has_content_in_original_bundle?query=cancer&dsoType=item&size=2"
+        }
+      },
+      "_embedded" : {
+        "values" : [ {
+          "label" : "false",
+          "count" : 12,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.has_content_in_original_bundle=false,equals"
+            }
+          }
+        }, {
+          "label" : "true",
+          "count" : 9,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.has_content_in_original_bundle=true,equals"
+            }
+          }
+        } ]
+      }
+    }, {
+      "name" : "entityType",
+      "facetType" : "text",
+      "facetLimit" : 5,
+      "openByDefault" : false,
+      "uniqueType" : "discover.discover",
+      "page" : {
+        "number" : 0,
+        "size" : 5
+      },
+      "_links" : {
+        "self" : {
+          "href" : "https://demo.dspace.org/server/api/discover/facets/entityType?query=cancer&dsoType=item&size=5"
+        }
+      },
+      "_embedded" : {
+        "values" : [ {
+          "label" : "Publication",
+          "count" : 8,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.entityType=Publication,equals"
+            }
+          }
+        }, {
+          "label" : "Project",
+          "count" : 5,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.entityType=Project,equals"
+            }
+          }
+        }, {
+          "label" : "none",
+          "count" : 1,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.entityType=none,equals"
+            }
+          }
+        } ]
+      }
+    }, {
+      "name" : "access_status",
+      "facetType" : "text",
+      "facetLimit" : 10,
+      "openByDefault" : false,
+      "uniqueType" : "discover.discover",
+      "page" : {
+        "number" : 0,
+        "size" : 10
+      },
+      "_links" : {
+        "self" : {
+          "href" : "https://demo.dspace.org/server/api/discover/facets/access_status?query=cancer&dsoType=item&size=10"
+        }
+      },
+      "_embedded" : {
+        "values" : [ {
+          "label" : "metadata.only",
+          "count" : 12,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.access_status=metadata.only,equals"
+            }
+          }
+        }, {
+          "label" : "open.access",
+          "count" : 9,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.access_status=open.access,equals"
+            }
+          }
+        } ]
+      }
+    } ]
+  }
+}

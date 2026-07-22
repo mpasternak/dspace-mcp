@@ -1,0 +1,16 @@
+{
+  "id" : 4,
+  "shortDescription" : "Adobe PDF",
+  "description" : "Adobe Portable Document Format",
+  "mimetype" : "application/pdf",
+  "supportLevel" : "KNOWN",
+  "internal" : false,
+  "extensions" : [ "pdf" ],
+  "type" : "bitstreamformat",
+  "uniqueType" : "core.bitstreamformat",
+  "_links" : {
+    "self" : {
+      "href" : "https://demo.dspace.org/server/api/core/bitstreamformats/4"
+    }
+  }
+}

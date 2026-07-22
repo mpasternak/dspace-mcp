@@ -1,0 +1,720 @@
+{
+  "id" : null,
+  "scope" : null,
+  "query" : "cancer",
+  "appliedFilters" : null,
+  "sort" : null,
+  "configuration" : null,
+  "type" : "discover",
+  "uniqueType" : "discover.discover",
+  "_links" : {
+    "self" : {
+      "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item"
+    }
+  },
+  "_embedded" : {
+    "searchResult" : {
+      "_embedded" : {
+        "objects" : [ {
+          "hitHighlights" : {
+            "dc.title" : [ "miR-17-92&#x2F;p38α dysregulation enhances Wnt signal and selects Lgr6+ <em>cancer</em> stem cell like cells during human lung adenocarcinoma progression" ]
+          },
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "indexableObject" : {
+              "href" : "https://demo.dspace.org/server/api/core/items/5f116a15-d156-46ce-9eb8-d0c820eb6c05"
+            }
+          },
+          "_embedded" : {
+            "indexableObject" : {
+              "id" : "5f116a15-d156-46ce-9eb8-d0c820eb6c05",
+              "uuid" : "5f116a15-d156-46ce-9eb8-d0c820eb6c05",
+              "name" : "miR-17-92/p38α dysregulation enhances Wnt signal and selects Lgr6+ cancer stem cell like cells during human lung adenocarcinoma progression",
+              "handle" : "123456789/443",
+              "metadata" : {
+                "dc.contributor.author" : [ {
+                  "value" : "Guinot, Anna",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                }, {
+                  "value" : "Oeztuerk-Winder, Feride",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 1
+                }, {
+                  "value" : "Ventura, Juan-Jose",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 2
+                } ],
+                "dc.date.accessioned" : [ {
+                  "value" : "2019-04-26T08:57:01Z",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.date.available" : [ {
+                  "value" : "2019-04-26T08:57:01Z",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.date.issued" : [ {
+                  "value" : "04/05/16",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.description" : [ {
+                  "value" : "Defining the molecular and cellular roots of lung cancer relapse after initial treatment remains an imperative to improve survival. Here we report that the lung stem cell marker Lgr6 becomes enriched in non-small cell lung cancer (NSCLC) cells during malignant progression. Lgr6+ NSCLC cells displayed self-renewal and differentiation properties along with a higher tumorigenic potential. Mechanistic investigations suggested that a defective repression of the miR-17-92 gene cluster was responsible for evolution of a selection for outgrowth of Lgr6+ NSCLC cells. High levels of expression of miR-19 family members were found to target and downregulate levels of p38α kinase, providing a specific survival signal for Lgr6+ cells as mediated by increased Wnt/ß-catenin activity. Our results identify a specific stem-like cell population in NSCLC with increased malignant potential, the elucidation of which may enable earlier prognosis and possibly the development of more effective targeted treatments.",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.identifier.uri" : [ {
+                  "value" : "https://demo7.dspace.org/handle/123456789/443",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.language" : [ {
+                  "value" : "en",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.publisher" : [ {
+                  "value" : "American Association for Cancer Research",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.title" : [ {
+                  "value" : "miR-17-92/p38α dysregulation enhances Wnt signal and selects Lgr6+ cancer stem cell like cells during human lung adenocarcinoma progression",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dspace.entity.type" : [ {
+                  "value" : "Publication",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "relation.isProjectOfPublication" : [ {
+                  "value" : "ba2bbf71-4300-4f2f-8f65-b53e4bb6def4",
+                  "language" : null,
+                  "authority" : "virtual::1028",
+                  "confidence" : -1,
+                  "place" : 0
+                }, {
+                  "value" : "17c600e5-5ebd-43af-8e1a-f733a7b20cc1",
+                  "language" : null,
+                  "authority" : "virtual::1029",
+                  "confidence" : -1,
+                  "place" : 1
+                } ],
+                "relation.isProjectOfPublication.latestForDiscovery" : [ {
+                  "value" : "ba2bbf71-4300-4f2f-8f65-b53e4bb6def4",
+                  "language" : null,
+                  "authority" : "virtual::1028",
+                  "confidence" : -1,
+                  "place" : -1
+                } ]
+              },
+              "inArchive" : true,
+              "discoverable" : true,
+              "withdrawn" : false,
+              "lastModified" : "2021-04-07T16:30:12.038Z",
+              "entityType" : "Publication",
+              "type" : "item",
+              "uniqueType" : "core.item",
+              "_links" : {
+                "accessStatus" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/5f116a15-d156-46ce-9eb8-d0c820eb6c05/accessStatus"
+                },
+                "bundles" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/5f116a15-d156-46ce-9eb8-d0c820eb6c05/bundles"
+                },
+                "identifiers" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/5f116a15-d156-46ce-9eb8-d0c820eb6c05/identifiers"
+                },
+                "mappedCollections" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/5f116a15-d156-46ce-9eb8-d0c820eb6c05/mappedCollections"
+                },
+                "owningCollection" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/5f116a15-d156-46ce-9eb8-d0c820eb6c05/owningCollection"
+                },
+                "relationships" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/5f116a15-d156-46ce-9eb8-d0c820eb6c05/relationships"
+                },
+                "version" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/5f116a15-d156-46ce-9eb8-d0c820eb6c05/version"
+                },
+                "templateItemOf" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/5f116a15-d156-46ce-9eb8-d0c820eb6c05/templateItemOf"
+                },
+                "thumbnail" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/5f116a15-d156-46ce-9eb8-d0c820eb6c05/thumbnail"
+                },
+                "submitter" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/5f116a15-d156-46ce-9eb8-d0c820eb6c05/submitter"
+                },
+                "self" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/5f116a15-d156-46ce-9eb8-d0c820eb6c05"
+                }
+              }
+            }
+          }
+        }, {
+          "hitHighlights" : {
+            "dc.description.abstract" : [ "The burden of hepatocellular carcinoma (HCC), the most common form of liver <em>cancer</em>, is steadily growing because obesity, type 2 diabetes, and nonalcoholic fatty liver disease (NAFLD) are replacing viral- and alcohol-related liver disease as major pathogenic promoters. ", "Systemic and hepatic molecular mechanisms involved in obesity- and NAFLD-induced hepatocarcinogenesis as well as potential early markers of HCC are being extensively investigated. This review summarizes current evidence linking obesity, NAFLD and liver <em>cancer</em>, discusses its clinical impact and describes the main mechanisms underlying this complex relationship." ],
+            "dc.title" : [ "Liver <em>Cancer</em>: Connections with Obesity, Fatty Liver, and Cirrhosis." ]
+          },
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "indexableObject" : {
+              "href" : "https://demo.dspace.org/server/api/core/items/866d5671-0206-4b3d-ac86-ba273ac9106a"
+            }
+          },
+          "_embedded" : {
+            "indexableObject" : {
+              "id" : "866d5671-0206-4b3d-ac86-ba273ac9106a",
+              "uuid" : "866d5671-0206-4b3d-ac86-ba273ac9106a",
+              "name" : "Liver Cancer: Connections with Obesity, Fatty Liver, and Cirrhosis.",
+              "handle" : "123456789/1139",
+              "metadata" : {
+                "dc.contributor.author" : [ {
+                  "value" : "Marengo, Andrea",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                }, {
+                  "value" : "Rosso, Chiara",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 1
+                }, {
+                  "value" : "Bugianesi, Elisabetta",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 2
+                } ],
+                "dc.date.accessioned" : [ {
+                  "value" : "2024-08-23T18:45:06Z",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.date.issued" : [ {
+                  "value" : "2016-01",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.description.abstract" : [ {
+                  "value" : "The burden of hepatocellular carcinoma (HCC), the most common form of liver cancer, is steadily growing because obesity, type 2 diabetes, and nonalcoholic fatty liver disease (NAFLD) are replacing viral- and alcohol-related liver disease as major pathogenic promoters. The most worrisome aspects of these new risk factors are their large spread in the general population and their link with HCC arising in noncirrhotic livers. HCC may be the presenting feature of an asymptomatic nonalcoholic steatohepatitis (NASH), the progressive form of NAFLD. The HCC risk connected to metabolic factors has been underestimated so far, and a poorer surveillance has prevented an adequate treatment. Systemic and hepatic molecular mechanisms involved in obesity- and NAFLD-induced hepatocarcinogenesis as well as potential early markers of HCC are being extensively investigated. This review summarizes current evidence linking obesity, NAFLD and liver cancer, discusses its clinical impact and describes the main mechanisms underlying this complex relationship.",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.identifier.citation" : [ {
+                  "value" : "Marengo, A., Rosso, C., & Bugianesi, E. (2016). Liver Cancer: Connections with Obesity, Fatty Liver, and Cirrhosis. Annual Review of Medicine, 67(1), 103–117. https://doi.org/10.1146/annurev-med-090514-013832",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.identifier.uri" : [ {
+                  "value" : "https://doi.org/10.1146/annurev-med-090514-013832",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                }, {
+                  "value" : "https://demo.dspace.org/handle/123456789/1139",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 1
+                } ],
+                "dc.language.iso" : [ {
+                  "value" : "en",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.publisher" : [ {
+                  "value" : "Annual Reviews",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.subject" : [ {
+                  "value" : "hepatocarcinogenesis",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                }, {
+                  "value" : "hepatocellular carcinoma",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 1
+                }, {
+                  "value" : "steatohepatitis",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 2
+                }, {
+                  "value" : "type 2 diabetes",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 3
+                } ],
+                "dc.title" : [ {
+                  "value" : "Liver Cancer: Connections with Obesity, Fatty Liver, and Cirrhosis.",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.type" : [ {
+                  "value" : "Article",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ]
+              },
+              "inArchive" : true,
+              "discoverable" : true,
+              "withdrawn" : false,
+              "lastModified" : "2024-08-23T19:08:38.675Z",
+              "entityType" : null,
+              "type" : "item",
+              "uniqueType" : "core.item",
+              "_links" : {
+                "accessStatus" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/866d5671-0206-4b3d-ac86-ba273ac9106a/accessStatus"
+                },
+                "bundles" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/866d5671-0206-4b3d-ac86-ba273ac9106a/bundles"
+                },
+                "identifiers" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/866d5671-0206-4b3d-ac86-ba273ac9106a/identifiers"
+                },
+                "mappedCollections" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/866d5671-0206-4b3d-ac86-ba273ac9106a/mappedCollections"
+                },
+                "owningCollection" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/866d5671-0206-4b3d-ac86-ba273ac9106a/owningCollection"
+                },
+                "relationships" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/866d5671-0206-4b3d-ac86-ba273ac9106a/relationships"
+                },
+                "version" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/866d5671-0206-4b3d-ac86-ba273ac9106a/version"
+                },
+                "templateItemOf" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/866d5671-0206-4b3d-ac86-ba273ac9106a/templateItemOf"
+                },
+                "thumbnail" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/866d5671-0206-4b3d-ac86-ba273ac9106a/thumbnail"
+                },
+                "submitter" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/866d5671-0206-4b3d-ac86-ba273ac9106a/submitter"
+                },
+                "self" : {
+                  "href" : "https://demo.dspace.org/server/api/core/items/866d5671-0206-4b3d-ac86-ba273ac9106a"
+                }
+              }
+            }
+          }
+        } ]
+      },
+      "page" : {
+        "number" : 0,
+        "size" : 2,
+        "totalPages" : 11,
+        "totalElements" : 21
+      },
+      "_links" : {
+        "next" : {
+          "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&page=1&size=2"
+        },
+        "last" : {
+          "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&page=10&size=2"
+        },
+        "self" : {
+          "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&size=2"
+        }
+      }
+    },
+    "facets" : [ {
+      "name" : "author",
+      "facetType" : "text",
+      "facetLimit" : 5,
+      "minValue" : "Abdominal and Paediatric Surgery",
+      "maxValue" : "Zwarenstein, Merrick",
+      "openByDefault" : true,
+      "uniqueType" : "discover.discover",
+      "page" : {
+        "number" : 0,
+        "size" : 5
+      },
+      "_links" : {
+        "next" : {
+          "href" : "https://demo.dspace.org/server/api/discover/facets/author?query=cancer&dsoType=item&page=1&size=5"
+        },
+        "self" : {
+          "href" : "https://demo.dspace.org/server/api/discover/facets/author?query=cancer&dsoType=item&size=5"
+        }
+      },
+      "_embedded" : {
+        "values" : [ {
+          "label" : "Adank, Muriel",
+          "count" : 1,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.author=Adank,%20Muriel,equals"
+            }
+          }
+        }, {
+          "label" : "Alhashem, Zainalabdeen Mohmammed",
+          "count" : 1,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.author=Alhashem,%20Zainalabdeen%20Mohmammed,equals"
+            }
+          }
+        }, {
+          "label" : "Andrulis, Irene L",
+          "count" : 1,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.author=Andrulis,%20Irene%20L,equals"
+            }
+          }
+        }, {
+          "label" : "Ang, Joo Chew",
+          "count" : 1,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.author=Ang,%20Joo%20Chew,equals"
+            }
+          }
+        }, {
+          "label" : "Ang, Joo Ern",
+          "count" : 1,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.author=Ang,%20Joo%20Ern,equals"
+            }
+          }
+        } ]
+      }
+    }, {
+      "name" : "subject",
+      "facetType" : "hierarchical",
+      "facetLimit" : 5,
+      "openByDefault" : false,
+      "uniqueType" : "discover.discover",
+      "page" : {
+        "number" : 0,
+        "size" : 5
+      },
+      "_links" : {
+        "next" : {
+          "href" : "https://demo.dspace.org/server/api/discover/facets/subject?query=cancer&dsoType=item&page=1&size=5"
+        },
+        "self" : {
+          "href" : "https://demo.dspace.org/server/api/discover/facets/subject?query=cancer&dsoType=item&size=5"
+        }
+      },
+      "_embedded" : {
+        "values" : [ {
+          "label" : "annuities",
+          "count" : 1,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.subject=annuities,equals"
+            }
+          }
+        }, {
+          "label" : "Biology",
+          "count" : 1,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.subject=Biology,equals"
+            }
+          }
+        }, {
+          "label" : "charitable gifts",
+          "count" : 1,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.subject=charitable%20gifts,equals"
+            }
+          }
+        }, {
+          "label" : "Chemistry",
+          "count" : 1,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.subject=Chemistry,equals"
+            }
+          }
+        }, {
+          "label" : "Diet",
+          "count" : 1,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.subject=Diet,equals"
+            }
+          }
+        } ]
+      }
+    }, {
+      "name" : "dateIssued",
+      "facetType" : "date",
+      "facetLimit" : 5,
+      "minValue" : "01/05/16",
+      "maxValue" : "31/05/16",
+      "openByDefault" : false,
+      "uniqueType" : "discover.discover",
+      "page" : {
+        "number" : 0,
+        "size" : 5
+      },
+      "_links" : {
+        "self" : {
+          "href" : "https://demo.dspace.org/server/api/discover/facets/dateIssued?query=cancer&dsoType=item&size=5"
+        }
+      },
+      "_embedded" : {
+        "values" : [ {
+          "label" : "1996 - 1999",
+          "count" : 1,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.dateIssued=%5B1996%20TO%201999%5D,equals"
+            }
+          }
+        }, {
+          "label" : "2010 - 2019",
+          "count" : 5,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.dateIssued=%5B2010%20TO%202019%5D,equals"
+            }
+          }
+        }, {
+          "label" : "2020 - 2026",
+          "count" : 4,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.dateIssued=%5B2020%20TO%202026%5D,equals"
+            }
+          }
+        } ]
+      }
+    }, {
+      "name" : "has_content_in_original_bundle",
+      "facetType" : "standard",
+      "facetLimit" : 2,
+      "openByDefault" : false,
+      "uniqueType" : "discover.discover",
+      "page" : {
+        "number" : 0,
+        "size" : 2
+      },
+      "_links" : {
+        "self" : {
+          "href" : "https://demo.dspace.org/server/api/discover/facets/has_content_in_original_bundle?query=cancer&dsoType=item&size=2"
+        }
+      },
+      "_embedded" : {
+        "values" : [ {
+          "label" : "false",
+          "count" : 12,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.has_content_in_original_bundle=false,equals"
+            }
+          }
+        }, {
+          "label" : "true",
+          "count" : 9,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.has_content_in_original_bundle=true,equals"
+            }
+          }
+        } ]
+      }
+    }, {
+      "name" : "entityType",
+      "facetType" : "text",
+      "facetLimit" : 5,
+      "openByDefault" : false,
+      "uniqueType" : "discover.discover",
+      "page" : {
+        "number" : 0,
+        "size" : 5
+      },
+      "_links" : {
+        "self" : {
+          "href" : "https://demo.dspace.org/server/api/discover/facets/entityType?query=cancer&dsoType=item&size=5"
+        }
+      },
+      "_embedded" : {
+        "values" : [ {
+          "label" : "Publication",
+          "count" : 8,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.entityType=Publication,equals"
+            }
+          }
+        }, {
+          "label" : "Project",
+          "count" : 5,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.entityType=Project,equals"
+            }
+          }
+        }, {
+          "label" : "none",
+          "count" : 1,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.entityType=none,equals"
+            }
+          }
+        } ]
+      }
+    }, {
+      "name" : "access_status",
+      "facetType" : "text",
+      "facetLimit" : 10,
+      "openByDefault" : false,
+      "uniqueType" : "discover.discover",
+      "page" : {
+        "number" : 0,
+        "size" : 10
+      },
+      "_links" : {
+        "self" : {
+          "href" : "https://demo.dspace.org/server/api/discover/facets/access_status?query=cancer&dsoType=item&size=10"
+        }
+      },
+      "_embedded" : {
+        "values" : [ {
+          "label" : "metadata.only",
+          "count" : 12,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.access_status=metadata.only,equals"
+            }
+          }
+        }, {
+          "label" : "open.access",
+          "count" : 9,
+          "authorityKey" : null,
+          "type" : "discover",
+          "uniqueType" : "discover.discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://demo.dspace.org/server/api/discover/search/objects?query=cancer&dsoType=item&f.access_status=open.access,equals"
+            }
+          }
+        } ]
+      }
+    } ]
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "id" : null,
+  "scope" : null,
+  "query" : null,
+  "appliedFilters" : null,
+  "sort" : null,
+  "configuration" : "default",
+  "name" : "author",
+  "facetType" : "text",
+  "facetLimit" : 5,
+  "openByDefault" : true,
+  "uniqueType" : "discover.discover",
+  "prefix" : null,
+  "type" : "discover",
+  "uniqueType" : "discover.discover",
+  "page" : {
+    "number" : 0,
+    "size" : 3
+  },
+  "_links" : {
+    "next" : {
+      "href" : "https://demo.dspace.org/server/api/discover/facets/author?configuration=default&page=1&size=3"
+    },
+    "self" : {
+      "href" : "https://demo.dspace.org/server/api/discover/facets/author?configuration=default&size=3"
+    }
+  },
+  "_embedded" : {
+    "values" : [ {
+      "label" : "Simmons, Cameron",
+      "count" : 190,
+      "authorityKey" : null,
+      "type" : "discover",
+      "uniqueType" : "discover.discover",
+      "_links" : {
+        "search" : {
+          "href" : "https://demo.dspace.org/server/api/discover/search/objects?configuration=default&f.author=Simmons,%20Cameron,equals"
+        }
+      }
+    }, {
+      "label" : "De Wael, Karolien",
+      "count" : 7,
+      "authorityKey" : null,
+      "type" : "discover",
+      "uniqueType" : "discover.discover",
+      "_links" : {
+        "search" : {
+          "href" : "https://demo.dspace.org/server/api/discover/search/objects?configuration=default&f.author=De%20Wael,%20Karolien,equals"
+        }
+      }
+    }, {
+      "label" : "Eens, Marcel",
+      "count" : 6,
+      "authorityKey" : null,
+      "type" : "discover",
+      "uniqueType" : "discover.discover",
+      "_links" : {
+        "search" : {
+          "href" : "https://demo.dspace.org/server/api/discover/search/objects?configuration=default&f.author=Eens,%20Marcel,equals"
+        }
+      }
+    } ]
+  }
+}

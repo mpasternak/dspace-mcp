@@ -1,0 +1,81 @@
+{
+  "id" : null,
+  "scope" : null,
+  "configuration" : null,
+  "type" : "discover",
+  "uniqueType" : "discover.discover",
+  "_links" : {
+    "self" : {
+      "href" : "https://demo.dspace.org/server/api/discover/facets"
+    }
+  },
+  "_embedded" : {
+    "facets" : [ {
+      "name" : "author",
+      "facetType" : "text",
+      "facetLimit" : 5,
+      "openByDefault" : true,
+      "uniqueType" : "discover.discover",
+      "_links" : {
+        "self" : {
+          "href" : "https://demo.dspace.org/server/api/discover/facets/author"
+        }
+      }
+    }, {
+      "name" : "subject",
+      "facetType" : "hierarchical",
+      "facetLimit" : 5,
+      "openByDefault" : false,
+      "uniqueType" : "discover.discover",
+      "_links" : {
+        "self" : {
+          "href" : "https://demo.dspace.org/server/api/discover/facets/subject"
+        }
+      }
+    }, {
+      "name" : "dateIssued",
+      "facetType" : "date",
+      "facetLimit" : 5,
+      "openByDefault" : false,
+      "uniqueType" : "discover.discover",
+      "_links" : {
+        "self" : {
+          "href" : "https://demo.dspace.org/server/api/discover/facets/dateIssued"
+        }
+      }
+    }, {
+      "name" : "has_content_in_original_bundle",
+      "facetType" : "standard",
+      "facetLimit" : 2,
+      "openByDefault" : false,
+      "uniqueType" : "discover.discover",
+      "_links" : {
+        "self" : {
+          "href" : "https://demo.dspace.org/server/api/discover/facets/has_content_in_original_bundle"
+        }
+      }
+    }, {
+      "name" : "entityType",
+      "facetType" : "text",
+      "facetLimit" : 5,
+      "openByDefault" : false,
+      "uniqueType" : "discover.discover",
+      "_links" : {
+        "self" : {
+          "href" : "https://demo.dspace.org/server/api/discover/facets/entityType"
+        }
+      }
+    }, {
+      "name" : "access_status",
+      "facetType" : "text",
+      "facetLimit" : 10,
+      "openByDefault" : false,
+      "uniqueType" : "discover.discover",
+      "_links" : {
+        "self" : {
+          "href" : "https://demo.dspace.org/server/api/discover/facets/access_status"
+        }
+      }
+    } ]
+  }
+}

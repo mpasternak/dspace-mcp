@@ -1,0 +1,206 @@
+{
+  "dspaceUI" : "https://researchcommons.waikato.ac.nz",
+  "dspaceName" : "Research Commons",
+  "dspaceServer" : "https://researchcommons.waikato.ac.nz/server",
+  "dspaceVersion" : "DSpace 7.6.5",
+  "type" : "root",
+  "_links" : {
+    "actuator" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/actuator"
+    },
+    "authn" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/authn"
+    },
+    "authorizations" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/authz/authorizations"
+    },
+    "bitstreamformats" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/core/bitstreamformats"
+    },
+    "bitstreams" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/core/bitstreams"
+    },
+    "browses" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/browses"
+    },
+    "bulkaccessconditionoptions" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/config/bulkaccessconditionoptions"
+    },
+    "bundles" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/core/bundles"
+    },
+    "claimedtasks" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/workflow/claimedtasks"
+    },
+    "claimedtasks-search" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/workflow/claimedtasks/search"
+    },
+    "collections" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/core/collections"
+    },
+    "communities" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/core/communities"
+    },
+    "discover" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/discover"
+    },
+    "dso" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/dso/find{?uuid}",
+      "templated" : true
+    },
+    "entitytypes" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/core/entitytypes"
+    },
+    "eperson-registration" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/eperson/registrations"
+    },
+    "epersons" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/eperson/epersons"
+    },
+    "externalsources" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/integration/externalsources"
+    },
+    "features" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/authz/features"
+    },
+    "feedbacks" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/tools/feedbacks"
+    },
+    "groups" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/eperson/groups"
+    },
+    "identifiers" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/pid/identifiers"
+    },
+    "itemrequests" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/tools/itemrequests"
+    },
+    "items" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/core/items"
+    },
+    "itemtemplates" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/core/itemtemplates"
+    },
+    "metadatafields" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/core/metadatafields"
+    },
+    "metadataschemas" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/core/metadataschemas"
+    },
+    "oidc" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/authn"
+    },
+    "pid" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/pid/find{?id}",
+      "templated" : true
+    },
+    "pooltasks" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/workflow/pooltasks"
+    },
+    "pooltasks-search" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/workflow/pooltasks/search"
+    },
+    "processes" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/system/processes"
+    },
+    "properties" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/config/properties"
+    },
+    "registrations" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/eperson/registrations"
+    },
+    "relationships" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/core/relationships"
+    },
+    "relationshiptypes" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/core/relationshiptypes"
+    },
+    "resourcepolicies" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/authz/resourcepolicies"
+    },
+    "resourcepolicies-search" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/authz/resourcepolicies/search"
+    },
+    "scripts" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/system/scripts"
+    },
+    "self" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api"
+    },
+    "sites" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/core/sites"
+    },
+    "statistics" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/statistics"
+    },
+    "submissionaccessoptions" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/config/submissionaccessoptions"
+    },
+    "submissioncclicenseUrls" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/config/submissioncclicenseUrls"
+    },
+    "submissioncclicenseUrls-search" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/config/submissioncclicenseUrls/search"
+    },
+    "submissioncclicenses" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/config/submissioncclicenses"
+    },
+    "submissiondefinitions" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/config/submissiondefinitions"
+    },
+    "submissionforms" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/config/submissionforms"
+    },
+    "submissionsections" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/config/submissionsections"
+    },
+    "submissionuploads" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/config/submissionuploads"
+    },
+    "subscriptions" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/core/subscriptions"
+    },
+    "subscriptions-search" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/core/subscriptions/search"
+    },
+    "supervisionorders" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/core/supervisionorders"
+    },
+    "systemwidealerts" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/system/systemwidealerts"
+    },
+    "usagereports" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/statistics/usagereports"
+    },
+    "versionhistories" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/versioning/versionhistories"
+    },
+    "versions" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/versioning/versions"
+    },
+    "vocabularies" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/submission/vocabularies"
+    },
+    "vocabularyEntryDetails" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/submission/vocabularyEntryDetails"
+    },
+    "vocabularyEntryDetails-search" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/submission/vocabularyEntryDetails/search"
+    },
+    "workflowactions" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/config/workflowactions"
+    },
+    "workflowdefinitions" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/config/workflowdefinitions"
+    },
+    "workflowitems" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/workflow/workflowitems"
+    },
+    "workflowsteps" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/config/workflowsteps"
+    },
+    "workspaceitems" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/submission/workspaceitems"
+    }
+  }
+}

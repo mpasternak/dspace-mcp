@@ -1,0 +1,45 @@
+{
+  "_embedded" : {
+    "bundles" : [ {
+      "uuid" : "660faf2c-1038-43b0-82b5-400bdc5adce4",
+      "name" : "ORIGINAL",
+      "handle" : null,
+      "metadata" : {
+        "dc.title" : [ {
+          "value" : "ORIGINAL",
+          "language" : null,
+          "authority" : null,
+          "confidence" : -1,
+          "place" : 0
+        } ]
+      },
+      "type" : "bundle",
+      "uniqueType" : "core.bundle",
+      "_links" : {
+        "item" : {
+          "href" : "https://demo.dspace.org/server/api/core/bundles/660faf2c-1038-43b0-82b5-400bdc5adce4/item"
+        },
+        "bitstreams" : {
+          "href" : "https://demo.dspace.org/server/api/core/bundles/660faf2c-1038-43b0-82b5-400bdc5adce4/bitstreams"
+        },
+        "primaryBitstream" : {
+          "href" : "https://demo.dspace.org/server/api/core/bundles/660faf2c-1038-43b0-82b5-400bdc5adce4/primaryBitstream"
+        },
+        "self" : {
+          "href" : "https://demo.dspace.org/server/api/core/bundles/660faf2c-1038-43b0-82b5-400bdc5adce4"
+        }
+      }
+    } ]
+  },
+  "page" : {
+    "number" : 0,
+    "size" : 20,
+    "totalPages" : 1,
+    "totalElements" : 1
+  },
+  "_links" : {
+    "self" : {
+      "href" : "https://demo.dspace.org/server/api/core/items/4109f8db-ff30-4a46-9148-268b7fe18a17/bundles"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "id" : null,
+  "identifiers" : [ {
+    "id" : "https://doi.org/10.5072/dspace/33",
+    "value" : "https://doi.org/10.5072/dspace/33",
+    "identifierType" : "doi",
+    "identifierStatus" : "TO_BE_REGISTERED",
+    "type" : "identifier",
+    "uniqueType" : "pid.identifier"
+  }, {
+    "id" : "https://demo.dspace.org/handle/10673/1263",
+    "value" : "https://demo.dspace.org/handle/10673/1263",
+    "identifierType" : "handle",
+    "identifierStatus" : null,
+    "type" : "identifier",
+    "uniqueType" : "pid.identifier"
+  } ],
+  "type" : "identifiers",
+  "uniqueType" : "null.identifiers",
+  "_links" : {
+    "self" : {
+      "href" : "https://demo.dspace.org/server/api/core/items/4109f8db-ff30-4a46-9148-268b7fe18a17/identifiers"
+    }
+  }
+}

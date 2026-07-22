@@ -1,0 +1,20 @@
+HTTP/2 302 
+date: Wed, 22 Jul 2026 15:20:13 GMT
+content-length: 0
+location: https://demo.dspace.org/server/api/core/items/5f116a15-d156-46ce-9eb8-d0c820eb6c05
+set-cookie: AWSALB=0jhepEnZykPRGoCwdl51u3+uX58asSW8awV8J2shFdSqiPh0u0KkqBSQ3C5jYWkhMRQ7NJ8STsquZ1gAiNckteLWAbRZ4mVbuNAEc14zil1f8f+ZIdPvEtYeohxf; Expires=Wed, 29 Jul 2026 15:20:13 GMT; Path=/
+set-cookie: AWSALBCORS=0jhepEnZykPRGoCwdl51u3+uX58asSW8awV8J2shFdSqiPh0u0KkqBSQ3C5jYWkhMRQ7NJ8STsquZ1gAiNckteLWAbRZ4mVbuNAEc14zil1f8f+ZIdPvEtYeohxf; Expires=Wed, 29 Jul 2026 15:20:13 GMT; Path=/; SameSite=None; Secure
+vary: Origin
+vary: Access-Control-Request-Method
+vary: Access-Control-Request-Headers
+dspace-xsrf-token: 27910dc0-20e6-4fc8-abda-d7d5866e0520
+set-cookie: DSPACE-XSRF-COOKIE=27910dc0-20e6-4fc8-abda-d7d5866e0520; Path=/server; Secure; HttpOnly; SameSite=None
+content-language: en
+x-content-type-options: nosniff
+x-xss-protection: 0
+cache-control: no-cache, no-store, max-age=0, must-revalidate
+pragma: no-cache
+expires: 0
+strict-transport-security: max-age=31536000 ; includeSubDomains
+x-frame-options: DENY
+

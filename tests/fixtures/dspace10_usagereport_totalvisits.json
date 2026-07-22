@@ -1,0 +1,20 @@
+{
+  "id" : "4109f8db-ff30-4a46-9148-268b7fe18a17_TotalVisits",
+  "points" : [ {
+    "id" : "4109f8db-ff30-4a46-9148-268b7fe18a17",
+    "label" : "Test PhD Thesis",
+    "values" : {
+      "views" : 3
+    },
+    "type" : "item",
+    "uniqueType" : "statistics.item"
+  } ],
+  "type" : "usagereport",
+  "uniqueType" : "statistics.usagereport",
+  "report-type" : "TotalVisits",
+  "_links" : {
+    "self" : {
+      "href" : "https://demo.dspace.org/server/api/statistics/usagereports/4109f8db-ff30-4a46-9148-268b7fe18a17_TotalVisits"
+    }
+  }
+}

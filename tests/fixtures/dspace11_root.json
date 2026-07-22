@@ -1,0 +1,280 @@
+{
+  "dspaceUI" : "https://sandbox.dspace.org",
+  "dspaceName" : "DSpace Sandbox",
+  "dspaceServer" : "https://sandbox.dspace.org/server",
+  "dspaceVersion" : "DSpace 11.0-SNAPSHOT",
+  "type" : "root",
+  "uniqueType" : "root.root",
+  "_links" : {
+    "actuator" : {
+      "href" : "https://sandbox.dspace.org/server/actuator"
+    },
+    "auditevents" : {
+      "href" : "https://sandbox.dspace.org/server/api/system/auditevents"
+    },
+    "authn" : {
+      "href" : "https://sandbox.dspace.org/server/api/authn"
+    },
+    "authorizations" : {
+      "href" : "https://sandbox.dspace.org/server/api/authz/authorizations"
+    },
+    "bitstreamformats" : {
+      "href" : "https://sandbox.dspace.org/server/api/core/bitstreamformats"
+    },
+    "bitstreams" : {
+      "href" : "https://sandbox.dspace.org/server/api/core/bitstreams"
+    },
+    "browses" : {
+      "href" : "https://sandbox.dspace.org/server/api/discover/browses"
+    },
+    "bulkaccessconditionoptions" : {
+      "href" : "https://sandbox.dspace.org/server/api/config/bulkaccessconditionoptions"
+    },
+    "bundles" : {
+      "href" : "https://sandbox.dspace.org/server/api/core/bundles"
+    },
+    "captcha" : {
+      "href" : "https://sandbox.dspace.org/server/api/captcha"
+    },
+    "claimedtasks" : {
+      "href" : "https://sandbox.dspace.org/server/api/workflow/claimedtasks"
+    },
+    "claimedtasks-search" : {
+      "href" : "https://sandbox.dspace.org/server/api/workflow/claimedtasks/search"
+    },
+    "collections" : {
+      "href" : "https://sandbox.dspace.org/server/api/core/collections"
+    },
+    "communities" : {
+      "href" : "https://sandbox.dspace.org/server/api/core/communities"
+    },
+    "contentreport" : {
+      "href" : "https://sandbox.dspace.org/server/api/contentreport"
+    },
+    "correctiontypes" : {
+      "href" : "https://sandbox.dspace.org/server/api/config/correctiontypes"
+    },
+    "discover" : {
+      "href" : "https://sandbox.dspace.org/server/api/discover"
+    },
+    "dso" : {
+      "href" : "https://sandbox.dspace.org/server/api/dso/find{?uuid}",
+      "templated" : true
+    },
+    "duplicates" : {
+      "href" : "https://sandbox.dspace.org/server/api/submission/duplicates"
+    },
+    "duplicates-search" : {
+      "href" : "https://sandbox.dspace.org/server/api/submission/duplicates/search"
+    },
+    "edititemmodes" : {
+      "href" : "https://sandbox.dspace.org/server/api/core/edititemmodes"
+    },
+    "edititems" : {
+      "href" : "https://sandbox.dspace.org/server/api/core/edititems"
+    },
+    "enqueueretry" : {
+      "href" : "https://sandbox.dspace.org/server/api/ldn/messages/{id}/enqueueretry",
+      "templated" : true
+    },
+    "entitytypes" : {
+      "href" : "https://sandbox.dspace.org/server/api/core/entitytypes"
+    },
+    "eperson-registration" : {
+      "href" : "https://sandbox.dspace.org/server/api/eperson/registrations"
+    },
+    "epersons" : {
+      "href" : "https://sandbox.dspace.org/server/api/eperson/epersons"
+    },
+    "externalsources" : {
+      "href" : "https://sandbox.dspace.org/server/api/integration/externalsources"
+    },
+    "features" : {
+      "href" : "https://sandbox.dspace.org/server/api/authz/features"
+    },
+    "feedbacks" : {
+      "href" : "https://sandbox.dspace.org/server/api/tools/feedbacks"
+    },
+    "groups" : {
+      "href" : "https://sandbox.dspace.org/server/api/eperson/groups"
+    },
+    "identifiers" : {
+      "href" : "https://sandbox.dspace.org/server/api/pid/identifiers"
+    },
+    "itemfilters" : {
+      "href" : "https://sandbox.dspace.org/server/api/config/itemfilters"
+    },
+    "itemrequests" : {
+      "href" : "https://sandbox.dspace.org/server/api/tools/itemrequests"
+    },
+    "items" : {
+      "href" : "https://sandbox.dspace.org/server/api/core/items"
+    },
+    "itemtemplates" : {
+      "href" : "https://sandbox.dspace.org/server/api/core/itemtemplates"
+    },
+    "ldnservices" : {
+      "href" : "https://sandbox.dspace.org/server/api/ldn/ldnservices"
+    },
+    "messages" : {
+      "href" : "https://sandbox.dspace.org/server/api/ldn/messages"
+    },
+    "metadatafields" : {
+      "href" : "https://sandbox.dspace.org/server/api/core/metadatafields"
+    },
+    "metadataschemas" : {
+      "href" : "https://sandbox.dspace.org/server/api/core/metadataschemas"
+    },
+    "notifyrequests" : {
+      "href" : "https://sandbox.dspace.org/server/api/ldn/notifyrequests"
+    },
+    "oidc" : {
+      "href" : "https://sandbox.dspace.org/server/api/authn"
+    },
+    "orcidhistories" : {
+      "href" : "https://sandbox.dspace.org/server/api/eperson/orcidhistories"
+    },
+    "orcidqueues" : {
+      "href" : "https://sandbox.dspace.org/server/api/eperson/orcidqueues"
+    },
+    "pid" : {
+      "href" : "https://sandbox.dspace.org/server/api/pid/find{?id}",
+      "templated" : true
+    },
+    "pooltasks" : {
+      "href" : "https://sandbox.dspace.org/server/api/workflow/pooltasks"
+    },
+    "pooltasks-search" : {
+      "href" : "https://sandbox.dspace.org/server/api/workflow/pooltasks/search"
+    },
+    "processes" : {
+      "href" : "https://sandbox.dspace.org/server/api/system/processes"
+    },
+    "profiles" : {
+      "href" : "https://sandbox.dspace.org/server/api/eperson/profiles"
+    },
+    "properties" : {
+      "href" : "https://sandbox.dspace.org/server/api/config/properties"
+    },
+    "qualityassuranceevents" : {
+      "href" : "https://sandbox.dspace.org/server/api/integration/qualityassuranceevents"
+    },
+    "qualityassurancesources" : {
+      "href" : "https://sandbox.dspace.org/server/api/integration/qualityassurancesources"
+    },
+    "qualityassurancetopics" : {
+      "href" : "https://sandbox.dspace.org/server/api/integration/qualityassurancetopics"
+    },
+    "registrations" : {
+      "href" : "https://sandbox.dspace.org/server/api/eperson/registrations"
+    },
+    "relationships" : {
+      "href" : "https://sandbox.dspace.org/server/api/core/relationships"
+    },
+    "relationshiptypes" : {
+      "href" : "https://sandbox.dspace.org/server/api/core/relationshiptypes"
+    },
+    "resourcepolicies" : {
+      "href" : "https://sandbox.dspace.org/server/api/authz/resourcepolicies"
+    },
+    "resourcepolicies-search" : {
+      "href" : "https://sandbox.dspace.org/server/api/authz/resourcepolicies/search"
+    },
+    "scripts" : {
+      "href" : "https://sandbox.dspace.org/server/api/system/scripts"
+    },
+    "securitysettings" : {
+      "href" : "https://sandbox.dspace.org/server/api/core/securitysettings"
+    },
+    "self" : {
+      "href" : "https://sandbox.dspace.org/server/api"
+    },
+    "sites" : {
+      "href" : "https://sandbox.dspace.org/server/api/core/sites"
+    },
+    "statistics" : {
+      "href" : "https://sandbox.dspace.org/server/api/statistics"
+    },
+    "submissionaccessoptions" : {
+      "href" : "https://sandbox.dspace.org/server/api/config/submissionaccessoptions"
+    },
+    "submissioncclicenseUrls" : {
+      "href" : "https://sandbox.dspace.org/server/api/config/submissioncclicenseUrls"
+    },
+    "submissioncclicenseUrls-search" : {
+      "href" : "https://sandbox.dspace.org/server/api/config/submissioncclicenseUrls/search"
+    },
+    "submissioncclicenses" : {
+      "href" : "https://sandbox.dspace.org/server/api/config/submissioncclicenses"
+    },
+    "submissioncoarnotifyconfigs" : {
+      "href" : "https://sandbox.dspace.org/server/api/config/submissioncoarnotifyconfigs"
+    },
+    "submissiondefinitions" : {
+      "href" : "https://sandbox.dspace.org/server/api/config/submissiondefinitions"
+    },
+    "submissionforms" : {
+      "href" : "https://sandbox.dspace.org/server/api/config/submissionforms"
+    },
+    "submissionsections" : {
+      "href" : "https://sandbox.dspace.org/server/api/config/submissionsections"
+    },
+    "submissionuploads" : {
+      "href" : "https://sandbox.dspace.org/server/api/config/submissionuploads"
+    },
+    "subscriptions" : {
+      "href" : "https://sandbox.dspace.org/server/api/core/subscriptions"
+    },
+    "subscriptions-search" : {
+      "href" : "https://sandbox.dspace.org/server/api/core/subscriptions/search"
+    },
+    "suggestions" : {
+      "href" : "https://sandbox.dspace.org/server/api/integration/suggestions"
+    },
+    "suggestionsources" : {
+      "href" : "https://sandbox.dspace.org/server/api/integration/suggestionsources"
+    },
+    "suggestiontargets" : {
+      "href" : "https://sandbox.dspace.org/server/api/integration/suggestiontargets"
+    },
+    "supervisionorders" : {
+      "href" : "https://sandbox.dspace.org/server/api/core/supervisionorders"
+    },
+    "systemwidealerts" : {
+      "href" : "https://sandbox.dspace.org/server/api/system/systemwidealerts"
+    },
+    "usagereports" : {
+      "href" : "https://sandbox.dspace.org/server/api/statistics/usagereports"
+    },
+    "versionhistories" : {
+      "href" : "https://sandbox.dspace.org/server/api/versioning/versionhistories"
+    },
+    "versions" : {
+      "href" : "https://sandbox.dspace.org/server/api/versioning/versions"
+    },
+    "vocabularies" : {
+      "href" : "https://sandbox.dspace.org/server/api/submission/vocabularies"
+    },
+    "vocabularyEntryDetails" : {
+      "href" : "https://sandbox.dspace.org/server/api/submission/vocabularyEntryDetails"
+    },
+    "vocabularyEntryDetails-search" : {
+      "href" : "https://sandbox.dspace.org/server/api/submission/vocabularyEntryDetails/search"
+    },
+    "workflowactions" : {
+      "href" : "https://sandbox.dspace.org/server/api/config/workflowactions"
+    },
+    "workflowdefinitions" : {
+      "href" : "https://sandbox.dspace.org/server/api/config/workflowdefinitions"
+    },
+    "workflowitems" : {
+      "href" : "https://sandbox.dspace.org/server/api/workflow/workflowitems"
+    },
+    "workflowsteps" : {
+      "href" : "https://sandbox.dspace.org/server/api/config/workflowsteps"
+    },
+    "workspaceitems" : {
+      "href" : "https://sandbox.dspace.org/server/api/submission/workspaceitems"
+    }
+  }
+}

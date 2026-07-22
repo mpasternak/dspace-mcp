@@ -1,0 +1,66 @@
+{
+  "_embedded" : {
+    "bitstreams" : [ {
+      "id" : "45382064-a29a-402f-bb1b-5304f5031f30",
+      "uuid" : "45382064-a29a-402f-bb1b-5304f5031f30",
+      "name" : "Test.pdf",
+      "handle" : null,
+      "metadata" : {
+        "dc.source" : [ {
+          "value" : "Test.pdf",
+          "language" : null,
+          "authority" : null,
+          "confidence" : -1,
+          "place" : 0
+        } ],
+        "dc.title" : [ {
+          "value" : "Test.pdf",
+          "language" : null,
+          "authority" : null,
+          "confidence" : -1,
+          "place" : 0
+        } ]
+      },
+      "bundleName" : "ORIGINAL",
+      "sizeBytes" : 14884,
+      "checkSum" : {
+        "checkSumAlgorithm" : "MD5",
+        "value" : "9e55704856c7798762321e4011451d98"
+      },
+      "sequenceId" : 2,
+      "type" : "bitstream",
+      "uniqueType" : "core.bitstream",
+      "_links" : {
+        "content" : {
+          "href" : "https://demo.dspace.org/server/api/core/bitstreams/45382064-a29a-402f-bb1b-5304f5031f30/content"
+        },
+        "bundle" : {
+          "href" : "https://demo.dspace.org/server/api/core/bitstreams/45382064-a29a-402f-bb1b-5304f5031f30/bundle"
+        },
+        "accessStatus" : {
+          "href" : "https://demo.dspace.org/server/api/core/bitstreams/45382064-a29a-402f-bb1b-5304f5031f30/accessStatus"
+        },
+        "format" : {
+          "href" : "https://demo.dspace.org/server/api/core/bitstreams/45382064-a29a-402f-bb1b-5304f5031f30/format"
+        },
+        "thumbnail" : {
+          "href" : "https://demo.dspace.org/server/api/core/bitstreams/45382064-a29a-402f-bb1b-5304f5031f30/thumbnail"
+        },
+        "self" : {
+          "href" : "https://demo.dspace.org/server/api/core/bitstreams/45382064-a29a-402f-bb1b-5304f5031f30"
+        }
+      }
+    } ]
+  },
+  "page" : {
+    "number" : 0,
+    "size" : 20,
+    "totalPages" : 1,
+    "totalElements" : 1
+  },
+  "_links" : {
+    "self" : {
+      "href" : "https://demo.dspace.org/server/api/core/bundles/660faf2c-1038-43b0-82b5-400bdc5adce4/bitstreams"
+    }
+  }
+}

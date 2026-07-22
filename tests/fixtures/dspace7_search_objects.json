@@ -1,0 +1,757 @@
+{
+  "id" : null,
+  "scope" : null,
+  "query" : "cancer",
+  "appliedFilters" : null,
+  "sort" : null,
+  "configuration" : null,
+  "type" : "discover",
+  "_links" : {
+    "self" : {
+      "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/search/objects?query=cancer&dsoType=item"
+    }
+  },
+  "_embedded" : {
+    "searchResult" : {
+      "_embedded" : {
+        "objects" : [ {
+          "hitHighlights" : {
+            "dc.description.abstract" : [ "BACKGROUND: Lung <em>cancer</em> is typically diagnosed at a late stage. Early presentation and detection of lung <em>cancer</em> symptoms is critical to improving survival but can be clinically complicated and as yet a robust screening method for diagnosis is not available in routine practice. ", "Addressing these barriers offers opportunities by which rates of early diagnosis of lung <em>cancer</em> may be improved." ],
+            "dc.title" : [ "Patient and carer perceived barriers to early presentation and diagnosis of lung <em>cancer</em>: A systematic review" ]
+          },
+          "type" : "discover",
+          "_links" : {
+            "indexableObject" : {
+              "href" : "https://researchcommons.waikato.ac.nz/server/api/core/items/74860545-ea47-4632-a2d6-9a06cb0b0c9a"
+            }
+          },
+          "_embedded" : {
+            "indexableObject" : {
+              "id" : "74860545-ea47-4632-a2d6-9a06cb0b0c9a",
+              "uuid" : "74860545-ea47-4632-a2d6-9a06cb0b0c9a",
+              "name" : "Patient and carer perceived barriers to early presentation and diagnosis of lung cancer: A systematic review",
+              "handle" : "10289/12325",
+              "metadata" : {
+                "dc.contributor.author" : [ {
+                  "value" : "Cassim, Shemana",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                }, {
+                  "value" : "Chepulis, Lynne Merran",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 1
+                }, {
+                  "value" : "Keenan, Rawiri",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 2
+                }, {
+                  "value" : "Kidd, Jacquie",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 3
+                }, {
+                  "value" : "Firth, Melissa",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 4
+                }, {
+                  "value" : "Lawrenson, Ross",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 5
+                } ],
+                "dc.coverage.spatial" : [ {
+                  "value" : "England",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.date.accessioned" : [ {
+                  "value" : "2019-02-12T22:27:00Z",
+                  "language" : "",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.date.available" : [ {
+                  "value" : "2019-01-08",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                }, {
+                  "value" : "2019-02-12T22:27:00Z",
+                  "language" : "",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 1
+                } ],
+                "dc.date.issued" : [ {
+                  "value" : "2019-01-08",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.description.abstract" : [ {
+                  "value" : "BACKGROUND: Lung cancer is typically diagnosed at a late stage. Early presentation and detection of lung cancer symptoms is critical to improving survival but can be clinically complicated and as yet a robust screening method for diagnosis is not available in routine practice. Accordingly, the barriers to help-seeking behaviour and diagnosis need to be considered. This review aimed to document the barriers to early presentation and diagnosis of lung cancer, based on patient and carer perspectives. \r\nMETHODS: A systematic review of databases was performed for original, English language articles discussing qualitative research on patient perceived barriers to early presentation and diagnosis of lung cancer. Three major databases were searched: Scopus, PubMed and EBSCOhost. References cited in the selected studies were searched for further relevant articles. \r\nRESULTS: Fourteen studies met inclusion criteria for review. Barriers were grouped into three categories: healthcare provider and system factors, patient factors and disease factors. \r\nCONCLUSIONS: Studies showed that the most frequently reported barriers to early presentation and diagnosis of lung cancer reported by patients and carers related to poor relationships between GPs and patients, a lack of access to services and care for patients, and a lack of awareness of lung cancer symptoms and treatment. Addressing these barriers offers opportunities by which rates of early diagnosis of lung cancer may be improved.",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.format.mimetype" : [ {
+                  "value" : "application/pdf",
+                  "language" : "",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.identifier.citation" : [ {
+                  "value" : "Cassim, S., Chepulis, L. M., Keenan, R., Kidd, J., Firth, M., & Lawrenson,  R. (2019). Patient and carer perceived barriers to early presentation and diagnosis of lung cancer: a systematic review. BMC Cancer, 19(1), 25. https://doi.org/10.1186/s12885-018-5169-9",
+                  "language" : "en",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.identifier.doi" : [ {
+                  "value" : "10.1186/s12885-018-5169-9",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.identifier.eissn" : [ {
+                  "value" : "1471-2407",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.identifier.uri" : [ {
+                  "value" : "https://hdl.handle.net/10289/12325",
+                  "language" : "",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.language.iso" : [ {
+                  "value" : "en",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.relation.isPartOf" : [ {
+                  "value" : "BMC Cancer",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.rights" : [ {
+                  "value" : "Licence for published version: Creative Commons Attribution 4.0 International",
+                  "language" : "",
+                  "authority" : null,
+                  "confidence" : 0,
+                  "place" : 0
+                } ],
+                "dc.subject" : [ {
+                  "value" : "Barrier to diagnosis",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                }, {
+                  "value" : "Cancer care",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 1
+                }, {
+                  "value" : "Delay to diagnosis",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 2
+                }, {
+                  "value" : "Early presentation",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 3
+                }, {
+                  "value" : "Lung cancer",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 4
+                }, {
+                  "value" : "Primary care",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 5
+                } ],
+                "dc.title" : [ {
+                  "value" : "Patient and carer perceived barriers to early presentation and diagnosis of lung cancer: A systematic review",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : 0,
+                  "place" : 0
+                } ],
+                "dc.type" : [ {
+                  "value" : "Journal Article",
+                  "language" : "",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dspace.entity.type" : [ {
+                  "value" : "Publication",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "pubs.begin-page" : [ {
+                  "value" : "25",
+                  "language" : "",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "pubs.issue" : [ {
+                  "value" : "1",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "pubs.publication-status" : [ {
+                  "value" : "Published online",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "pubs.volume" : [ {
+                  "value" : "19",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ]
+              },
+              "inArchive" : true,
+              "discoverable" : true,
+              "withdrawn" : false,
+              "lastModified" : "2026-04-29T00:57:29.486+00:00",
+              "entityType" : "Publication",
+              "type" : "item",
+              "_links" : {
+                "accessStatus" : {
+                  "href" : "https://researchcommons.waikato.ac.nz/server/api/core/items/74860545-ea47-4632-a2d6-9a06cb0b0c9a/accessStatus"
+                },
+                "bundles" : {
+                  "href" : "https://researchcommons.waikato.ac.nz/server/api/core/items/74860545-ea47-4632-a2d6-9a06cb0b0c9a/bundles"
+                },
+                "identifiers" : {
+                  "href" : "https://researchcommons.waikato.ac.nz/server/api/core/items/74860545-ea47-4632-a2d6-9a06cb0b0c9a/identifiers"
+                },
+                "mappedCollections" : {
+                  "href" : "https://researchcommons.waikato.ac.nz/server/api/core/items/74860545-ea47-4632-a2d6-9a06cb0b0c9a/mappedCollections"
+                },
+                "owningCollection" : {
+                  "href" : "https://researchcommons.waikato.ac.nz/server/api/core/items/74860545-ea47-4632-a2d6-9a06cb0b0c9a/owningCollection"
+                },
+                "relationships" : {
+                  "href" : "https://researchcommons.waikato.ac.nz/server/api/core/items/74860545-ea47-4632-a2d6-9a06cb0b0c9a/relationships"
+                },
+                "version" : {
+                  "href" : "https://researchcommons.waikato.ac.nz/server/api/core/items/74860545-ea47-4632-a2d6-9a06cb0b0c9a/version"
+                },
+                "templateItemOf" : {
+                  "href" : "https://researchcommons.waikato.ac.nz/server/api/core/items/74860545-ea47-4632-a2d6-9a06cb0b0c9a/templateItemOf"
+                },
+                "thumbnail" : {
+                  "href" : "https://researchcommons.waikato.ac.nz/server/api/core/items/74860545-ea47-4632-a2d6-9a06cb0b0c9a/thumbnail"
+                },
+                "self" : {
+                  "href" : "https://researchcommons.waikato.ac.nz/server/api/core/items/74860545-ea47-4632-a2d6-9a06cb0b0c9a"
+                }
+              }
+            }
+          }
+        }, {
+          "hitHighlights" : {
+            "dc.description.abstract" : [ "Abstract\nBackground: The rising prevalence of <em>cancer</em> in New Zealand calls for a need to improve person-centred and equitable <em>cancer</em> nursing care, in order to enhance patient outcomes and alleviate burden on the healthcare system. ", "In addition, implementation of strategies, and interventions to encourage the alignment of perspectives and expectations between patients and nurses should also be explored at different levels of <em>cancer</em> care, including the incorporation of policy, educational and clinical support." ],
+            "dc.title" : [ "Perspectives and expectations of person-centred and equitable <em>cancer</em> nursing care" ]
+          },
+          "type" : "discover",
+          "_links" : {
+            "indexableObject" : {
+              "href" : "https://researchcommons.waikato.ac.nz/server/api/core/items/ed33041e-6cfb-4816-a64f-b8d18b42fffe"
+            }
+          },
+          "_embedded" : {
+            "indexableObject" : {
+              "id" : "ed33041e-6cfb-4816-a64f-b8d18b42fffe",
+              "uuid" : "ed33041e-6cfb-4816-a64f-b8d18b42fffe",
+              "name" : "Perspectives and expectations of person-centred and equitable cancer nursing care",
+              "handle" : "10289/17783",
+              "metadata" : {
+                "dc.contributor.advisor" : [ {
+                  "value" : "Wall, Lara",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                }, {
+                  "value" : "Parsons, Matthew",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 1
+                } ],
+                "dc.contributor.author" : [ {
+                  "value" : "Leow, Clara",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.date.accessioned" : [ {
+                  "value" : "2025-11-24T03:32:05Z",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.date.available" : [ {
+                  "value" : "2025-11-24T03:32:05Z",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.date.issued" : [ {
+                  "value" : "2025",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.description.abstract" : [ {
+                  "value" : "Abstract\nBackground: The rising prevalence of cancer in New Zealand calls for a need to improve person-centred and equitable cancer nursing care, in order to enhance patient outcomes and alleviate burden on the healthcare system. However, achieving this can prove to be a challenge due to the increase in cultural diversity amongst patients and nurses. Therefore, understanding and embracing the perspectives and expectations of both patients and nurses would be beneficial and crucial to raising awareness and bridging gaps that could jeopardise person-centred and equitable cancer nursing care. With only one inpatient ward within the region, the acute Haematology and Oncology ward within Health New Zealand - Te Whatu Ora Waikato is no exception to these challenges. \n\nObjective: This research aims to explore the perspectives and expectations of patients and nurses in an acute Haematology and Oncology ward within Health New Zealand - Te Whatu Ora Waikato.\n\nParticipants: Six patients from the inpatient ward were purposefully recruited in the qualitative phase according to the sampling framework, and through the application of inclusion, and exclusion criteria. All 53 registered nurses were invited to participate in an anonymous online survey during the quantitative phase. However, only 15 registered nurses responded. \n\nMethods: This exploratory sequential mixed methods research consisted of an initial qualitative phase that explored the perspectives and expectations of patients using semi-structured interviews. Braun and Clarke’s reflexive thematic analysis was utilised to identify themes from the interviews. An anonymous online Likert scale survey was then developed for registered nurses in the quantitative phase. Data from the surveys were analysed using descriptive statistics. \n\nFindings: Four main themes emerged from patient interviews as important aspects of person-centred and equitable cancer care to patients: (i) Holistic needs and care, (ii) Involving and engaging support system, (iii) Barriers and challenges, and (iv) Nursing roles and patient engagement. However, findings from staff surveys revealed that nurses had varying perspectives and were not consistently providing care that patients valued. When both data sets were compared, it was evident that there were significant misalignments in the perspectives and expectations of person-centred and equitable care between patients and nurses. \n\nConclusion: Understanding and embracing the perspectives and expectations of patients and nurses in cancer care is a pivotal aspect to achieving person-centred and equitable care in New Zealand. However, barriers such as misaligned perspectives and expectations between patients and nurses can negatively impact the delivery of individualised care. As a result, this increases the risk for more unfavourable treatment outcomes and complications, thereby also placing more pressure on the already strained healthcare system. While this study has provided valuable insights, further research may be required to increase the generalisability and robustness of this topic. In addition, implementation of strategies, and interventions to encourage the alignment of perspectives and expectations between patients and nurses should also be explored at different levels of cancer care, including the incorporation of policy, educational and clinical support.",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.identifier.uri" : [ {
+                  "value" : "https://hdl.handle.net/10289/17783",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.language.iso" : [ {
+                  "value" : "en",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.publisher" : [ {
+                  "value" : "The University of Waikato",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.rights" : [ {
+                  "value" : "All items in Research Commons are provided for private study and research purposes and are protected by copyright with all rights reserved unless otherwise indicated.",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.subject" : [ {
+                  "value" : "Person-centred",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                }, {
+                  "value" : "Equitable",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 1
+                }, {
+                  "value" : "Cancer nursing care",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 2
+                }, {
+                  "value" : "Perspectives and expectations",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 3
+                } ],
+                "dc.title" : [ {
+                  "value" : "Perspectives and expectations of person-centred and equitable cancer nursing care",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dc.type" : [ {
+                  "value" : "Thesis",
+                  "language" : "en",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "dspace.entity.type" : [ {
+                  "value" : "Publication",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "pubs.place-of-publication" : [ {
+                  "value" : "Hamilton, New Zealand",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "thesis.degree.grantor" : [ {
+                  "value" : "The University of Waikato",
+                  "language" : "en_NZ",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "thesis.degree.level" : [ {
+                  "value" : "Masters",
+                  "language" : "en",
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ],
+                "thesis.degree.name" : [ {
+                  "value" : "Master of Science (Research) (MSc(Research))",
+                  "language" : null,
+                  "authority" : null,
+                  "confidence" : -1,
+                  "place" : 0
+                } ]
+              },
+              "inArchive" : true,
+              "discoverable" : true,
+              "withdrawn" : false,
+              "lastModified" : "2025-11-24T14:01:48.142+00:00",
+              "entityType" : "Publication",
+              "type" : "item",
+              "_links" : {
+                "accessStatus" : {
+                  "href" : "https://researchcommons.waikato.ac.nz/server/api/core/items/ed33041e-6cfb-4816-a64f-b8d18b42fffe/accessStatus"
+                },
+                "bundles" : {
+                  "href" : "https://researchcommons.waikato.ac.nz/server/api/core/items/ed33041e-6cfb-4816-a64f-b8d18b42fffe/bundles"
+                },
+                "identifiers" : {
+                  "href" : "https://researchcommons.waikato.ac.nz/server/api/core/items/ed33041e-6cfb-4816-a64f-b8d18b42fffe/identifiers"
+                },
+                "mappedCollections" : {
+                  "href" : "https://researchcommons.waikato.ac.nz/server/api/core/items/ed33041e-6cfb-4816-a64f-b8d18b42fffe/mappedCollections"
+                },
+                "owningCollection" : {
+                  "href" : "https://researchcommons.waikato.ac.nz/server/api/core/items/ed33041e-6cfb-4816-a64f-b8d18b42fffe/owningCollection"
+                },
+                "relationships" : {
+                  "href" : "https://researchcommons.waikato.ac.nz/server/api/core/items/ed33041e-6cfb-4816-a64f-b8d18b42fffe/relationships"
+                },
+                "version" : {
+                  "href" : "https://researchcommons.waikato.ac.nz/server/api/core/items/ed33041e-6cfb-4816-a64f-b8d18b42fffe/version"
+                },
+                "templateItemOf" : {
+                  "href" : "https://researchcommons.waikato.ac.nz/server/api/core/items/ed33041e-6cfb-4816-a64f-b8d18b42fffe/templateItemOf"
+                },
+                "thumbnail" : {
+                  "href" : "https://researchcommons.waikato.ac.nz/server/api/core/items/ed33041e-6cfb-4816-a64f-b8d18b42fffe/thumbnail"
+                },
+                "self" : {
+                  "href" : "https://researchcommons.waikato.ac.nz/server/api/core/items/ed33041e-6cfb-4816-a64f-b8d18b42fffe"
+                }
+              }
+            }
+          }
+        } ]
+      },
+      "page" : {
+        "number" : 0,
+        "size" : 2,
+        "totalPages" : 470,
+        "totalElements" : 940
+      },
+      "_links" : {
+        "next" : {
+          "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/search/objects?query=cancer&dsoType=item&page=1&size=2"
+        },
+        "last" : {
+          "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/search/objects?query=cancer&dsoType=item&page=469&size=2"
+        },
+        "self" : {
+          "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/search/objects?query=cancer&dsoType=item&size=2"
+        }
+      }
+    },
+    "facets" : [ {
+      "name" : "author",
+      "facetType" : "text",
+      "facetLimit" : 5,
+      "minValue" : "A V Muthiah, M Nachiamal",
+      "maxValue" : "Zyngfogel, R",
+      "page" : {
+        "number" : 0,
+        "size" : 5
+      },
+      "_links" : {
+        "next" : {
+          "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/facets/author?query=cancer&dsoType=item&page=1&size=5"
+        },
+        "self" : {
+          "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/facets/author?query=cancer&dsoType=item&size=5"
+        }
+      },
+      "_embedded" : {
+        "values" : [ {
+          "label" : "Lawrenson, Ross",
+          "count" : 35,
+          "authorityKey" : null,
+          "type" : "discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/search/objects?query=cancer&dsoType=item&f.author=Lawrenson,%20Ross,equals"
+            }
+          }
+        }, {
+          "label" : "Frank, Eibe",
+          "count" : 23,
+          "authorityKey" : null,
+          "type" : "discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/search/objects?query=cancer&dsoType=item&f.author=Frank,%20Eibe,equals"
+            }
+          }
+        }, {
+          "label" : "Lao, Chunhuan",
+          "count" : 18,
+          "authorityKey" : null,
+          "type" : "discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/search/objects?query=cancer&dsoType=item&f.author=Lao,%20Chunhuan,equals"
+            }
+          }
+        }, {
+          "label" : "Hudson, Maui",
+          "count" : 15,
+          "authorityKey" : null,
+          "type" : "discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/search/objects?query=cancer&dsoType=item&f.author=Hudson,%20Maui,equals"
+            }
+          }
+        }, {
+          "label" : "Masters-Awatere, Bridgette",
+          "count" : 15,
+          "authorityKey" : null,
+          "type" : "discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/search/objects?query=cancer&dsoType=item&f.author=Masters-Awatere,%20Bridgette,equals"
+            }
+          }
+        } ]
+      }
+    }, {
+      "name" : "subject",
+      "facetType" : "hierarchical",
+      "facetLimit" : 5,
+      "page" : {
+        "number" : 0,
+        "size" : 5
+      },
+      "_links" : {
+        "next" : {
+          "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/facets/subject?query=cancer&dsoType=item&page=1&size=5"
+        },
+        "self" : {
+          "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/facets/subject?query=cancer&dsoType=item&size=5"
+        }
+      },
+      "_embedded" : {
+        "values" : [ {
+          "label" : "Science & Technology",
+          "count" : 46,
+          "authorityKey" : null,
+          "type" : "discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/search/objects?query=cancer&dsoType=item&f.subject=Science%20%26%20Technology,equals"
+            }
+          }
+        }, {
+          "label" : "Machine learning",
+          "count" : 38,
+          "authorityKey" : null,
+          "type" : "discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/search/objects?query=cancer&dsoType=item&f.subject=Machine%20learning,equals"
+            }
+          }
+        }, {
+          "label" : "New Zealand",
+          "count" : 36,
+          "authorityKey" : null,
+          "type" : "discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/search/objects?query=cancer&dsoType=item&f.subject=New%20Zealand,equals"
+            }
+          }
+        }, {
+          "label" : "Life Sciences & Biomedicine",
+          "count" : 35,
+          "authorityKey" : null,
+          "type" : "discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/search/objects?query=cancer&dsoType=item&f.subject=Life%20Sciences%20%26%20Biomedicine,equals"
+            }
+          }
+        }, {
+          "label" : "computer science",
+          "count" : 34,
+          "authorityKey" : null,
+          "type" : "discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/search/objects?query=cancer&dsoType=item&f.subject=computer%20science,equals"
+            }
+          }
+        } ]
+      }
+    }, {
+      "name" : "dateIssued",
+      "facetType" : "date",
+      "facetLimit" : 5,
+      "minValue" : "0202-07-01",
+      "maxValue" : "2026-07-01",
+      "page" : {
+        "number" : 0,
+        "size" : 5
+      },
+      "_links" : {
+        "self" : {
+          "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/facets/dateIssued?query=cancer&dsoType=item&size=5"
+        }
+      },
+      "_embedded" : {
+        "values" : [ {
+          "label" : "1850 - 2026",
+          "count" : 939,
+          "authorityKey" : null,
+          "type" : "discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/search/objects?query=cancer&dsoType=item&f.dateIssued=%5B1850%20TO%202026%5D,equals"
+            }
+          }
+        } ]
+      }
+    }, {
+      "name" : "has_content_in_original_bundle",
+      "facetType" : "standard",
+      "facetLimit" : 2,
+      "page" : {
+        "number" : 0,
+        "size" : 2
+      },
+      "_links" : {
+        "self" : {
+          "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/facets/has_content_in_original_bundle?query=cancer&dsoType=item&size=2"
+        }
+      },
+      "_embedded" : {
+        "values" : [ {
+          "label" : "true",
+          "count" : 929,
+          "authorityKey" : null,
+          "type" : "discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/search/objects?query=cancer&dsoType=item&f.has_content_in_original_bundle=true,equals"
+            }
+          }
+        }, {
+          "label" : "false",
+          "count" : 11,
+          "authorityKey" : null,
+          "type" : "discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/search/objects?query=cancer&dsoType=item&f.has_content_in_original_bundle=false,equals"
+            }
+          }
+        } ]
+      }
+    }, {
+      "name" : "entityType",
+      "facetType" : "text",
+      "facetLimit" : 5,
+      "page" : {
+        "number" : 0,
+        "size" : 5
+      },
+      "_links" : {
+        "self" : {
+          "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/facets/entityType?query=cancer&dsoType=item&size=5"
+        }
+      },
+      "_embedded" : {
+        "values" : [ {
+          "label" : "Publication",
+          "count" : 904,
+          "authorityKey" : null,
+          "type" : "discover",
+          "_links" : {
+            "search" : {
+              "href" : "https://researchcommons.waikato.ac.nz/server/api/discover/search/objects?query=cancer&dsoType=item&f.entityType=Publication,equals"
+            }
+          }
+        } ]
+      }
+    } ]
+  }
+}

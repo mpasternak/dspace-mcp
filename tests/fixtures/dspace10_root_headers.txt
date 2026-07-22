@@ -1,0 +1,19 @@
+HTTP/2 200 
+date: Wed, 22 Jul 2026 15:20:01 GMT
+content-type: application/hal+json;charset=UTF-8
+set-cookie: AWSALB=YY4TTfryoliyPgAz2tcpjTWiMQpqF92mmT5pBgVhLIQNVS1B7vgtmCM53yI8W5MxFjvJqPbKOjl0WTfXAFi7HmtWVvEqq5eEblr4zRPCb1HM8Gs+1zH8eiB8SlOf; Expires=Wed, 29 Jul 2026 15:20:01 GMT; Path=/
+set-cookie: AWSALBCORS=YY4TTfryoliyPgAz2tcpjTWiMQpqF92mmT5pBgVhLIQNVS1B7vgtmCM53yI8W5MxFjvJqPbKOjl0WTfXAFi7HmtWVvEqq5eEblr4zRPCb1HM8Gs+1zH8eiB8SlOf; Expires=Wed, 29 Jul 2026 15:20:01 GMT; Path=/; SameSite=None; Secure
+vary: Origin
+vary: Access-Control-Request-Method
+vary: Access-Control-Request-Headers
+dspace-xsrf-token: 20aeb061-84c4-4231-b63f-cdaf8d149b43
+set-cookie: DSPACE-XSRF-COOKIE=20aeb061-84c4-4231-b63f-cdaf8d149b43; Path=/server; Secure; HttpOnly; SameSite=None
+content-language: en
+x-content-type-options: nosniff
+x-xss-protection: 0
+cache-control: no-cache, no-store, max-age=0, must-revalidate
+pragma: no-cache
+expires: 0
+strict-transport-security: max-age=31536000 ; includeSubDomains
+x-frame-options: DENY
+

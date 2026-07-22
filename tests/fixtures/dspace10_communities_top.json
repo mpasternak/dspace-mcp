@@ -1,0 +1,120 @@
+{
+  "_embedded" : {
+    "communities" : [ {
+      "id" : "93a27dc5-be27-4ef4-a8ab-9b82fb9e3e6d",
+      "uuid" : "93a27dc5-be27-4ef4-a8ab-9b82fb9e3e6d",
+      "name" : "aarthi",
+      "handle" : "10673/1251",
+      "metadata" : {
+        "dc.identifier.uri" : [ {
+          "value" : "https://demo.dspace.org/handle/10673/1251",
+          "language" : null,
+          "authority" : null,
+          "confidence" : -1,
+          "place" : 0
+        } ],
+        "dc.title" : [ {
+          "value" : "aarthi",
+          "language" : null,
+          "authority" : null,
+          "confidence" : -1,
+          "place" : 0
+        } ]
+      },
+      "archivedItemsCount" : 0,
+      "type" : "community",
+      "uniqueType" : "core.community",
+      "_links" : {
+        "collections" : {
+          "href" : "https://demo.dspace.org/server/api/core/communities/93a27dc5-be27-4ef4-a8ab-9b82fb9e3e6d/collections"
+        },
+        "logo" : {
+          "href" : "https://demo.dspace.org/server/api/core/communities/93a27dc5-be27-4ef4-a8ab-9b82fb9e3e6d/logo"
+        },
+        "subcommunities" : {
+          "href" : "https://demo.dspace.org/server/api/core/communities/93a27dc5-be27-4ef4-a8ab-9b82fb9e3e6d/subcommunities"
+        },
+        "parentCommunity" : {
+          "href" : "https://demo.dspace.org/server/api/core/communities/93a27dc5-be27-4ef4-a8ab-9b82fb9e3e6d/parentCommunity"
+        },
+        "adminGroup" : {
+          "href" : "https://demo.dspace.org/server/api/core/communities/93a27dc5-be27-4ef4-a8ab-9b82fb9e3e6d/adminGroup"
+        },
+        "self" : {
+          "href" : "https://demo.dspace.org/server/api/core/communities/93a27dc5-be27-4ef4-a8ab-9b82fb9e3e6d"
+        }
+      }
+    }, {
+      "id" : "20c307f4-2405-49de-8e22-b256a7f2fa01",
+      "uuid" : "20c307f4-2405-49de-8e22-b256a7f2fa01",
+      "name" : "AdikaviMaharshi Valmiki University",
+      "handle" : "10673/1147",
+      "metadata" : {
+        "dc.description" : [ {
+          "value" : "<>WELCOME TO ASMVUR<>",
+          "language" : null,
+          "authority" : null,
+          "confidence" : -1,
+          "place" : 0
+        } ],
+        "dc.identifier.uri" : [ {
+          "value" : "https://demo.dspace.org/handle/10673/1147",
+          "language" : null,
+          "authority" : null,
+          "confidence" : -1,
+          "place" : 0
+        } ],
+        "dc.title" : [ {
+          "value" : "AdikaviMaharshi Valmiki University",
+          "language" : null,
+          "authority" : null,
+          "confidence" : -1,
+          "place" : 0
+        } ]
+      },
+      "archivedItemsCount" : 0,
+      "type" : "community",
+      "uniqueType" : "core.community",
+      "_links" : {
+        "collections" : {
+          "href" : "https://demo.dspace.org/server/api/core/communities/20c307f4-2405-49de-8e22-b256a7f2fa01/collections"
+        },
+        "logo" : {
+          "href" : "https://demo.dspace.org/server/api/core/communities/20c307f4-2405-49de-8e22-b256a7f2fa01/logo"
+        },
+        "subcommunities" : {
+          "href" : "https://demo.dspace.org/server/api/core/communities/20c307f4-2405-49de-8e22-b256a7f2fa01/subcommunities"
+        },
+        "parentCommunity" : {
+          "href" : "https://demo.dspace.org/server/api/core/communities/20c307f4-2405-49de-8e22-b256a7f2fa01/parentCommunity"
+        },
+        "adminGroup" : {
+          "href" : "https://demo.dspace.org/server/api/core/communities/20c307f4-2405-49de-8e22-b256a7f2fa01/adminGroup"
+        },
+        "self" : {
+          "href" : "https://demo.dspace.org/server/api/core/communities/20c307f4-2405-49de-8e22-b256a7f2fa01"
+        }
+      }
+    } ]
+  },
+  "_links" : {
+    "first" : {
+      "href" : "https://demo.dspace.org/server/api/core/communities/search/top?page=0&size=2"
+    },
+    "self" : {
+      "href" : "https://demo.dspace.org/server/api/core/communities/search/top?size=2"
+    },
+    "next" : {
+      "href" : "https://demo.dspace.org/server/api/core/communities/search/top?page=1&size=2"
+    },
+    "last" : {
+      "href" : "https://demo.dspace.org/server/api/core/communities/search/top?page=19&size=2"
+    }
+  },
+  "page" : {
+    "size" : 2,
+    "totalElements" : 40,
+    "totalPages" : 20,
+    "number" : 0
+  }
+}

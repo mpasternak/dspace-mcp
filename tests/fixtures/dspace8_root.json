@@ -1,0 +1,308 @@
+{
+  "dspaceUI" : "https://dspace.mit.edu",
+  "dspaceName" : "MIT Open Scholarship",
+  "dspaceServer" : "https://dspace.mit.edu/server",
+  "dspaceVersion" : "DSpace 8.2",
+  "crisVersion" : "cris-2024.02.04",
+  "type" : "root",
+  "uniqueType" : "root.root",
+  "_links" : {
+    "actuator" : {
+      "href" : "https://dspace.mit.edu/server/actuator"
+    },
+    "auditevents" : {
+      "href" : "https://dspace.mit.edu/server/api/system/auditevents"
+    },
+    "authn" : {
+      "href" : "https://dspace.mit.edu/server/api/authn"
+    },
+    "authorizations" : {
+      "href" : "https://dspace.mit.edu/server/api/authz/authorizations"
+    },
+    "bitstreamformats" : {
+      "href" : "https://dspace.mit.edu/server/api/core/bitstreamformats"
+    },
+    "bitstreams" : {
+      "href" : "https://dspace.mit.edu/server/api/core/bitstreams"
+    },
+    "browses" : {
+      "href" : "https://dspace.mit.edu/server/api/discover/browses"
+    },
+    "bulkaccessconditionoptions" : {
+      "href" : "https://dspace.mit.edu/server/api/config/bulkaccessconditionoptions"
+    },
+    "bundles" : {
+      "href" : "https://dspace.mit.edu/server/api/core/bundles"
+    },
+    "categories" : {
+      "href" : "https://dspace.mit.edu/server/api/statistics/categories"
+    },
+    "claimedtasks" : {
+      "href" : "https://dspace.mit.edu/server/api/workflow/claimedtasks"
+    },
+    "claimedtasks-search" : {
+      "href" : "https://dspace.mit.edu/server/api/workflow/claimedtasks/search"
+    },
+    "collections" : {
+      "href" : "https://dspace.mit.edu/server/api/core/collections"
+    },
+    "communities" : {
+      "href" : "https://dspace.mit.edu/server/api/core/communities"
+    },
+    "contentreport" : {
+      "href" : "https://dspace.mit.edu/server/api/contentreport"
+    },
+    "correctiontypes" : {
+      "href" : "https://dspace.mit.edu/server/api/config/correctiontypes"
+    },
+    "discover" : {
+      "href" : "https://dspace.mit.edu/server/api/discover"
+    },
+    "dso" : {
+      "href" : "https://dspace.mit.edu/server/api/dso/find{?uuid}",
+      "templated" : true
+    },
+    "edititemmodes" : {
+      "href" : "https://dspace.mit.edu/server/api/core/edititemmodes"
+    },
+    "edititems" : {
+      "href" : "https://dspace.mit.edu/server/api/core/edititems"
+    },
+    "enqueueretry" : {
+      "href" : "https://dspace.mit.edu/server/api/ldn/messages/{id}/enqueueretry",
+      "templated" : true
+    },
+    "entitytypes" : {
+      "href" : "https://dspace.mit.edu/server/api/core/entitytypes"
+    },
+    "eperson-registration" : {
+      "href" : "https://dspace.mit.edu/server/api/eperson/registrations"
+    },
+    "epersons" : {
+      "href" : "https://dspace.mit.edu/server/api/eperson/epersons"
+    },
+    "externalsources" : {
+      "href" : "https://dspace.mit.edu/server/api/integration/externalsources"
+    },
+    "features" : {
+      "href" : "https://dspace.mit.edu/server/api/authz/features"
+    },
+    "feedbacks" : {
+      "href" : "https://dspace.mit.edu/server/api/tools/feedbacks"
+    },
+    "groups" : {
+      "href" : "https://dspace.mit.edu/server/api/eperson/groups"
+    },
+    "identifiers" : {
+      "href" : "https://dspace.mit.edu/server/api/pid/identifiers"
+    },
+    "itemexportformats" : {
+      "href" : "https://dspace.mit.edu/server/api/integration/itemexportformats"
+    },
+    "itemfilters" : {
+      "href" : "https://dspace.mit.edu/server/api/config/itemfilters"
+    },
+    "itemrequests" : {
+      "href" : "https://dspace.mit.edu/server/api/tools/itemrequests"
+    },
+    "items" : {
+      "href" : "https://dspace.mit.edu/server/api/core/items"
+    },
+    "itemtemplates" : {
+      "href" : "https://dspace.mit.edu/server/api/core/itemtemplates"
+    },
+    "ldnservices" : {
+      "href" : "https://dspace.mit.edu/server/api/ldn/ldnservices"
+    },
+    "logins" : {
+      "href" : "https://dspace.mit.edu/server/api/statistics/logins"
+    },
+    "merge" : {
+      "href" : "https://dspace.mit.edu/server/api/deduplications/merge"
+    },
+    "messages" : {
+      "href" : "https://dspace.mit.edu/server/api/ldn/messages"
+    },
+    "metadatafields" : {
+      "href" : "https://dspace.mit.edu/server/api/core/metadatafields"
+    },
+    "metadataschemas" : {
+      "href" : "https://dspace.mit.edu/server/api/core/metadataschemas"
+    },
+    "metrics" : {
+      "href" : "https://dspace.mit.edu/server/api/cris/metrics"
+    },
+    "notifyrequests" : {
+      "href" : "https://dspace.mit.edu/server/api/ldn/notifyrequests"
+    },
+    "oidc" : {
+      "href" : "https://dspace.mit.edu/server/api/authn"
+    },
+    "orcidhistories" : {
+      "href" : "https://dspace.mit.edu/server/api/eperson/orcidhistories"
+    },
+    "orcidqueues" : {
+      "href" : "https://dspace.mit.edu/server/api/eperson/orcidqueues"
+    },
+    "pid" : {
+      "href" : "https://dspace.mit.edu/server/api/pid/find{?id}",
+      "templated" : true
+    },
+    "pooltasks" : {
+      "href" : "https://dspace.mit.edu/server/api/workflow/pooltasks"
+    },
+    "pooltasks-search" : {
+      "href" : "https://dspace.mit.edu/server/api/workflow/pooltasks/search"
+    },
+    "processes" : {
+      "href" : "https://dspace.mit.edu/server/api/system/processes"
+    },
+    "profiles" : {
+      "href" : "https://dspace.mit.edu/server/api/eperson/profiles"
+    },
+    "properties" : {
+      "href" : "https://dspace.mit.edu/server/api/config/properties"
+    },
+    "qualityassuranceevents" : {
+      "href" : "https://dspace.mit.edu/server/api/integration/qualityassuranceevents"
+    },
+    "qualityassurancesources" : {
+      "href" : "https://dspace.mit.edu/server/api/integration/qualityassurancesources"
+    },
+    "qualityassurancetopics" : {
+      "href" : "https://dspace.mit.edu/server/api/integration/qualityassurancetopics"
+    },
+    "registrations" : {
+      "href" : "https://dspace.mit.edu/server/api/eperson/registrations"
+    },
+    "relationships" : {
+      "href" : "https://dspace.mit.edu/server/api/core/relationships"
+    },
+    "relationshiptypes" : {
+      "href" : "https://dspace.mit.edu/server/api/core/relationshiptypes"
+    },
+    "resourcepolicies" : {
+      "href" : "https://dspace.mit.edu/server/api/authz/resourcepolicies"
+    },
+    "resourcepolicies-search" : {
+      "href" : "https://dspace.mit.edu/server/api/authz/resourcepolicies/search"
+    },
+    "scripts" : {
+      "href" : "https://dspace.mit.edu/server/api/system/scripts"
+    },
+    "sections" : {
+      "href" : "https://dspace.mit.edu/server/api/layout/sections"
+    },
+    "securitysettings" : {
+      "href" : "https://dspace.mit.edu/server/api/core/securitysettings"
+    },
+    "self" : {
+      "href" : "https://dspace.mit.edu/server/api"
+    },
+    "sets" : {
+      "href" : "https://dspace.mit.edu/server/api/deduplications/sets"
+    },
+    "signatures" : {
+      "href" : "https://dspace.mit.edu/server/api/deduplications/signatures"
+    },
+    "sites" : {
+      "href" : "https://dspace.mit.edu/server/api/core/sites"
+    },
+    "statistics" : {
+      "href" : "https://dspace.mit.edu/server/api/statistics"
+    },
+    "submissionaccessoptions" : {
+      "href" : "https://dspace.mit.edu/server/api/config/submissionaccessoptions"
+    },
+    "submissioncclicenseUrls" : {
+      "href" : "https://dspace.mit.edu/server/api/config/submissioncclicenseUrls"
+    },
+    "submissioncclicenseUrls-search" : {
+      "href" : "https://dspace.mit.edu/server/api/config/submissioncclicenseUrls/search"
+    },
+    "submissioncclicenses" : {
+      "href" : "https://dspace.mit.edu/server/api/config/submissioncclicenses"
+    },
+    "submissioncoarnotifyconfigs" : {
+      "href" : "https://dspace.mit.edu/server/api/config/submissioncoarnotifyconfigs"
+    },
+    "submissiondefinitions" : {
+      "href" : "https://dspace.mit.edu/server/api/config/submissiondefinitions"
+    },
+    "submissionfields" : {
+      "href" : "https://dspace.mit.edu/server/api/config/submissionfields"
+    },
+    "submissionforms" : {
+      "href" : "https://dspace.mit.edu/server/api/config/submissionforms"
+    },
+    "submissionsections" : {
+      "href" : "https://dspace.mit.edu/server/api/config/submissionsections"
+    },
+    "submissionuploads" : {
+      "href" : "https://dspace.mit.edu/server/api/config/submissionuploads"
+    },
+    "subscriptions" : {
+      "href" : "https://dspace.mit.edu/server/api/core/subscriptions"
+    },
+    "subscriptions-search" : {
+      "href" : "https://dspace.mit.edu/server/api/core/subscriptions/search"
+    },
+    "suggestions" : {
+      "href" : "https://dspace.mit.edu/server/api/integration/suggestions"
+    },
+    "suggestionsources" : {
+      "href" : "https://dspace.mit.edu/server/api/integration/suggestionsources"
+    },
+    "suggestiontargets" : {
+      "href" : "https://dspace.mit.edu/server/api/integration/suggestiontargets"
+    },
+    "supervisionorders" : {
+      "href" : "https://dspace.mit.edu/server/api/core/supervisionorders"
+    },
+    "systemwidealerts" : {
+      "href" : "https://dspace.mit.edu/server/api/system/systemwidealerts"
+    },
+    "tabs" : {
+      "href" : "https://dspace.mit.edu/server/api/layout/tabs"
+    },
+    "usagereports" : {
+      "href" : "https://dspace.mit.edu/server/api/statistics/usagereports"
+    },
+    "versionhistories" : {
+      "href" : "https://dspace.mit.edu/server/api/versioning/versionhistories"
+    },
+    "versions" : {
+      "href" : "https://dspace.mit.edu/server/api/versioning/versions"
+    },
+    "vocabularies" : {
+      "href" : "https://dspace.mit.edu/server/api/submission/vocabularies"
+    },
+    "vocabularyEntryDetails" : {
+      "href" : "https://dspace.mit.edu/server/api/submission/vocabularyEntryDetails"
+    },
+    "vocabularyEntryDetails-search" : {
+      "href" : "https://dspace.mit.edu/server/api/submission/vocabularyEntryDetails/search"
+    },
+    "wfSteps" : {
+      "href" : "https://dspace.mit.edu/server/api/statistics/wfSteps"
+    },
+    "workflowOwners" : {
+      "href" : "https://dspace.mit.edu/server/api/statistics/workflowOwners"
+    },
+    "workflowSteps" : {
+      "href" : "https://dspace.mit.edu/server/api/config/workflowSteps"
+    },
+    "workflowactions" : {
+      "href" : "https://dspace.mit.edu/server/api/config/workflowactions"
+    },
+    "workflowdefinitions" : {
+      "href" : "https://dspace.mit.edu/server/api/config/workflowdefinitions"
+    },
+    "workflowitems" : {
+      "href" : "https://dspace.mit.edu/server/api/workflow/workflowitems"
+    },
+    "workspaceitems" : {
+      "href" : "https://dspace.mit.edu/server/api/submission/workspaceitems"
+    }
+  }
+}
