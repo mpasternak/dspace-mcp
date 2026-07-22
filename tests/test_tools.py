@@ -106,6 +106,14 @@ def search_payload(hits: list[dict], total: int) -> dict:
     }
 
 
+def error(message: str, *, status: int | None = None) -> DSpaceError:
+    """Błąd taki, jaki zbudowałby klient — z kodem HTTP, po którym `tools.py`
+    rozróżnia sytuacje (404 to co innego niż 429)."""
+    exc = DSpaceError(message)
+    exc.status = status
+    return exc
+
+
 def item_raw(uuid: str = ITEM_UUID, **extra: Any) -> dict:
     raw = {
         "uuid": uuid,
@@ -241,22 +249,66 @@ async def test_get_item_full_metadata_includes_everything():
     assert result["metadata"]["dc.title"] == ["A study of things"]
 
 
+def resolved_via_pid(routes: dict | None = None) -> FakeClient:
+    """Klient, u którego /pid/find rozwiązuje handle/DOI na nasz rekord.
+
+    Rozwiązanie identyfikatora to dopiero pierwszy krok — po nim narzędzie
+    pobiera rekord po UUID, żeby dostać embed, którego przekierowanie nie
+    przenosi. Stąd obie trasy w atrapie.
+    """
+    base = {
+        "/pid/find": item_raw(),
+        f"/core/items/{ITEM_UUID}": item_raw(),
+    }
+    base.update(routes or {})
+    return FakeClient(base)
+
+
 async def test_get_item_by_handle_uses_pid_find():
-    client = FakeClient({"/pid/find": item_raw()})
+    client = resolved_via_pid()
     await tools.get_item(client, "123456789/42")
     assert client.params_for("/pid/find") == {"id": "hdl:123456789/42"}
 
 
 async def test_get_item_strips_hdl_prefix():
-    client = FakeClient({"/pid/find": item_raw()})
+    client = resolved_via_pid()
     await tools.get_item(client, "hdl:123456789/42")
     assert client.params_for("/pid/find") == {"id": "hdl:123456789/42"}
 
 
-async def test_get_item_by_doi_uses_pid_find_first():
-    client = FakeClient({"/pid/find": item_raw()})
-    await tools.get_item(client, "10.1234/abcd")
+async def test_get_item_by_handle_refetches_with_embed():
+    """Bez tego kroku ta sama publikacja miałaby inny kształt zależnie od
+    tego, jakim identyfikatorem o nią zapytano (brak `collection` i `files`)."""
+    client = resolved_via_pid()
+    await tools.get_item(client, "123456789/42")
+    assert client.params_for(f"/core/items/{ITEM_UUID}") == {"embed": tools.ITEM_EMBED}
+
+
+@pytest.mark.parametrize(
+    "identifier",
+    [
+        "10.1234/abcd",
+        "doi:10.1234/abcd",
+        "https://doi.org/10.1234/abcd",
+        "http://doi.org/10.1234/abcd",
+        "https://dx.doi.org/10.1234/abcd",
+    ],
+)
+async def test_get_item_recognises_doi_forms(identifier):
+    client = resolved_via_pid()
+    await tools.get_item(client, identifier)
     assert client.params_for("/pid/find") == {"id": "doi:10.1234/abcd"}
+
+
+async def test_get_item_rejects_handle_of_a_community():
+    """/pid/find rozwiązuje każdy obiekt, więc bez kontroli typu model
+    dostałby społeczność przebraną za publikację."""
+    community = {"uuid": OTHER_UUID, "type": "community", "name": "Faculty of X"}
+    client = FakeClient({"/pid/find": community})
+    with pytest.raises(DSpaceError) as exc:
+        await tools.get_item(client, "10673/1251")
+    assert "community" in str(exc.value)
+    assert "list_communities" in str(exc.value)
 
 
 async def test_get_item_by_doi_falls_back_to_search():
@@ -265,18 +317,29 @@ async def test_get_item_by_doi_falls_back_to_search():
     hit["metadata"]["dc.identifier.doi"] = [{"value": "10.1234/abcd", "place": 0}]
     client = FakeClient(
         {
-            "/pid/find": DSpaceError("Not found"),
+            "/pid/find": error("Not found", status=404),
             "/discover/search/objects": search_payload([hit], 1),
+            f"/core/items/{ITEM_UUID}": item_raw(),
         }
     )
     result = await tools.get_item(client, "https://doi.org/10.1234/abcd")
     assert result["uuid"] == ITEM_UUID
 
 
+async def test_doi_fallback_only_on_not_found():
+    """Przy 429 faseta… to znaczy DOI może istnieć — drugie żądanie tylko
+    dorzuciłoby ruchu pod limiter i zamaskowało prawdziwą przyczynę."""
+    client = FakeClient({"/pid/find": error("Rate limited", status=429)})
+    with pytest.raises(DSpaceError) as exc:
+        await tools.get_item(client, "10.1234/abcd")
+    assert "rate" in str(exc.value).lower()
+    assert not any(call == "/discover/search/objects" for call, _ in client.calls)
+
+
 async def test_get_item_by_doi_reports_when_nothing_matches():
     client = FakeClient(
         {
-            "/pid/find": DSpaceError("Not found"),
+            "/pid/find": error("Not found", status=404),
             "/discover/search/objects": search_payload([], 0),
         }
     )
@@ -355,11 +418,13 @@ async def test_list_collections_rejects_bad_uuid():
 # --- list_bitstreams ------------------------------------------------------
 
 
-def bundle_with(name: str, bitstreams: list[dict]) -> dict:
-    return {
-        "name": name,
-        "_embedded": {"bitstreams": {"_embedded": {"bitstreams": bitstreams}}},
-    }
+ORIGINAL_UUID = "bbbbbbbb-cccc-dddd-eeee-ffffffffffff"
+THUMBNAIL_UUID = "cccccccc-dddd-eeee-ffff-111111111111"
+
+
+def bundle_ref(name: str, uuid: str) -> dict:
+    """Bundle tak, jak przychodzi z /core/items/{uuid}/bundles — bez `id`."""
+    return {"uuid": uuid, "name": name, "type": "bundle"}
 
 
 def bitstream_raw(name: str = "paper.pdf", mimetype: str = "application/pdf") -> dict:
@@ -375,29 +440,59 @@ def bitstream_raw(name: str = "paper.pdf", mimetype: str = "application/pdf") ->
     }
 
 
-async def test_list_bitstreams_returns_original_bundle():
+async def test_list_bitstreams_returns_only_the_requested_bundle():
     client = FakeClient(
         pages={
             f"/core/items/{ITEM_UUID}/bundles": (
                 [
-                    bundle_with(
-                        "THUMBNAIL", [bitstream_raw("thumb.jpg", "image/jpeg")]
-                    ),
-                    bundle_with("ORIGINAL", [bitstream_raw()]),
+                    bundle_ref("THUMBNAIL", THUMBNAIL_UUID),
+                    bundle_ref("ORIGINAL", ORIGINAL_UUID),
                 ],
                 2,
-            )
+            ),
+            f"/core/bundles/{ORIGINAL_UUID}/bitstreams": ([bitstream_raw()], 1),
+            f"/core/bundles/{THUMBNAIL_UUID}/bitstreams": (
+                [bitstream_raw("thumb.jpg", "image/jpeg")],
+                1,
+            ),
         }
     )
     result = await tools.list_bitstreams(client, ITEM_UUID)
     assert len(result["results"]) == 1
     assert result["results"][0]["name"] == "paper.pdf"
     assert result["results"][0]["mimetype"] == "application/pdf"
+    assert result["truncated"] is False
+
+
+async def test_list_bitstreams_pages_instead_of_reading_embedded_list():
+    """Osadzona lista bitstreamów ucina się na 20 pozycjach i nie niesie
+    sygnału o obcięciu — dlatego pobieramy ją osobnym, stronicowanym
+    żądaniem, a nie z embeda."""
+    many = [bitstream_raw(f"file{i}.pdf") for i in range(30)]
+    client = FakeClient(
+        pages={
+            f"/core/items/{ITEM_UUID}/bundles": (
+                [bundle_ref("ORIGINAL", ORIGINAL_UUID)],
+                1,
+            ),
+            f"/core/bundles/{ORIGINAL_UUID}/bitstreams": (many, 45),
+        }
+    )
+    client.config = Config(base_url="https://repo.test/server", max_results=10)
+    result = await tools.list_bitstreams(client, ITEM_UUID)
+    assert len(result["results"]) == 10
+    assert result["total"] == 45
+    assert result["truncated"] is True
 
 
 async def test_list_bitstreams_reports_missing_bundle():
     client = FakeClient(
-        pages={f"/core/items/{ITEM_UUID}/bundles": ([bundle_with("ORIGINAL", [])], 1)}
+        pages={
+            f"/core/items/{ITEM_UUID}/bundles": (
+                [bundle_ref("ORIGINAL", ORIGINAL_UUID)],
+                1,
+            )
+        }
     )
     with pytest.raises(DSpaceError) as exc:
         await tools.list_bitstreams(client, ITEM_UUID, bundle="NOPE")
@@ -456,14 +551,29 @@ async def test_facet_values_shape_and_truncation():
 async def test_unknown_facet_lists_available_ones():
     client = FakeClient(
         {
+            "/discover/facets/itemtype": error("Bad request", status=400),
             "/discover/facets": {
                 "_embedded": {"facets": [{"name": "author"}, {"name": "subject"}]}
-            }
+            },
         }
     )
     with pytest.raises(DSpaceError) as exc:
         await tools.list_facet_values(client, "itemtype")
     assert "author" in str(exc.value) and "subject" in str(exc.value)
+
+
+async def test_facet_transport_error_is_not_reported_as_missing_facet():
+    """Wmowienie modelowi, ze istniejaca faseta nie istnieje, trwale wylacza
+    poprawne narzedzie - a 429 nic o istnieniu fasety nie mowi."""
+    client = FakeClient(
+        {
+            "/discover/facets/author": error("Rate limited", status=429),
+            "/discover/facets": {"_embedded": {"facets": [{"name": "author"}]}},
+        }
+    )
+    with pytest.raises(DSpaceError) as exc:
+        await tools.list_facet_values(client, "author")
+    assert "rate" in str(exc.value).lower()
 
 
 # --- statistics / repository info -----------------------------------------
@@ -485,8 +595,8 @@ async def test_item_statistics_extracts_views():
 async def test_item_statistics_explains_closed_instance():
     client = FakeClient(
         {
-            f"/statistics/usagereports/{ITEM_UUID}_TotalVisits": DSpaceError(
-                "Not publicly available: this server queries DSpace anonymously."
+            f"/statistics/usagereports/{ITEM_UUID}_TotalVisits": error(
+                "Not publicly available.", status=403
             )
         }
     )
@@ -508,3 +618,106 @@ async def test_repository_info_lists_capabilities():
     assert result["search_filters"] == ["author", "dateIssued"]
     assert result["facets"] == ["author"]
     assert "newest" in result["sort_aliases"]
+
+
+# --- regresje z koncowego review ------------------------------------------
+
+
+async def test_search_rejects_offset_that_is_not_a_multiple_of_limit():
+    """DSpace stronicuje numerami stron: offset=4 przy limit=3 po cichu dalby
+    te sama strone co offset=3, czyli inne okno niz zamowione."""
+    client = FakeClient({"/discover/search/objects": search_payload([], 0)})
+    with pytest.raises(DSpaceError) as exc:
+        await tools.search_items(client, limit=3, offset=4)
+    assert "multiple of limit" in str(exc.value)
+    assert client.calls == []
+
+
+async def test_search_offset_maps_to_page_number():
+    client = FakeClient({"/discover/search/objects": search_payload([], 0)})
+    await tools.search_items(client, limit=10, offset=30)
+    assert client.params_for("/discover/search/objects")["page"] == 3
+
+
+async def test_search_rejects_author_filter_the_instance_lacks():
+    """Decyzja D8: filtr spoza discovery.xml daje surowe 422, wiec mowimy
+    modelowi wprost, czego ta instancja nie potrafi."""
+    client = FakeClient({"/discover/search/objects": search_payload([], 0)})
+    client.caps = {"filters": ["title", "subject"], "sorts": []}
+    with pytest.raises(DSpaceError) as exc:
+        await tools.search_items(client, author="Kowalski")
+    assert "author" in str(exc.value)
+    assert "title" in str(exc.value)
+    assert client.calls == []
+
+
+async def test_search_allows_filters_when_capabilities_unknown():
+    """Gdy instancja nie odpowiedziala na /discover/search, nie blokujemy
+    zapytania - brak wiedzy to nie to samo co brak filtru."""
+    client = FakeClient({"/discover/search/objects": search_payload([], 0)})
+    client.caps = {"filters": [], "sorts": []}
+    await tools.search_items(client, author="Kowalski", year_from=2020)
+    params = client.params_for("/discover/search/objects")
+    assert params["f.author"] == "Kowalski,contains"
+
+
+async def test_get_bitstream_text_rejects_zero_max_chars():
+    """max_chars pochodzi od modelu, wiec zly zakres to komunikat, a nie
+    ValueError - i na pewno nie po pobraniu 20 MB."""
+    client = FakeClient({f"/core/bitstreams/{ITEM_UUID}": bitstream_raw()})
+    with pytest.raises(DSpaceError) as exc:
+        await tools.get_bitstream_text(client, ITEM_UUID, max_chars=0)
+    assert "max_chars" in str(exc.value)
+    assert client.streamed == []
+
+
+async def test_count_of_files_uses_total_not_page_length():
+    """Osadzona lista bitstreamow konczy sie na 20 pozycjach; prawda o liczbie
+    plikow siedzi w page.totalElements."""
+    raw = item_raw(
+        _embedded={
+            "bundles": {
+                "_embedded": {
+                    "bundles": [
+                        {
+                            "name": "ORIGINAL",
+                            "_embedded": {
+                                "bitstreams": {
+                                    "_embedded": {"bitstreams": [{}] * 20},
+                                    "page": {"size": 20, "totalElements": 45},
+                                }
+                            },
+                        }
+                    ]
+                }
+            }
+        }
+    )
+    client = FakeClient({f"/core/items/{ITEM_UUID}": raw})
+    result = await tools.get_item(client, ITEM_UUID)
+    assert result["files"] == 45
+
+
+async def test_community_tree_shares_one_global_budget():
+    """Limit obowiazuje dla calego drzewa, nie osobno na kazdym poziomie."""
+    top = [
+        {"uuid": f"0000000{i}-0000-0000-0000-00000000000{i}", "name": f"C{i}"}
+        for i in range(1, 4)
+    ]
+    children = [
+        {"uuid": f"1000000{i}-0000-0000-0000-00000000000{i}", "name": f"S{i}"}
+        for i in range(1, 4)
+    ]
+    pages = {"/core/communities/search/top": (top, 3)}
+    for node in top:
+        pages[f"/core/communities/{node['uuid']}/subcommunities"] = (children, 3)
+
+    client = FakeClient(pages=pages)
+    client.config = Config(base_url="https://repo.test/server", max_results=5)
+    result = await tools.list_communities(client, depth=2)
+
+    seen = len(result["results"]) + sum(
+        len(node.get("subcommunities", [])) for node in result["results"]
+    )
+    assert seen <= 5
+    assert result["truncated"] is True

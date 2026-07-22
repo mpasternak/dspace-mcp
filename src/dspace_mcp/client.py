@@ -51,16 +51,20 @@ def is_uuid(value: str) -> bool:
     return bool(_UUID_RE.match(value)) if isinstance(value, str) else False
 
 
-def require_uuid(value: str) -> str:
+def require_uuid(value: str, what: str = "") -> str:
     """Zwróć ``value``, jeśli to UUID; w przeciwnym razie rzuć ``DSpaceError``.
 
     Sprawdzamy po swojej stronie, bo DSpace na niepoprawny UUID w ścieżce
     odpowiada **401 „Authentication is required"** (nie 400) — komunikat, po
     którym model zaczyna szukać sposobu na zalogowanie się, zamiast poprawić
     identyfikator. Patrz ``tests/fixtures/dspace10_401_malformed_uuid.json``.
+
+    ``what`` doprecyzowuje, o który identyfikator chodzi (``"scope"``,
+    ``"item"``…), żeby model wiedział, który argument poprawić.
     """
     if not is_uuid(value):
-        raise DSpaceError(f"'{value}' is not a valid UUID.")
+        label = f"{what} UUID" if what else "UUID"
+        raise DSpaceError(f"'{value}' is not a valid {label}.")
     return value
 
 
@@ -180,17 +184,25 @@ class DSpaceClient:
         if response.status_code >= 400:
             raise self._error_for_status(response.status_code, where)
 
+        # Błędom „odpowiedź przyszła, ale to nie nasze API" nadajemy status
+        # odpowiedzi HTTP (2xx/3xx). Sonda odróżnia po nim sytuację „pod tym
+        # adresem siedzi coś innego” (np. interfejs Angulara, który na /api
+        # oddaje HTML) od zerwanego połączenia, gdzie status zostaje None.
         try:
             payload = response.json()
         except (json.JSONDecodeError, ValueError) as exc:
-            raise DSpaceError(
+            error = DSpaceError(
                 f"The repository returned a response that is not valid JSON "
                 f"for {where}."
-            ) from exc
+            )
+            error.status = response.status_code
+            raise error from exc
         if not isinstance(payload, dict):
-            raise DSpaceError(
+            error = DSpaceError(
                 f"The repository returned unexpected JSON (not an object) for {where}."
             )
+            error.status = response.status_code
+            raise error
         return payload
 
     async def get(self, path: str, params: dict | None = None) -> dict:
@@ -208,8 +220,13 @@ class DSpaceClient:
             payload = await self._request_json(self._api_url, where="/")
         except DSpaceError as exc:
             # Najczęstsza pomyłka konfiguracyjna: base_url bez „/server".
-            # Próbujemy raz, a gdy się uda — zapamiętujemy poprawiony korzeń.
-            if exc.status != 404:
+            # Ponawiamy, gdy serwer w ogóle odpowiedział, ale nie tym, czego
+            # oczekujemy: 404, albo 2xx/3xx z treścią, która nie jest naszym
+            # API (na gołym hoście DSpace serwuje interfejs Angulara, który
+            # na /api oddaje HTML ze statusem 200/202 — sam 404 by tego nie
+            # złapał). Zerwane połączenie ma status None i nie jest ponawiane,
+            # bo drugie żądanie pod ten sam host tylko podwoi czas oczekiwania.
+            if exc.status is None or (exc.status != 404 and exc.status >= 400):
                 raise
             retry_url = f"{self.config.base_url.rstrip('/')}/server/api"
             if retry_url == self._api_url:

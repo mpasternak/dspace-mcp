@@ -23,7 +23,7 @@ Wszystkie twierdzenia o API w tym dokumencie zostały zweryfikowane wobec
 
 ### W zakresie
 
-- Wyłącznie odczyt (`GET`, plus `HEAD` jako fallback przy plikach).
+- Wyłącznie odczyt — każde żądanie jest metodą `GET`, bez wyjątków.
 - Wyłącznie dostęp anonimowy — bez logowania, bez JWT, bez CSRF.
 - Jedna instancja DSpace na proces serwera, wskazana w konfiguracji.
 - Dziewięć narzędzi MCP (tabela niżej).
@@ -296,7 +296,13 @@ Odpowiedź wyszukiwania zawiera też fasety w `_embedded.facets` (top-level, nie
 w `searchResult`) — odrzucamy je przy spłaszczaniu, ale warto wiedzieć, że
 przychodzą w tym samym żądaniu.
 
-**`get_item`.** Rozgałęzienie po kształcie `id`:
+**`get_item`.** Rekord zawsze pobieramy po UUID (`?embed=` z `ITEM_EMBED`),
+także wtedy, gdy zapytano handlem lub DOI: `/pid/find` odpowiada
+przekierowaniem, a przekierowanie gubi parametry zapytania, więc bez tego
+kroku ta sama publikacja miałaby inny kształt zależnie od użytego
+identyfikatora. Rozwiązany obiekt sprawdzamy po polu `type` — `/pid/find`
+rozwiązuje każdy obiekt DSpace, a społeczność zwrócona jako publikacja byłaby
+cichym fałszem. Rozgałęzienie po kształcie `id`:
 
 - UUID → `/api/core/items/{uuid}`;
 - handle (`123456789/42` lub `hdl:…`) → `/api/pid/find?id=hdl:…` (302 →
@@ -367,10 +373,11 @@ Kolejność sprawdzeń:
    `sizeBytes` oraz `format.mimetype`. Uwaga: bitstream **nie zawiera pola
    `mimetype`** bezpośrednio, a checksum nazywa się `checkSum` (wielkie S).
 2. `sizeBytes` traktujemy jako wskazówkę, nie gwarancję — zaobserwowano
-   rozjazd wobec faktycznego `Content-Length`. Dlatego pobieranie idzie
-   **strumieniowo z twardym limitem bajtów**; po przekroczeniu przerywamy i
-   zwracamy komunikat. `HEAD` zostaje jako tani fallback, gdy metadanych nie
-   ma (przy `Transfer-Encoding: chunked` nagłówka `Content-Length` nie będzie).
+   rozjazd wobec faktycznego `Content-Length`. Dlatego limit egzekwuje samo
+   pobieranie: idzie **strumieniowo z twardym limitem bajtów** i przerywa po
+   jego przekroczeniu. Nie sondujemy `HEAD`-em — przy `Transfer-Encoding:
+   chunked` i tak nie byłoby `Content-Length`, a limit strumieniowy działa
+   niezależnie od tego, co serwer deklaruje.
 3. Nie-PDF → komunikat z typem MIME i URL-em.
 4. PDF zaszyfrowany (`pypdf` rzuca wyjątek) → komunikat „plik jest
    zabezpieczony hasłem”.
@@ -399,7 +406,7 @@ pierwszeństwie to niepotrzebna komplikacja.
 - Testy `pdf.py`: PDF z warstwą tekstową, bez warstwy, zaszyfrowany,
   przekraczający limit (przerwanie strumienia), plik nie-PDF.
 - Test architektoniczny: serwer nie wykonuje żadnego żądania metodą inną niż
-  `GET`/`HEAD` (asercja na routerze `respx`).
+  `GET` (asercja na routerze `respx`).
 - `@pytest.mark.live` — testy kontraktowe przeciwko `demo.dspace.org`,
   wyłączone domyślnie, uruchamiane ręcznie i z crona. **Nie mogą zależeć od
   konkretnych UUID-ów** — instancja demo jest cyklicznie resetowana, a jej
@@ -412,8 +419,8 @@ pierwszeństwie to niepotrzebna komplikacja.
    odpowiada na `get_repository_info`.
 2. Wszystkie dziewięć narzędzi działa przeciwko instancji demo (testy `live`).
 3. Testy jednostkowe przechodzą na fixture'ach z DSpace 7.x, 8.x, 10.x i 11.x.
-4. Serwer nie wykonuje żadnego żądania metodą inną niż `GET` i `HEAD` —
-   zweryfikowane testem.
+4. Serwer nie wykonuje żadnego żądania metodą inną niż `GET` — zweryfikowane
+   testem architektonicznym.
 5. README z instrukcją konfiguracji dla klienta MCP i tabelą narzędzi.
 
 ## Rejestr zmian względem wersji 1

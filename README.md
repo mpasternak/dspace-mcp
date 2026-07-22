@@ -15,10 +15,10 @@ querying the DSpace REST API directly.
 
 ## Read-only by construction, not by promise
 
-The server holds no credentials and never issues a request other than `GET`
-or `HEAD`. It cannot deposit, edit or delete anything, and it cannot read what
-the public cannot already see — embargoed items, workflow submissions and
-restricted collections stay invisible.
+The server holds no credentials and never issues a request other than `GET`.
+It cannot deposit, edit or delete anything, and it cannot read what the public
+cannot already see — embargoed items, workflow submissions and restricted
+collections stay invisible.
 
 That is a property of the code, not of the model's behaviour: there is nothing
 to prompt-inject your way into. A test in the suite asserts that no other HTTP

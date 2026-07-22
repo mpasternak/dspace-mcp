@@ -34,6 +34,38 @@ async def client():
         yield DSpaceClient(config, http)
 
 
+async def test_base_url_without_server_suffix_is_corrected(client):
+    """README obiecuje, że brak „/server" w adresie jest wykrywany. Gołe
+    demo.dspace.org serwuje na /api interfejs Angulara (HTML, status 2xx),
+    więc sam warunek na 404 tego nie łapał."""
+    bare = BASE_URL.removesuffix("/server")
+    if bare == BASE_URL:
+        pytest.skip("DSPACE_TEST_URL nie kończy się na /server")
+
+    config = Config(base_url=bare, timeout=30)
+    http = DSpaceClient.build_http(config)
+    async with http:
+        corrected = DSpaceClient(config, http)
+        info = await tools.get_repository_info(corrected)
+        assert info["counts"]["items"] is not None
+        assert corrected.api_url.endswith("/server/api")
+
+
+async def test_handle_of_a_community_is_reported_not_faked(client):
+    """/pid/find rozwiązuje każdy obiekt — społeczność nie może wrócić
+    przebrana za publikację."""
+    from dspace_mcp.client import DSpaceError
+
+    communities = await tools.list_communities(client)
+    handles = [c["handle"] for c in communities["results"] if c.get("handle")]
+    if not handles:
+        pytest.skip("brak społeczności z handlem na tej instancji")
+
+    with pytest.raises(DSpaceError) as exc:
+        await tools.get_item(client, handles[0])
+    assert "community" in str(exc.value)
+
+
 async def test_repository_info(client):
     info = await tools.get_repository_info(client)
     assert info["name"]
@@ -75,6 +107,10 @@ async def test_search_and_fetch_roundtrip(client):
         # Ścieżka przez /pid/find, czyli 302 → wymaga follow_redirects.
         by_handle = await tools.get_item(client, record["handle"])
         assert by_handle["uuid"] == record["uuid"]
+        # Kształt musi być identyczny niezależnie od użytego identyfikatora:
+        # przekierowanie z /pid/find gubi `?embed=`, więc bez ponownego
+        # pobrania po UUID `collection` i `files` byłyby tu puste.
+        assert by_handle == by_uuid
 
 
 async def test_full_metadata_is_lossless(client):

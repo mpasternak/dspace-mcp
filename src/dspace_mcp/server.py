@@ -237,11 +237,17 @@ def build_server(config: Config) -> FastMCP:
     async def lifespan(_: FastMCP) -> AsyncIterator[AppContext]:
         http = DSpaceClient.build_http(config)
         client = DSpaceClient(config, http)
-        try:
-            async with http:
-                yield AppContext(client=client)
-        finally:
-            pass
+        async with http:
+            # Sonda przy starcie robi dwie rzeczy: mówi od razu, że adres jest
+            # zły (zamiast pozwolić modelowi zderzyć się z tym w trakcie), i
+            # koryguje brakujące „/server" zanim poleci pierwsze zapytanie.
+            # Nie jest krytyczna — instancja z zablokowanym korzeniem API
+            # nadal obsłuży wyszukiwanie, więc porażkę tylko sygnalizujemy.
+            try:
+                await client.probe()
+            except DSpaceError as exc:
+                print(f"dspace-mcp: startup check failed: {exc}", file=sys.stderr)
+            yield AppContext(client=client)
 
     mcp = FastMCP("dspace-mcp", lifespan=lifespan)
     for fn in READ_TOOLS:

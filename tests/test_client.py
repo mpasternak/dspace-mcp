@@ -798,3 +798,42 @@ async def test_client_only_ever_sends_get() -> None:
 
     assert len(respx.calls) > 0
     assert {call.request.method for call in respx.calls} == {"GET"}
+
+
+@respx.mock
+async def test_probe_retries_with_server_suffix_when_root_serves_html() -> None:
+    """Nowoczesne wdrozenia serwuja na golym hoscie interfejs Angulara, ktory
+    na /api oddaje HTML ze statusem 2xx - nie 404. Sam warunek na 404 nie
+    naprawilby wiec adresu w przypadku, ktory README podaje jako przyklad.
+    """
+    config = Config(base_url="https://repo.test")
+    client = DSpaceClient(config, DSpaceClient.build_http(config))
+    html = respx.get("https://repo.test/api").mock(
+        return_value=httpx.Response(
+            200, text="<!doctype html><html><body>app</body></html>"
+        )
+    )
+    good = respx.get("https://repo.test/server/api").mock(
+        return_value=httpx.Response(200, json=fixture_json("dspace10_root"))
+    )
+    info = await client.probe()
+    assert info["name"] == "DSpace Demo"
+    assert html.call_count == 1
+    assert good.call_count == 1
+    assert client.api_url == "https://repo.test/server/api"
+
+
+@respx.mock
+async def test_probe_does_not_retry_after_connection_error() -> None:
+    """Zerwane polaczenie nie jest pomylka w adresie - drugie zadanie tylko
+    podwoiloby czas oczekiwania na niedostepnym hoscie."""
+    config = Config(base_url="https://repo.test")
+    client = DSpaceClient(config, DSpaceClient.build_http(config))
+    route = respx.get("https://repo.test/api").mock(
+        side_effect=httpx.ConnectError("boom")
+    )
+    retry = respx.get("https://repo.test/server/api")
+    with pytest.raises(DSpaceError):
+        await client.probe()
+    assert route.call_count == 1
+    assert retry.call_count == 0
