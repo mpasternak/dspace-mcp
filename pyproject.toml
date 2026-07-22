@@ -1,0 +1,72 @@
+[project]
+name = "dspace-mcp"
+version = "0.1.0"
+description = "Read-only MCP server for DSpace 7+ repositories"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Michał Pasternak", email = "michal.dtz@gmail.com" },
+]
+keywords = ["dspace", "mcp", "repository", "oai", "llm", "open-access"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Text Processing :: Indexing",
+]
+dependencies = [
+    "mcp[cli]>=1.28.0",
+    "httpx>=0.27",
+    "pypdf>=4.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/mpasternak/dspace-mcp"
+Repository = "https://github.com/mpasternak/dspace-mcp"
+Issues = "https://github.com/mpasternak/dspace-mcp/issues"
+
+[project.scripts]
+dspace-mcp = "dspace_mcp.server:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "respx>=0.21",
+    "ruff>=0.6",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/dspace_mcp"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/dspace_mcp", "tests", "README.md", "LICENSE"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = [
+    "live: contract tests against a live DSpace instance (deselected by default)",
+]
+addopts = "-m 'not live'"
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["dspace_mcp", "conftest"]
