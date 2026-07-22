@@ -2,8 +2,12 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
+      # Fixture'y są surowymi odpowiedziami HTTP z żywych instancji DSpace i
+      # mają takie zostać — ich wartość polega na tym, że nikt ich nie tknął.
       - id: trailing-whitespace
+        exclude: ^tests/fixtures/
       - id: end-of-file-fixer
+        exclude: ^tests/fixtures/
       - id: check-yaml
       - id: check-toml
       - id: check-added-large-files

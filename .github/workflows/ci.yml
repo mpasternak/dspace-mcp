@@ -22,10 +22,14 @@ jobs:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
+      # Akcje spoza organizacji `actions` przypinamy do SHA, nie do tagu: tag
+      # może zostać przesunięty przez autora (albo przez kogoś, kto przejmie
+      # jego konto) na dowolny kod — tak wyglądał incydent tj-actions z marca
+      # 2025. SHA jest niezmienne.
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
           enable-cache: true
 
