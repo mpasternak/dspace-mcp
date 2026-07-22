@@ -1,8 +1,8 @@
 # dspace-mcp
 
 [![CI](https://github.com/mpasternak/dspace-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/mpasternak/dspace-mcp/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/dspace-mcp.svg)](https://pypi.org/project/dspace-mcp/)
-[![Python](https://img.shields.io/pypi/pyversions/dspace-mcp.svg)](https://pypi.org/project/dspace-mcp/)
+[![PyPI](https://img.shields.io/pypi/v/dspace-mcp)](https://pypi.org/project/dspace-mcp/)
+[![Python](https://img.shields.io/pypi/pyversions/dspace-mcp)](https://pypi.org/project/dspace-mcp/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 A read-only [MCP](https://modelcontextprotocol.io/) server that lets an AI
