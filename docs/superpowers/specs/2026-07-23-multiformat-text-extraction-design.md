@@ -84,6 +84,24 @@ Ekstrakcja działa na bajtach pobranych przez GET-only `client.stream_bytes`.
 Inwariant „proces wysyła wyłącznie GET" (D1) trzyma się bez dotykania warstwy
 sieci. Test „tylko GET" zostaje rozszerzony o wywołania nowych formatów.
 
+### E6. Bezpieczne parsowanie niezaufanych plików
+
+Pliki pochodzą z dowolnych repozytoriów wskazanych przez użytkownika — to
+niezaufane wejście. Goły `xml.etree` jest podatny na ataki „billion laughs"
+(wykładnicza ekspansja encji) i XXE, a rozpakowywanie ZIP — na „zip bomby".
+Dlatego:
+
+- XML rodziny ZIP+XML parsujemy przez **`defusedxml`** (mała, czysto-pythonowa
+  paczka, `defusedxml>=0.7`), nie przez goły `xml.etree`. Dokument z bombą
+  encji kończy się `ExtractError`, nie DoS-em procesu.
+- Każdą część archiwum czytamy przez helper `read_member`, który sprawdza
+  **rozpakowany** rozmiar (`ZipInfo.file_size`) wobec twardego sufitu i odmawia
+  ponad limit.
+
+To dokłada jedną zależność (`defusedxml`) ponad pierwotne założenie „tylko
+`olefile`". Uzasadnione modelem zagrożeń: koszt ~50 KB, korzyść to odporność na
+złośliwy plik.
+
 ## Architektura
 
 Obecny `dspace_mcp/pdf.py` zostaje zastąpiony pakietem:
@@ -155,7 +173,7 @@ Cała wiedza „który format" siedzi w pakiecie `extractors/`, nie w `tools.py`
   property staje się `extract_max_bytes` (alias zachowany, jeśli używany).
 - Docstring narzędzia `get_bitstream_text` (czyta go model) — lista obsługiwanych
   formatów zamiast „tylko PDF".
-- `pyproject.toml` — dochodzi `olefile>=0.47` do `dependencies`.
+- `pyproject.toml` — dochodzą `olefile>=0.47` i `defusedxml>=0.7` do `dependencies` (E6).
 
 ## Szczegóły ekstrakcji per rodzina
 
