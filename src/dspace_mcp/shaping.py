@@ -26,6 +26,7 @@ import re
 from typing import Any
 
 __all__ = [
+    "auth_methods",
     "flatten_metadata",
     "link_href",
     "metadata_value",
@@ -48,6 +49,9 @@ _VERSION_RE = re.compile(r"(\d+)(?:\.(\d+))?")
 
 # Klucze, z których budujemy listę słów kluczowych w trybie pełnym.
 _SUBJECT_PREFIX = "dc.subject"
+
+# Nazwa metody logowania z nagłówka WWW-Authenticate — patrz auth_methods().
+_AUTH_METHOD_RE = re.compile(r"([A-Za-z][A-Za-z0-9_.-]*)\s+realm=")
 
 
 def _as_dict(value: Any) -> dict:
@@ -173,6 +177,28 @@ def parse_version(dspace_version: str | None) -> tuple[int, int] | None:
         return None
     major, minor = match.groups()
     return int(major), int(minor or 0)
+
+
+def auth_methods(header: Any) -> list[str]:
+    """Metody logowania ogłoszone przez instancję w ``WWW-Authenticate``.
+
+    DSpace odpowiada na ``GET /api/authn/status`` nagłówkiem w rodzaju
+    ``password realm="DSpace REST API", orcid realm="DSpace REST API",
+    location="..."``. Zestaw jest konfigurowalny per-instancja, więc pytamy
+    zamiast zakładać (decyzja D8 rozciągnięta w A6): dzięki temu wiemy, zanim
+    wyślemy hasło, czy ta instancja w ogóle przyjmuje logowanie hasłem.
+
+    Metodą jest token stojący **przed** ``realm=``; ``location=`` nią nie jest.
+    Pusta lista znaczy „nie wiadomo" i nie blokuje próby logowania.
+    """
+    if not isinstance(header, str):
+        return []
+    found: list[str] = []
+    for name in _AUTH_METHOD_RE.findall(header):
+        lowered = name.lower()
+        if lowered not in found:
+            found.append(lowered)
+    return found
 
 
 def search_hits(payload: dict) -> tuple[list[dict], dict]:

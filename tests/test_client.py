@@ -8,15 +8,29 @@ budujemy syntetycznie, bo fixture'y linkują do prawdziwych hostów.
 
 from __future__ import annotations
 
+import asyncio
+import base64
+import json
+import time
+from pathlib import Path
 from typing import Any
 
 import httpx
 import pytest
 import respx
 
+import dspace_mcp
 from conftest import fixture_json
 from dspace_mcp import __version__
-from dspace_mcp.client import DSpaceClient, DSpaceError, is_uuid, require_uuid
+from dspace_mcp import client as client_module
+from dspace_mcp.client import (
+    AuthState,
+    DSpaceClient,
+    DSpaceError,
+    NeedsDecision,
+    is_uuid,
+    require_uuid,
+)
 from dspace_mcp.config import Config
 
 BASE = "https://repo.test/server"
@@ -772,8 +786,19 @@ async def test_stream_bytes_maps_timeout() -> None:
 
 
 @respx.mock
-async def test_client_only_ever_sends_get() -> None:
-    """Gwarancja bezpieczeństwa całego projektu: żadnej metody poza GET."""
+async def test_client_sends_get_everywhere_except_the_login_endpoint() -> None:
+    """Gwarancja bezpieczeństwa całego projektu, w węższej postaci (decyzja A2).
+
+    Do wersji 0.2 brzmiała „żadnej metody poza GET". Logowania nie da się zrobić
+    GET-em, więc gwarancja jest teraz taka: każde żądanie to GET, a jedyny POST
+    trafia pod **dokładnie** ten jeden adres.
+
+    Asercja porównuje adres przez **równość**, nie ``endswith`` — inaczej
+    ``https://evil.test/authn/login`` przeszedłby jako poprawny cel, czyli test
+    maskowałby dokładnie tę podatność, przed którą ma chronić.
+    """
+    mock_status()
+    mock_login(jwt())
     respx.get(API).mock(
         return_value=httpx.Response(200, json=fixture_json("dspace10_root"))
     )
@@ -792,17 +817,46 @@ async def test_client_only_ever_sends_get() -> None:
         return_value=httpx.Response(200, content=b"PK\x03\x04docx-bytes")
     )
 
-    client = make_client()
+    client = account_client()
+    await client.authenticate()
     await client.probe()
     await client.capabilities()
     await client.get("/core/communities/search/top")
+    await client.get("/core/communities/search/top", anonymous=True)
     await client.get_page("/core/communities/search/top", key="communities")
     await client.get_all("/discover/facets/author", key="values", limit=3)
     await client.stream_bytes(CONTENT_URL, max_bytes=ONE_MB)
     await client.stream_bytes(docx_url, max_bytes=ONE_MB)
 
     assert len(respx.calls) > 0
-    assert {call.request.method for call in respx.calls} == {"GET"}
+    methods = [call.request.method for call in respx.calls]
+    assert "POST" in methods, "test nie sprawdziłby niczego, gdyby nie było logowania"
+    for call in respx.calls:
+        if call.request.method != "GET":
+            assert call.request.method == "POST"
+            assert str(call.request.url) == f"{API}/authn/login"
+
+
+def test_no_mutating_http_method_exists_anywhere_in_the_package() -> None:
+    """Strażnik działający także dla ścieżek, na które nikt nie napisał testu.
+
+    Gwarancja z A2 opiera się na tym, że kodu wysyłającego cokolwiek poza GET-em
+    po prostu **nie ma** — poza jednym logowaniem. To sprawdzamy na źródłach, bo
+    test zachowania obroni tylko te wywołania, które ktoś pomyślał, żeby wywołać.
+    """
+    package = Path(dspace_mcp.__file__).parent
+    sources = {
+        path.relative_to(package): path.read_text(encoding="utf-8")
+        for path in package.rglob("*.py")
+    }
+
+    posts = {name: text.count(".post(") for name, text in sources.items()}
+    assert sum(posts.values()) == 1, f"POST poza logowaniem: {posts}"
+    assert posts[Path("client.py")] == 1
+
+    for name, text in sources.items():
+        for method in (".put(", ".patch(", ".delete(", ".request("):
+            assert method not in text, f"{name} wysyła {method}"
 
 
 @respx.mock
@@ -842,3 +896,458 @@ async def test_probe_does_not_retry_after_connection_error() -> None:
         await client.probe()
     assert route.call_count == 1
     assert retry.call_count == 0
+
+
+# --- uwierzytelnianie tylko-do-odczytu (A2-A9) ------------------------------
+
+STATUS_ANON = f"{API}/authn/status"
+LOGIN = f"{API}/authn/login"
+TOP = f"{API}/core/communities/search/top"
+
+OFFERS_PASSWORD = 'password realm="DSpace REST API", orcid realm="DSpace REST API"'
+
+
+def jwt(expires_in: float = 1800.0) -> str:
+    """JWT o kształcie takim, jak wystawia DSpace — bez prawdziwego podpisu."""
+    payload = {"eid": VALID_UUID, "sg": [], "exp": int(time.time() + expires_in)}
+    raw = base64.urlsafe_b64encode(json.dumps(payload).encode()).rstrip(b"=").decode()
+    return f"eyJhbGciOiJIUzI1NiJ9.{raw}.c2lnbmF0dXJl"
+
+
+def mock_status(*, offers: str = OFFERS_PASSWORD, csrf: str = "csrf-1") -> None:
+    respx.get(STATUS_ANON).mock(
+        return_value=httpx.Response(
+            200,
+            json=fixture_json("dspace10_authn_status_anonymous"),
+            headers={"DSPACE-XSRF-TOKEN": csrf, "WWW-Authenticate": offers},
+        )
+    )
+
+
+def mock_login(token: str | None = None, *, status: int = 200, **kwargs: Any) -> None:
+    headers = dict(kwargs.pop("headers", {}))
+    if token is not None:
+        headers["Authorization"] = f"Bearer {token}"
+    respx.post(LOGIN).mock(return_value=httpx.Response(status, headers=headers))
+
+
+def mock_top() -> None:
+    respx.get(TOP).mock(
+        return_value=httpx.Response(200, json=fixture_json("dspace10_communities_top"))
+    )
+
+
+def account_client(**kwargs: Any) -> DSpaceClient:
+    return make_client(username="reader@repo.test", password="s3kret", **kwargs)
+
+
+def auth_headers_sent() -> list[str | None]:
+    return [call.request.headers.get("authorization") for call in respx.calls]
+
+
+@pytest.fixture
+def instant_refresh(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Zdejmij minimalny odstęp między logowaniami (``TOKEN_MIN_LOGIN_INTERVAL``).
+
+    W produkcji token żyje ~30 minut, a odnowienie wypada ~25 minut po logowaniu —
+    60-sekundowa podłoga nigdy tam nie koliduje. Kolidowałaby natomiast z każdym
+    testem, który skraca życie tokenu do kilku sekund, żeby nie czekać.
+    """
+    monkeypatch.setattr(client_module, "TOKEN_MIN_LOGIN_INTERVAL", 0.0)
+
+
+@respx.mock
+async def test_login_sends_csrf_token_and_uses_the_returned_jwt() -> None:
+    """Pełny przepływ z A2: CSRF z /authn/status, POST, token na kolejnych GET-ach."""
+    mock_status()
+    mock_login(jwt())
+    mock_top()
+
+    client = account_client()
+    await client.authenticate()
+    await client.get("/core/communities/search/top")
+
+    assert client.auth_state is AuthState.AUTHENTICATED
+    login_call = next(c for c in respx.calls if c.request.method == "POST")
+    assert login_call.request.headers["X-XSRF-TOKEN"] == "csrf-1"
+    assert b"user=reader%40repo.test" in login_call.request.content
+    top_call = next(c for c in respx.calls if str(c.request.url).startswith(TOP))
+    assert top_call.request.headers["authorization"].startswith("Bearer ")
+
+
+@respx.mock
+async def test_login_never_follows_a_redirect() -> None:
+    """httpx przy 307 powtarza POST RAZEM Z CIAŁEM — hasło nie ma prawa tam pójść."""
+    mock_status()
+    respx.post(LOGIN).mock(
+        return_value=httpx.Response(
+            307, headers={"Location": "https://evil.test/authn/login"}
+        )
+    )
+    elsewhere = respx.post("https://evil.test/authn/login").mock(
+        return_value=httpx.Response(200, headers={"Authorization": "Bearer stolen"})
+    )
+
+    client = account_client()
+    await client.authenticate()
+
+    assert not elsewhere.called
+    assert client.auth_state is AuthState.NEEDS_DECISION
+    assert "redirect" in client.auth_reason.lower()
+
+
+@respx.mock
+async def test_wrong_password_asks_the_user_instead_of_falling_back() -> None:
+    mock_status()
+    respx.post(LOGIN).mock(
+        return_value=httpx.Response(401, json=fixture_json("dspace10_authn_login_401"))
+    )
+
+    client = account_client()
+    await client.authenticate()
+
+    assert client.auth_state is AuthState.NEEDS_DECISION
+    assert "username or password" in client.auth_reason
+
+
+@respx.mock
+async def test_instance_without_password_login_is_not_even_asked() -> None:
+    """A6: wiemy z www-authenticate, że nie ma sensu wysyłać hasła."""
+    mock_status(offers='shibboleth realm="DSpace REST API"')
+    login = respx.post(LOGIN).mock(return_value=httpx.Response(200))
+
+    client = account_client()
+    await client.authenticate()
+
+    assert not login.called
+    assert client.auth_state is AuthState.NEEDS_DECISION
+    assert "shibboleth" in client.auth_reason
+
+
+@respx.mock
+async def test_token_close_to_expiry_is_replaced_before_the_request(
+    instant_refresh: None,
+) -> None:
+    """A4: nieważny token nie daje 401, tylko ciche dane anonimowe.
+
+    Wygaśnięciu trzeba więc zapobiegać, a nie na nie reagować.
+    """
+    mock_status()
+    respx.post(LOGIN).mock(
+        side_effect=[
+            httpx.Response(
+                200, headers={"Authorization": f"Bearer {jwt(expires_in=5)}"}
+            ),
+            httpx.Response(200, headers={"Authorization": f"Bearer {jwt()}"}),
+        ]
+    )
+    mock_top()
+
+    client = account_client()
+    await client.authenticate()
+    await client.get("/core/communities/search/top")
+
+    assert (
+        len(respx.calls) and sum(c.request.method == "POST" for c in respx.calls) == 2
+    )
+
+
+@respx.mock
+async def test_401_triggers_exactly_one_relogin_and_one_retry(
+    instant_refresh: None,
+) -> None:
+    mock_status()
+    respx.post(LOGIN).mock(
+        side_effect=[
+            httpx.Response(200, headers={"Authorization": f"Bearer {jwt()}"}),
+            httpx.Response(200, headers={"Authorization": f"Bearer {jwt()}"}),
+        ]
+    )
+    top = respx.get(TOP).mock(
+        side_effect=[
+            httpx.Response(401),
+            httpx.Response(200, json=fixture_json("dspace10_communities_top")),
+        ]
+    )
+
+    client = account_client()
+    await client.authenticate()
+    await client.get("/core/communities/search/top")
+
+    assert top.call_count == 2
+    assert sum(c.request.method == "POST" for c in respx.calls) == 2
+
+
+@respx.mock
+async def test_second_401_after_a_successful_relogin_is_not_retried_again(
+    instant_refresh: None,
+) -> None:
+    """Nie twierdzimy nic o uprawnieniach konta — nie zmierzyliśmy tego."""
+    mock_status()
+    mock_login(jwt())
+    respx.get(TOP).mock(return_value=httpx.Response(401))
+
+    client = account_client()
+    await client.authenticate()
+    with pytest.raises(DSpaceError) as excinfo:
+        await client.get("/core/communities/search/top")
+
+    assert client.auth_state is AuthState.AUTHENTICATED
+    assert "does not have access" not in str(excinfo.value)
+
+
+@respx.mock
+async def test_403_does_not_trigger_a_relogin() -> None:
+    mock_status()
+    mock_login(jwt())
+    respx.get(TOP).mock(return_value=httpx.Response(403))
+
+    client = account_client()
+    await client.authenticate()
+    with pytest.raises(DSpaceError):
+        await client.get("/core/communities/search/top")
+
+    assert sum(c.request.method == "POST" for c in respx.calls) == 1
+
+
+@respx.mock
+async def test_concurrent_requests_log_in_only_once(instant_refresh: None) -> None:
+    """A8: token CSRF rotuje, więc równoległe logowania psują sobie POST-y."""
+    mock_status()
+    respx.post(LOGIN).mock(
+        side_effect=[
+            httpx.Response(
+                200, headers={"Authorization": f"Bearer {jwt(expires_in=5)}"}
+            ),
+            httpx.Response(200, headers={"Authorization": f"Bearer {jwt()}"}),
+        ]
+    )
+    mock_top()
+
+    client = account_client()
+    await client.authenticate()
+    await asyncio.gather(
+        client.get("/core/communities/search/top"),
+        client.get("/core/communities/search/top"),
+    )
+
+    # Trzecie logowanie wyczerpałoby side_effect i wysadziło test — o to chodzi.
+    assert sum(c.request.method == "POST" for c in respx.calls) == 2
+
+
+@respx.mock
+async def test_a_stale_looking_token_does_not_cause_a_login_per_request() -> None:
+    """Rozjechany zegar nie ma prawa zamienić serwera w maszynę do logowania.
+
+    Gdyby instancja (albo przesunięty zegar lokalny) kazała nam uznawać token za
+    przeterminowany od razu po zalogowaniu, naiwna reguła „odnów, gdy stary"
+    logowałaby się przed KAŻDYM żądaniem — a natrętny klient kończy z banem IP.
+    """
+    mock_status()
+    respx.post(LOGIN).mock(
+        return_value=httpx.Response(
+            200, headers={"Authorization": f"Bearer {jwt(expires_in=-60)}"}
+        )
+    )
+    mock_top()
+
+    client = account_client()
+    await client.authenticate()
+    for _ in range(5):
+        await client.get("/core/communities/search/top")
+
+    assert sum(c.request.method == "POST" for c in respx.calls) == 1
+
+
+@respx.mock
+async def test_anonymous_track_never_carries_the_token() -> None:
+    """A9: porównanie jest bezwartościowe, jeśli „anonim" jedzie z tokenem konta."""
+    mock_status()
+    mock_login(jwt())
+    mock_top()
+
+    client = account_client()
+    await client.authenticate()
+    await client.get("/core/communities/search/top", anonymous=True)
+
+    anon_calls = [c for c in respx.calls if str(c.request.url).startswith(TOP)]
+    assert anon_calls and all(
+        "authorization" not in c.request.headers for c in anon_calls
+    )
+
+
+@respx.mock
+async def test_anonymous_track_uses_a_separate_cookie_jar() -> None:
+    """Cookies z logowania (AWSALB, DSPACE-XSRF) nie mogą uwierzytelnić „anonima"."""
+    mock_status()
+    respx.post(LOGIN).mock(
+        return_value=httpx.Response(
+            200,
+            headers=[
+                ("Authorization", f"Bearer {jwt()}"),
+                ("Set-Cookie", "AWSALB=sticky; Path=/"),
+            ],
+        )
+    )
+    mock_top()
+
+    client = account_client()
+    await client.authenticate()
+    await client.get("/core/communities/search/top", anonymous=True)
+
+    anon_call = next(c for c in respx.calls if str(c.request.url).startswith(TOP))
+    assert "cookie" not in anon_call.request.headers
+
+
+@respx.mock
+async def test_no_token_after_the_user_chooses_anonymous() -> None:
+    mock_status()
+    respx.post(LOGIN).mock(return_value=httpx.Response(401))
+    mock_top()
+
+    client = account_client()
+    await client.authenticate()
+    assert client.auth_state is AuthState.NEEDS_DECISION
+    client.accept_anonymous()
+    await client.get("/core/communities/search/top")
+
+    assert client.auth_state is AuthState.ANONYMOUS_BY_CHOICE
+    assert all(header is None for header in auth_headers_sent())
+
+
+@respx.mock
+async def test_login_failing_mid_session_raises_needs_decision(
+    instant_refresh: None,
+) -> None:
+    """Ten sam sygnał, czy trafi w bramkę, czy w środek już trwającego wywołania."""
+    mock_status()
+    respx.post(LOGIN).mock(
+        side_effect=[
+            httpx.Response(
+                200, headers={"Authorization": f"Bearer {jwt(expires_in=5)}"}
+            ),
+            httpx.Response(401),
+        ]
+    )
+    mock_top()
+
+    client = account_client()
+    await client.authenticate()
+    with pytest.raises(NeedsDecision):
+        await client.get("/core/communities/search/top")
+
+    assert client.auth_state is AuthState.NEEDS_DECISION
+
+
+@respx.mock
+async def test_stream_bytes_carries_the_token() -> None:
+    """Bez tego pliki z kolekcji o ograniczonym dostępie pozostają nieczytelne."""
+    mock_status()
+    mock_login(jwt())
+    respx.get(CONTENT_URL).mock(return_value=httpx.Response(200, content=b"%PDF-1.4"))
+
+    client = account_client()
+    await client.authenticate()
+    await client.stream_bytes(CONTENT_URL, max_bytes=ONE_MB)
+
+    content_call = next(c for c in respx.calls if str(c.request.url) == CONTENT_URL)
+    assert content_call.request.headers["authorization"].startswith("Bearer ")
+
+
+@respx.mock
+async def test_csrf_token_is_taken_from_the_cookie_when_the_header_is_gone(
+    instant_refresh: None,
+) -> None:
+    """DSpace wysyła nagłówek CSRF tylko wtedy, gdy wystawia NOWY token.
+
+    Zweryfikowane na żywej instancji: pierwsze ``/authn/status`` niesie
+    ``DSPACE-XSRF-TOKEN`` i sadza ciasteczko, kolejne nagłówka już nie mają —
+    token żyje w ciasteczku (wzorzec double-submit). Czytanie wyłącznie
+    nagłówka sprawiało, że każde logowanie po pierwszym żądaniu leciało bez
+    ``X-XSRF-TOKEN`` i dostawało 403.
+    """
+    respx.get(STATUS_ANON).mock(
+        side_effect=[
+            httpx.Response(
+                200,
+                json=fixture_json("dspace10_authn_status_anonymous"),
+                headers=[
+                    ("DSPACE-XSRF-TOKEN", "csrf-1"),
+                    ("WWW-Authenticate", OFFERS_PASSWORD),
+                    ("Set-Cookie", "DSPACE-XSRF-COOKIE=csrf-1; Path=/server"),
+                ],
+            ),
+            httpx.Response(
+                200,
+                json=fixture_json("dspace10_authn_status_anonymous"),
+                headers={"WWW-Authenticate": OFFERS_PASSWORD},
+            ),
+        ]
+    )
+    respx.post(LOGIN).mock(
+        side_effect=[
+            httpx.Response(
+                200, headers={"Authorization": f"Bearer {jwt(expires_in=5)}"}
+            ),
+            httpx.Response(200, headers={"Authorization": f"Bearer {jwt()}"}),
+        ]
+    )
+    mock_top()
+
+    client = account_client()
+    await client.authenticate()
+    await client.get("/core/communities/search/top")
+
+    logins = [c.request for c in respx.calls if c.request.method == "POST"]
+    assert len(logins) == 2
+    assert logins[1].headers.get("X-XSRF-TOKEN") == "csrf-1"
+    assert client.auth_state is AuthState.AUTHENTICATED
+
+
+@respx.mock
+async def test_a_401_moments_after_logging_in_does_not_trigger_another_login() -> None:
+    """Świeży token nie może być przyczyną 401, więc ponowne logowanie nie pomoże.
+
+    Bez tego bezpiecznika model iterujący po rekordach, na które instancja
+    odpowiada 401 zamiast 403, wywoływałby pełne logowanie przy KAŻDYM z nich —
+    czyli dokładnie scenariusz „natrętny klient → ban IP", przed którym
+    TOKEN_MIN_LOGIN_INTERVAL ma chronić na ścieżce proaktywnej.
+    """
+    mock_status()
+    mock_login(jwt())
+    respx.get(TOP).mock(return_value=httpx.Response(401))
+
+    client = account_client()
+    await client.authenticate()
+    for _ in range(4):
+        with pytest.raises(DSpaceError):
+            await client.get("/core/communities/search/top")
+
+    assert sum(c.request.method == "POST" for c in respx.calls) == 1
+
+
+@respx.mock
+async def test_stream_bytes_does_not_blame_the_account_after_a_failed_retry(
+    instant_refresh: None,
+) -> None:
+    """Ten sam przypadek graniczny co w _request_json — i ta sama powściągliwość.
+
+    Nie zmierzyliśmy, czy DSpace odpowiada zalogowanemu-bez-uprawnień kodem 401
+    czy 403, więc komunikat nie ma prawa twierdzić niczego o uprawnieniach konta.
+    """
+    mock_status()
+    respx.post(LOGIN).mock(
+        side_effect=[
+            httpx.Response(200, headers={"Authorization": f"Bearer {jwt()}"}),
+            httpx.Response(200, headers={"Authorization": f"Bearer {jwt()}"}),
+        ]
+    )
+    respx.get(CONTENT_URL).mock(return_value=httpx.Response(401))
+
+    client = account_client()
+    await client.authenticate()
+    with pytest.raises(DSpaceError) as exc:
+        await client.stream_bytes(CONTENT_URL, max_bytes=ONE_MB)
+
+    assert "refused access" not in str(exc.value)
+    assert "token" in str(exc.value).lower()

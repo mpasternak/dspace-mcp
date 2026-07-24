@@ -20,6 +20,8 @@ ENV_VARS = (
     "DSPACE_MAX_RESULTS",
     "DSPACE_PDF_MAX_MB",
     "DSPACE_EXTRACT_MAX_MB",
+    "DSPACE_USERNAME",
+    "DSPACE_PASSWORD",
 )
 
 
@@ -424,3 +426,94 @@ def test_parse_args_flag_wins_even_when_alias_env_is_malformed(
     monkeypatch.setenv("DSPACE_PDF_MAX_MB", "garbage")
     cfg = parse_args(["--base-url", "https://x/server", "--extract-max-mb", "9"])
     assert cfg.extract_max_mb == 9
+
+
+# --- konto (A7) -------------------------------------------------------------
+
+
+def test_config_from_env_reads_account() -> None:
+    config = config_from_env(
+        {
+            "DSPACE_BASE_URL": "https://repo.test/server",
+            "DSPACE_USERNAME": "reader@repo.test",
+            "DSPACE_PASSWORD": "s3kret",
+        }
+    )
+    assert config.username == "reader@repo.test"
+    assert config.password == "s3kret"
+
+
+def test_config_from_env_has_no_account_by_default() -> None:
+    config = config_from_env({"DSPACE_BASE_URL": "https://repo.test/server"})
+    assert config.username is None
+    assert config.password is None
+
+
+@pytest.mark.parametrize("blank", ["", "   ", "\t"])
+def test_config_from_env_treats_blank_account_as_anonymous(blank: str) -> None:
+    """Host MCP potrafi podstawić pusty string za niewypełnione pole (A7 pkt 2).
+
+    Bez tej reguły każda anonimowa instalacja z paczki .mcpb próbowałaby się
+    logować jako użytkownik o pustej nazwie.
+    """
+    config = config_from_env(
+        {
+            "DSPACE_BASE_URL": "https://repo.test/server",
+            "DSPACE_USERNAME": blank,
+            "DSPACE_PASSWORD": blank,
+        }
+    )
+    assert config.username is None
+    assert config.password is None
+
+
+@pytest.mark.parametrize(
+    "env",
+    [
+        {"DSPACE_USERNAME": "reader@repo.test"},
+        {"DSPACE_PASSWORD": "s3kret"},
+        {"DSPACE_USERNAME": "reader@repo.test", "DSPACE_PASSWORD": "  "},
+    ],
+)
+def test_config_from_env_rejects_half_an_account(env: dict[str, str]) -> None:
+    with pytest.raises(ValueError, match="both"):
+        config_from_env({"DSPACE_BASE_URL": "https://repo.test/server", **env})
+
+
+def test_parse_args_reads_account_flags() -> None:
+    config = parse_args(
+        [
+            "--base-url",
+            "https://repo.test/server",
+            "--username",
+            "reader@repo.test",
+            "--password",
+            "s3kret",
+        ]
+    )
+    assert config.username == "reader@repo.test"
+    assert config.password == "s3kret"
+
+
+def test_parse_args_accepts_username_from_flag_and_password_from_env(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Reguła „oba albo żadne" dotyczy wartości wynikowej, nie źródła (A7 pkt 1)."""
+    monkeypatch.setenv("DSPACE_PASSWORD", "s3kret")
+    config = parse_args(
+        ["--base-url", "https://repo.test/server", "--username", "reader@repo.test"]
+    )
+    assert config.username == "reader@repo.test"
+    assert config.password == "s3kret"
+
+
+def test_parse_args_rejects_half_an_account(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    with pytest.raises(SystemExit):
+        parse_args(
+            ["--base-url", "https://repo.test/server", "--username", "reader@repo.test"]
+        )
+    message = capsys.readouterr().err
+    assert "DSPACE_PASSWORD" in message
+    assert "Incomplete credentials" in message

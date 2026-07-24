@@ -14,11 +14,12 @@ import pytest
 
 from conftest import fixture_json
 from dspace_mcp import tools
-from dspace_mcp.client import DSpaceError
+from dspace_mcp.client import AuthState, DSpaceError
 from dspace_mcp.config import Config
 
 ITEM_UUID = "11111111-2222-3333-4444-555555555555"
 OTHER_UUID = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+RESTRICTED_UUID = "99999999-8888-7777-6666-555555555555"
 
 
 class FakeClient:
@@ -35,12 +36,23 @@ class FakeClient:
         *,
         pages: dict[str, tuple] | None = None,
         config: Config | None = None,
+        anon_routes: dict[str, Any] | None = None,
+        anon_pages: dict[str, tuple] | None = None,
+        auth_state: AuthState = AuthState.ANONYMOUS,
     ) -> None:
         self.routes = routes or {}
         self.pages = pages or {}
+        # Widok anonimowy (A9): domyślnie taki sam jak widok konta, bo większość
+        # testów nie dotyczy różnicy w widoczności.
+        self.anon_routes = self.routes if anon_routes is None else anon_routes
+        self.anon_pages = self.pages if anon_pages is None else anon_pages
+        self.auth_state = auth_state
+        self.auth_reason = ""
+        self.offered_methods: list[str] = []
         self.config = config or Config(base_url="https://repo.test/server")
         self.api_url = self.config.api_url
         self.calls: list[tuple[str, dict]] = []
+        self.anon_calls: list[tuple[str, dict]] = []
         self.streamed: list[str] = []
         self.stream_payload = b""
         self.caps = {"filters": ["author", "dateIssued"], "sorts": ["dc.title"]}
@@ -57,27 +69,50 @@ class FakeClient:
     async def capabilities(self) -> dict:
         return self.caps
 
-    async def get(self, path: str, params: dict | None = None) -> dict:
-        self.calls.append((path, params or {}))
-        if path not in self.routes:
-            raise DSpaceError(f"Not found: no such object at {path}.")
-        value = self.routes[path]
+    def _record(self, path: str, params: dict | None, anonymous: bool) -> None:
+        (self.anon_calls if anonymous else self.calls).append((path, params or {}))
+
+    async def get(
+        self, path: str, params: dict | None = None, *, anonymous: bool = False
+    ) -> dict:
+        self._record(path, params, anonymous)
+        routes = self.anon_routes if anonymous else self.routes
+        if path not in routes:
+            # Prawdziwy klient zawsze nadaje `status` (patrz _error_for_status),
+            # a kod wywołujący na nim polega, żeby odróżnić brak dostępu od awarii.
+            missing = DSpaceError(f"Not found: no such object at {path}.")
+            missing.status = 404
+            raise missing
+        value = routes[path]
         if isinstance(value, Exception):
             raise value
         return value
 
     async def get_page(
-        self, path: str, params: dict | None = None, *, key: str
+        self,
+        path: str,
+        params: dict | None = None,
+        *,
+        key: str,
+        anonymous: bool = False,
     ) -> tuple[list[dict], dict]:
-        self.calls.append((path, params or {}))
-        items, total = self.pages.get(path, ([], 0))
+        self._record(path, params, anonymous)
+        pages = self.anon_pages if anonymous else self.pages
+        items, total = pages.get(path, ([], 0))
         return items, {"totalElements": total}
 
     async def get_all(
-        self, path: str, params: dict | None = None, *, key: str, limit: int
+        self,
+        path: str,
+        params: dict | None = None,
+        *,
+        key: str,
+        limit: int,
+        anonymous: bool = False,
     ) -> tuple[list[dict], int | None, bool]:
-        self.calls.append((path, params or {}))
-        items, total = self.pages.get(path, ([], 0))
+        self._record(path, params, anonymous)
+        pages = self.anon_pages if anonymous else self.pages
+        items, total = pages.get(path, ([], 0))
         cut = items[:limit]
         return cut, total, len(cut) < (total or 0)
 
@@ -427,9 +462,13 @@ def bundle_ref(name: str, uuid: str) -> dict:
     return {"uuid": uuid, "name": name, "type": "bundle"}
 
 
-def bitstream_raw(name: str = "paper.pdf", mimetype: str = "application/pdf") -> dict:
+def bitstream_raw(
+    name: str = "paper.pdf",
+    mimetype: str = "application/pdf",
+    uuid: str = OTHER_UUID,
+) -> dict:
     return {
-        "uuid": OTHER_UUID,
+        "uuid": uuid,
         "name": name,
         "sizeBytes": 14884,
         "checkSum": {"checkSumAlgorithm": "MD5", "value": "abc123"},
@@ -747,3 +786,201 @@ async def test_community_tree_shares_one_global_budget():
     )
     assert seen <= 5
     assert result["truncated"] is True
+
+
+# --- compare_access i raport stanu (A5, A9) ---------------------------------
+
+
+def _two_bundles_with(files: list[dict]) -> dict[str, tuple]:
+    return {
+        f"/core/items/{ITEM_UUID}/bundles": (
+            [bundle_ref("ORIGINAL", ORIGINAL_UUID)],
+            1,
+        ),
+        f"/core/bundles/{ORIGINAL_UUID}/bitstreams": (files, len(files)),
+    }
+
+
+async def test_compare_access_names_the_files_only_the_account_can_see():
+    """Sedno funkcji: „użytkownik twierdzi, że brakuje plików" — których?"""
+    public = bitstream_raw("abstract.pdf", uuid=OTHER_UUID)
+    restricted = bitstream_raw("full-text.pdf", uuid=RESTRICTED_UUID)
+    client = FakeClient(
+        routes={f"/core/items/{ITEM_UUID}": {"uuid": ITEM_UUID}},
+        pages=_two_bundles_with([public, restricted]),
+        anon_routes={f"/core/items/{ITEM_UUID}": {"uuid": ITEM_UUID}},
+        anon_pages=_two_bundles_with([public]),
+        auth_state=AuthState.AUTHENTICATED,
+    )
+
+    result = await tools.compare_access(client, ITEM_UUID)
+
+    assert result["visible_to_anonymous"] is True
+    assert [f["name"] for f in result["files"]["authenticated_only"]] == [
+        "full-text.pdf"
+    ]
+    assert [f["name"] for f in result["files"]["both"]] == ["abstract.pdf"]
+
+
+async def test_compare_access_reports_an_item_the_public_cannot_see_at_all():
+    client = FakeClient(
+        routes={f"/core/items/{ITEM_UUID}": {"uuid": ITEM_UUID}},
+        pages=_two_bundles_with([bitstream_raw("thesis.pdf")]),
+        anon_routes={},
+        anon_pages={},
+        auth_state=AuthState.AUTHENTICATED,
+    )
+
+    result = await tools.compare_access(client, ITEM_UUID)
+
+    assert result["visible_to_anonymous"] is False
+    assert [f["name"] for f in result["files"]["authenticated_only"]] == ["thesis.pdf"]
+    assert result["files"]["both"] == []
+
+
+async def test_compare_access_says_so_when_nothing_is_hidden():
+    """„Wszystko widać publicznie" jest tak samo użyteczne jak lista braków."""
+    same = _two_bundles_with([bitstream_raw("open.pdf")])
+    client = FakeClient(
+        routes={f"/core/items/{ITEM_UUID}": {"uuid": ITEM_UUID}},
+        pages=same,
+        anon_pages=same,
+        auth_state=AuthState.AUTHENTICATED,
+    )
+
+    result = await tools.compare_access(client, ITEM_UUID)
+
+    assert result["files"]["authenticated_only"] == []
+    assert "no files" in result["summary"].lower()
+
+
+async def test_compare_access_asks_both_identities():
+    """Bez pytania obiema tożsamościami porównanie nie ma o co się oprzeć."""
+    client = FakeClient(
+        routes={f"/core/items/{ITEM_UUID}": {"uuid": ITEM_UUID}},
+        pages=_two_bundles_with([bitstream_raw("a.pdf")]),
+        auth_state=AuthState.AUTHENTICATED,
+    )
+
+    await tools.compare_access(client, ITEM_UUID)
+
+    assert client.calls, "widok konta nie został odpytany"
+    assert client.anon_calls, "widok anonimowy nie został odpytany"
+
+
+async def test_get_repository_info_reports_anonymous_mode():
+    client = FakeClient(routes={"/discover/search/objects": {}})
+    info = await tools.get_repository_info(client)
+    assert info["authentication"] == {"mode": "anonymous"}
+
+
+async def test_get_repository_info_names_the_account_when_logged_in():
+    config = Config(
+        base_url="https://repo.test/server",
+        username="reader@repo.test",
+        password="s3kret",
+    )
+    client = FakeClient(
+        routes={"/discover/search/objects": {}},
+        config=config,
+        auth_state=AuthState.AUTHENTICATED,
+    )
+    client.offered_methods = ["password", "orcid"]
+
+    info = await tools.get_repository_info(client)
+
+    assert info["authentication"]["mode"] == "authenticated"
+    assert info["authentication"]["user"] == "reader@repo.test"
+    assert info["authentication"]["methods_offered"] == ["password", "orcid"]
+
+
+async def test_statistics_error_does_not_say_anonymously_when_logged_in():
+    """D5 zaszyło tu słowo „anonymously"; po zalogowaniu jest ono nieprawdą."""
+    denied = DSpaceError("nope")
+    denied.status = 403
+    config = Config(
+        base_url="https://repo.test/server",
+        username="reader@repo.test",
+        password="s3kret",
+    )
+    client = FakeClient(
+        routes={f"/statistics/usagereports/{ITEM_UUID}_TotalVisits": denied},
+        config=config,
+        auth_state=AuthState.AUTHENTICATED,
+    )
+
+    with pytest.raises(DSpaceError) as exc:
+        await tools.get_item_statistics(client, ITEM_UUID)
+
+    assert "anonymously" not in str(exc.value)
+    assert "reader@repo.test" in str(exc.value)
+
+
+async def test_statistics_error_still_says_anonymously_without_an_account():
+    denied = DSpaceError("nope")
+    denied.status = 403
+    client = FakeClient(
+        routes={f"/statistics/usagereports/{ITEM_UUID}_TotalVisits": denied}
+    )
+
+    with pytest.raises(DSpaceError) as exc:
+        await tools.get_item_statistics(client, ITEM_UUID)
+
+    assert "anonymously" in str(exc.value)
+
+
+async def test_compare_access_refuses_when_not_actually_logged_in():
+    """Po `continue_anonymously` „widok konta" jest w rzeczywistości anonimowy.
+
+    Bramka w `_guard` blokuje tylko NEEDS_DECISION, a `_auth_headers` dokleja
+    token wyłącznie w stanie AUTHENTICATED — więc bez tej odmowy narzędzie
+    porównałoby anonima z anonimem i z pełnym przekonaniem zameldowało „nic nie
+    jest ukryte". Fałszywe zapewnienie w narzędziu stworzonym dokładnie po to,
+    żeby odpowiadać na pytanie „czy czegoś brakuje".
+    """
+    client = FakeClient(
+        routes={f"/core/items/{ITEM_UUID}": {"uuid": ITEM_UUID}},
+        pages=_two_bundles_with([bitstream_raw("secret.pdf")]),
+        auth_state=AuthState.ANONYMOUS_BY_CHOICE,
+    )
+
+    with pytest.raises(DSpaceError) as exc:
+        await tools.compare_access(client, ITEM_UUID)
+
+    assert "not logged in" in str(exc.value).lower()
+
+
+async def test_compare_access_does_not_turn_a_timeout_into_a_permissions_verdict():
+    """Timeout po stronie anonimowej to awaria, a nie dowód, że rekord jest ukryty."""
+    timeout = DSpaceError("The repository did not respond in time; try narrowing.")
+    client = FakeClient(
+        routes={f"/core/items/{ITEM_UUID}": {"uuid": ITEM_UUID}},
+        pages=_two_bundles_with([bitstream_raw("a.pdf")]),
+        anon_routes={f"/core/items/{ITEM_UUID}": timeout},
+        auth_state=AuthState.AUTHENTICATED,
+    )
+
+    with pytest.raises(DSpaceError) as exc:
+        await tools.compare_access(client, ITEM_UUID)
+
+    assert "did not respond in time" in str(exc.value)
+
+
+async def test_authentication_report_does_not_claim_a_failed_login_succeeded():
+    """`tools.py` ma być poprawny bez warstwy MCP — nie może polegać na bramce."""
+    config = Config(
+        base_url="https://repo.test/server",
+        username="reader@repo.test",
+        password="s3kret",
+    )
+    client = FakeClient(
+        routes={"/discover/search/objects": {}},
+        config=config,
+        auth_state=AuthState.NEEDS_DECISION,
+    )
+    client.auth_reason = "the repository rejected that username or password"
+
+    info = await tools.get_repository_info(client)
+
+    assert info["authentication"]["mode"] != "authenticated"
+    assert "rejected" in info["authentication"]["reason"]

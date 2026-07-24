@@ -1,0 +1,19 @@
+{
+  "id" : null,
+  "okay" : true,
+  "authenticated" : true,
+  "authenticationMethod" : "password",
+  "type" : "status",
+  "uniqueType" : "authn.status",
+  "_links" : {
+    "eperson" : {
+      "href" : "https://demo.dspace.org/server/api/eperson/epersons/335647b6-8a52-4ecb-a8c1-7ebabb199bda"
+    },
+    "specialGroups" : {
+      "href" : "https://demo.dspace.org/server/api/authn/status/specialGroups"
+    },
+    "self" : {
+      "href" : "https://demo.dspace.org/server/api/authn/status"
+    }
+  }
+}

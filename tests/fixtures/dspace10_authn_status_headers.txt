@@ -1,0 +1,20 @@
+HTTP/2 200 
+date: Fri, 24 Jul 2026 20:31:21 GMT
+content-type: application/hal+json;charset=UTF-8
+set-cookie: AWSALB=W90Vf0tcSyokym783MD/schw/rk2JpayPZBcaKWiWYXJ1kaPo/YQEcVVektkKRS0NxJR6RtKfoSz/En2GQCBTRZleqM+mMSJE+1L9R+rHYrTI/IUXIclRyo4kt0k; Expires=Fri, 31 Jul 2026 20:31:21 GMT; Path=/
+set-cookie: AWSALBCORS=W90Vf0tcSyokym783MD/schw/rk2JpayPZBcaKWiWYXJ1kaPo/YQEcVVektkKRS0NxJR6RtKfoSz/En2GQCBTRZleqM+mMSJE+1L9R+rHYrTI/IUXIclRyo4kt0k; Expires=Fri, 31 Jul 2026 20:31:21 GMT; Path=/; SameSite=None; Secure
+vary: Origin
+vary: Access-Control-Request-Method
+vary: Access-Control-Request-Headers
+dspace-xsrf-token: c2740399-2dde-4b42-837f-4b13455b93d9
+set-cookie: DSPACE-XSRF-COOKIE=c2740399-2dde-4b42-837f-4b13455b93d9; Path=/server; Secure; HttpOnly; SameSite=None
+content-language: en
+www-authenticate: password realm="DSpace REST API", orcid realm="DSpace REST API", location="https://sandbox.orcid.org/oauth/authorize?client_id=APP-KQWHR8WLDCO95GMI&response_type=code&scope=/authenticate+/read-limited+/activities/update+/person/update&redirect_uri=https%3A%2F%2Fdemo.dspace.org%2Fserver%2Fapi%2Fauthn%2Forcid"
+x-content-type-options: nosniff
+x-xss-protection: 0
+cache-control: no-cache, no-store, max-age=0, must-revalidate
+pragma: no-cache
+expires: 0
+strict-transport-security: max-age=31536000 ; includeSubDomains
+x-frame-options: DENY
+
