@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import dataclasses
+from pathlib import Path
 
 import pytest
+import tomllib
 
 from dspace_mcp import __version__
 from dspace_mcp.config import (
@@ -517,3 +519,16 @@ def test_parse_args_rejects_half_an_account(
     message = capsys.readouterr().err
     assert "DSPACE_PASSWORD" in message
     assert "Incomplete credentials" in message
+
+
+def test_package_version_matches_pyproject() -> None:
+    """`__version__` musi śledzić `pyproject.toml`, a nie żyć własnym życiem.
+
+    Rozjazd jest widoczny na zewnątrz w dwóch miejscach: `dspace-mcp --version`
+    oraz nagłówek `User-Agent` wysyłany do każdego odpytywanego repozytorium.
+    Ten drugi istnieje po to, żeby administrator instancji wiedział, kto go
+    odpytuje — fałszywy numer wersji podważa cały sens takiej identyfikacji.
+    """
+    pyproject = Path(__file__).parent.parent / "pyproject.toml"
+    metadata = tomllib.loads(pyproject.read_text(encoding="utf-8"))
+    assert __version__ == metadata["project"]["version"]
