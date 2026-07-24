@@ -154,9 +154,9 @@ async def get_bitstream_text(
 
     Supports PDF, Word (.docx, legacy .doc), OpenDocument (.odt, .ods, .odp)
     and Office Open XML (.pptx, .xlsx). The result reports which `format` was
-    read and, where meaningful, how many `units` (pages, slides or sheets)
-    were processed. Scans without OCR, encrypted files, unsupported types and
-    oversized files come back as a clear error with a download link.
+    read and, where meaningful, how many pages, slides or sheets it processed.
+    Scans without OCR, encrypted files, unsupported types and oversized files
+    come back as a clear error with a download link.
 
     Args:
         bitstream: UUID of the bitstream (get it from list_bitstreams).

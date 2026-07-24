@@ -11,6 +11,7 @@ from __future__ import annotations
 import io
 import re
 import zipfile
+import zlib
 from collections.abc import Iterable
 from xml.etree.ElementTree import Element, ParseError
 
@@ -71,7 +72,10 @@ def read_member(
         raise ExtractError(f"This file is not a readable {fmt}.") from None
     if info.file_size > _MAX_PART_BYTES:
         raise ExtractError(f"This {fmt} is too large to process safely.")
-    return zf.read(name)
+    try:
+        return zf.read(name)
+    except (zipfile.BadZipFile, zlib.error, EOFError, OSError):
+        raise ExtractError(f"This file is not a readable {fmt}.") from None
 
 
 def parse_xml(xml: bytes, fmt: str) -> Element:

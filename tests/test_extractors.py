@@ -10,13 +10,14 @@ from __future__ import annotations
 
 import io
 import struct
+import zipfile
 from collections.abc import Sequence
 
 import pypdf
 import pytest
 
 from dspace_mcp.extractors import ExtractError, dispatch, extract_pdf
-from dspace_mcp.extractors.base import normalize
+from dspace_mcp.extractors.base import normalize, parse_xml
 from dspace_mcp.extractors.msword import _scrape_text, extract_doc
 from dspace_mcp.extractors.ooxml import extract_docx, extract_pptx, extract_xlsx
 from dspace_mcp.extractors.opendocument import extract_odp, extract_ods, extract_odt
@@ -647,3 +648,67 @@ def test_extract_doc_internal_corruption_raises_extract_error():
     with pytest.raises(ExtractError) as exc:
         extract_doc(data, max_chars=100)
     assert "not a readable" in str(exc.value)
+
+
+# --- read_member: uszkodzone ciało części ZIP (finalny przegląd gałęzi) ----
+
+
+def _corrupt_zip_member(data: bytes, member: str) -> bytes:
+    """Uszkodź skompresowane ciało ``member``, zostawiając katalog centralny
+    nietknięty — ``zipfile.ZipFile(...)`` (i ``getinfo``) nadal przechodzą,
+    awaria ujawnia się dopiero przy ``zf.read(member)``.
+    """
+    buf = bytearray(data)
+    with zipfile.ZipFile(io.BytesIO(data)) as zf:
+        info = zf.getinfo(member)
+    offset = info.header_offset
+    name_len, extra_len = struct.unpack_from("<HH", buf, offset + 26)
+    data_start = offset + 30 + name_len + extra_len
+    data_end = data_start + info.compress_size
+    # Zamiana bitów w środku strumienia deflate psuje kody Huffmana —
+    # zlib zgłasza to jako zlib.error, a nie jako uszkodzenie ZIP-a.
+    mid = (data_start + data_end) // 2
+    for i in range(mid, min(mid + 8, data_end)):
+        buf[i] ^= 0xFF
+    return bytes(buf)
+
+
+def test_corrupt_zip_member_read_raises_extract_error():
+    """Regresja: ZIP z poprawnym katalogiem centralnym (``open_zip`` i
+    ``getinfo`` przechodzą), ale uszkodzonym strumieniem danych członka —
+    awaria ujawnia się dopiero w ``zf.read(name)`` wewnątrz ``read_member``.
+
+    Przed poprawką ten odczyt nie był niczym osłonięty: przeciekał goły
+    ``zlib.error`` (dekompresja) prosto przez ``dispatch`` do modelu —
+    dokładnie ta usterka, którą łata ten commit.
+    """
+    data = docx_bytes(["hello world"])
+    corrupted = _corrupt_zip_member(data, "word/document.xml")
+    with pytest.raises(ExtractError):
+        dispatch(
+            corrupted,
+            mimetype=(
+                "application/vnd.openxmlformats-officedocument"
+                ".wordprocessingml.document"
+            ),
+            filename=None,
+            max_chars=1000,
+        )
+
+
+def test_parse_xml_billion_laughs_raises_extract_error():
+    """Regresja: parsowanie z rozwinięciem encji (\"billion laughs\") musi
+    zostać odrzucone jako ``ExtractError``, nie rozwinięte/nie crashnąć —
+    to gwarancja defusedxml, którą tu pinujemy."""
+    payload = (
+        b'<?xml version="1.0"?>\n'
+        b"<!DOCTYPE lolz [\n"
+        b' <!ENTITY lol "lol">\n'
+        b' <!ENTITY lol2 "&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;">\n'
+        b' <!ENTITY lol3 "&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;'
+        b'&lol2;&lol2;">\n'
+        b"]>\n"
+        b"<lolz>&lol3;</lolz>"
+    )
+    with pytest.raises(ExtractError):
+        parse_xml(payload, "test")
