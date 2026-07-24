@@ -408,6 +408,10 @@ def test_shape_item_kompaktowy_dspace7():
         "type": "Journal Article",
         "doi": "10.1186/s12885-018-5169-9",
         "collection": None,
+        # DSpace 7.6 podaje flagi stanu także w rekordach z wyszukiwania.
+        "withdrawn": False,
+        "discoverable": True,
+        "in_archive": True,
     }
 
 
@@ -434,6 +438,9 @@ def test_shape_item_ma_zawsze_ten_sam_zestaw_kluczy():
         "type",
         "doi",
         "collection",
+        "withdrawn",
+        "discoverable",
+        "in_archive",
     }
     assert set(shape_item(_dspace10_hits()[0])) == oczekiwane
     assert set(shape_item({})) == oczekiwane
@@ -771,3 +778,22 @@ def test_auth_methods_lists_what_the_instance_offers() -> None:
 def test_auth_methods_never_raises_on_junk(raw: object) -> None:
     """Reguła shaping.py: śmieciowe wejście daje pustą listę, nie wyjątek."""
     assert auth_methods(raw) == []  # type: ignore[arg-type]
+
+
+# --- flagi stanu rekordu ----------------------------------------------------
+
+
+def test_shape_item_reports_state_flags() -> None:
+    """`withdrawn` odróżnia „wycofany" od „niedostępny" — bez tego model zgaduje."""
+    shaped = shape_item(fixture_json("dspace10_item"))
+    assert shaped["withdrawn"] is False
+    assert shaped["discoverable"] is True
+    assert shaped["in_archive"] is True
+
+
+def test_shape_item_state_flags_are_none_when_absent() -> None:
+    """Brak pola to „nie wiadomo", a nie „fałsz" — zgadywanie byłoby myląceym."""
+    shaped = shape_item({})
+    assert shaped["withdrawn"] is None
+    assert shaped["discoverable"] is None
+    assert shaped["in_archive"] is None

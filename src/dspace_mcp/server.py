@@ -86,6 +86,8 @@ async def search_items(
     sort: str | None = None,
     limit: int = 25,
     offset: int = 0,
+    filters: dict[str, str] | None = None,
+    as_anonymous: bool = False,
 ) -> dict[str, Any]:
     """Search the repository for items (publications, theses, datasets...).
 
@@ -102,15 +104,32 @@ async def search_items(
         sort: one of "relevance", "newest", "oldest", "title".
         limit: max records to return (0 = count only).
         offset: number of records to skip; use multiples of `limit`.
+        filters: any other discovery filter this instance supports, as
+            {name: value} — call get_repository_info for the list. Append an
+            operator if you need one other than the default `equals`, e.g.
+            {"access_status": "restricted", "title": "cancer,contains"}. Note
+            that `query` is full-text search and does NOT reach these filters.
+        as_anonymous: ask as the anonymous public instead of the logged-in
+            account — use it to see what a visitor would get.
     """
     return await tools.search_items(
-        _client(ctx), query, scope, year_from, year_to, author, sort, limit, offset
+        _client(ctx),
+        query,
+        scope,
+        year_from,
+        year_to,
+        author,
+        sort,
+        limit,
+        offset,
+        filters,
+        as_anonymous,
     )
 
 
 @_guard
 async def get_item(
-    ctx: Context, id: str, full_metadata: bool = False
+    ctx: Context, id: str, full_metadata: bool = False, as_anonymous: bool = False
 ) -> dict[str, Any]:
     """Fetch one item by UUID, Handle or DOI.
 
@@ -121,13 +140,18 @@ async def get_item(
     Args:
         id: UUID, Handle or DOI of the item.
         full_metadata: also return every metadata field, unabridged.
+        as_anonymous: ask as the anonymous public instead of the logged-in
+            account — use it to see what a visitor would get.
     """
-    return await tools.get_item(_client(ctx), id, full_metadata)
+    return await tools.get_item(_client(ctx), id, full_metadata, anonymous=as_anonymous)
 
 
 @_guard
 async def list_communities(
-    ctx: Context, parent: str | None = None, depth: int = 1
+    ctx: Context,
+    parent: str | None = None,
+    depth: int = 1,
+    as_anonymous: bool = False,
 ) -> dict[str, Any]:
     """List communities — the top level of the repository's structure.
 
@@ -135,13 +159,20 @@ async def list_communities(
         parent: UUID of a community whose sub-communities you want; omit for
             the top-level ones.
         depth: how many levels of sub-communities to include (1-3).
+        as_anonymous: ask as the anonymous public instead of the logged-in
+            account — use it to see what a visitor would get.
     """
-    return await tools.list_communities(_client(ctx), parent, depth)
+    return await tools.list_communities(
+        _client(ctx), parent, depth, anonymous=as_anonymous
+    )
 
 
 @_guard
 async def list_collections(
-    ctx: Context, community: str | None = None, limit: int = 50
+    ctx: Context,
+    community: str | None = None,
+    limit: int = 50,
+    as_anonymous: bool = False,
 ) -> dict[str, Any]:
     """List collections, either of one community or of the whole repository.
 
@@ -151,13 +182,17 @@ async def list_collections(
     Args:
         community: UUID of a community; omit to list every collection.
         limit: max collections to return.
+        as_anonymous: ask as the anonymous public instead of the logged-in
+            account — use it to see what a visitor would get.
     """
-    return await tools.list_collections(_client(ctx), community, limit)
+    return await tools.list_collections(
+        _client(ctx), community, limit, anonymous=as_anonymous
+    )
 
 
 @_guard
 async def list_bitstreams(
-    ctx: Context, item: str, bundle: str = "ORIGINAL"
+    ctx: Context, item: str, bundle: str = "ORIGINAL", as_anonymous: bool = False
 ) -> dict[str, Any]:
     """List the files attached to an item, with direct download URLs.
 
@@ -167,14 +202,38 @@ async def list_bitstreams(
     Args:
         item: UUID of the item.
         bundle: which bundle to list; "ORIGINAL" holds the real files,
-            "THUMBNAIL" and "LICENSE" hold generated ones.
+            "THUMBNAIL" and "LICENSE" hold generated ones. Pass an empty string
+            to list every bundle, or call list_bundles to see which exist.
+        as_anonymous: ask as the anonymous public instead of the logged-in
+            account — use it to see what a visitor would get.
     """
-    return await tools.list_bitstreams(_client(ctx), item, bundle)
+    return await tools.list_bitstreams(
+        _client(ctx), item, bundle, anonymous=as_anonymous
+    )
+
+
+@_guard
+async def list_bundles(
+    ctx: Context, item: str, as_anonymous: bool = False
+) -> dict[str, Any]:
+    """List an item's bundles — the named groups its files are filed under.
+
+    Most repositories put the real files in "ORIGINAL" and generated previews in
+    "THUMBNAIL", but the set differs per item. Call this when list_bitstreams
+    reports the bundle you asked for does not exist, or when you want to know
+    what an item actually holds before listing files.
+
+    Args:
+        item: UUID of the item.
+        as_anonymous: ask as the anonymous public instead of the logged-in
+            account — use it to see what a visitor would get.
+    """
+    return await tools.list_bundles(_client(ctx), item, anonymous=as_anonymous)
 
 
 @_guard
 async def get_bitstream_text(
-    ctx: Context, bitstream: str, max_chars: int = 20000
+    ctx: Context, bitstream: str, max_chars: int = 20000, as_anonymous: bool = False
 ) -> dict[str, Any]:
     """Extract the text of a document so you can read or summarise it.
 
@@ -187,8 +246,12 @@ async def get_bitstream_text(
     Args:
         bitstream: UUID of the bitstream (get it from list_bitstreams).
         max_chars: stop after this many characters.
+        as_anonymous: ask as the anonymous public instead of the logged-in
+            account — use it to see what a visitor would get.
     """
-    return await tools.get_bitstream_text(_client(ctx), bitstream, max_chars)
+    return await tools.get_bitstream_text(
+        _client(ctx), bitstream, max_chars, anonymous=as_anonymous
+    )
 
 
 @_guard
@@ -199,6 +262,7 @@ async def list_facet_values(
     query: str | None = None,
     prefix: str | None = None,
     limit: int = 25,
+    as_anonymous: bool = False,
 ) -> dict[str, Any]:
     """List the values of a search facet together with their counts.
 
@@ -214,14 +278,18 @@ async def list_facet_values(
         query: restrict counting to items matching this query.
         prefix: only values starting with this prefix.
         limit: max values to return.
+        as_anonymous: ask as the anonymous public instead of the logged-in
+            account — use it to see what a visitor would get.
     """
     return await tools.list_facet_values(
-        _client(ctx), facet, scope, query, prefix, limit
+        _client(ctx), facet, scope, query, prefix, limit, anonymous=as_anonymous
     )
 
 
 @_guard
-async def get_item_statistics(ctx: Context, item: str) -> dict[str, Any]:
+async def get_item_statistics(
+    ctx: Context, item: str, as_anonymous: bool = False
+) -> dict[str, Any]:
     """Get the view count of an item.
 
     Most repositories expose this publicly; some switch it off, and then this
@@ -229,8 +297,10 @@ async def get_item_statistics(ctx: Context, item: str) -> dict[str, Any]:
 
     Args:
         item: UUID of the item.
+        as_anonymous: ask as the anonymous public instead of the logged-in
+            account — use it to see what a visitor would get.
     """
-    return await tools.get_item_statistics(_client(ctx), item)
+    return await tools.get_item_statistics(_client(ctx), item, anonymous=as_anonymous)
 
 
 @_guard
@@ -300,6 +370,7 @@ READ_TOOLS = (
     get_item,
     list_communities,
     list_collections,
+    list_bundles,
     list_bitstreams,
     get_bitstream_text,
     list_facet_values,

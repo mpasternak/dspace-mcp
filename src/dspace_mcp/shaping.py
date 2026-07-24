@@ -179,6 +179,16 @@ def parse_version(dspace_version: str | None) -> tuple[int, int] | None:
     return int(major), int(minor or 0)
 
 
+def _flag(raw: dict, key: str) -> bool | None:
+    """Wartość logiczna z odpowiedzi albo ``None``, gdy jej nie ma.
+
+    Nie przepuszczamy tu ``bool(cokolwiek)``: instancja, która przysyła string
+    albo pomija pole, ma dać „nie wiadomo", a nie przypadkowe „prawda".
+    """
+    value = raw.get(key)
+    return value if isinstance(value, bool) else None
+
+
 def auth_methods(header: Any) -> list[str]:
     """Metody logowania ogłoszone przez instancję w ``WWW-Authenticate``.
 
@@ -258,6 +268,12 @@ def shape_item(raw: dict, *, ui_url: str = "", full: bool = False) -> dict:
         "type": metadata_value(metadata, "dc.type"),
         "doi": metadata_value(metadata, "dc.identifier.doi"),
         "collection": collection if isinstance(collection, str) else None,
+        # Stan rekordu w repozytorium. Bez tego model nie odróżnia „wycofany"
+        # od „niedostępny dla ciebie" i zgaduje, czemu czegoś nie widać.
+        # ``None`` znaczy „instancja tego nie podała", a nie „fałsz".
+        "withdrawn": _flag(raw, "withdrawn"),
+        "discoverable": _flag(raw, "discoverable"),
+        "in_archive": _flag(raw, "inArchive"),
     }
     if not full:
         return shaped

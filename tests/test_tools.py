@@ -54,6 +54,7 @@ class FakeClient:
         self.calls: list[tuple[str, dict]] = []
         self.anon_calls: list[tuple[str, dict]] = []
         self.streamed: list[str] = []
+        self.anon_streamed: list[str] = []
         self.stream_payload = b""
         self.caps = {"filters": ["author", "dateIssued"], "sorts": ["dc.title"]}
 
@@ -116,8 +117,10 @@ class FakeClient:
         cut = items[:limit]
         return cut, total, len(cut) < (total or 0)
 
-    async def stream_bytes(self, url: str, *, max_bytes: int) -> bytes:
-        self.streamed.append(url)
+    async def stream_bytes(
+        self, url: str, *, max_bytes: int, anonymous: bool = False
+    ) -> bytes:
+        (self.anon_streamed if anonymous else self.streamed).append(url)
         return self.stream_payload
 
     def params_for(self, path: str) -> dict:
@@ -259,6 +262,9 @@ async def test_search_shapes_records_from_real_fixture():
         "title",
         "authors",
         "year",
+        "withdrawn",
+        "discoverable",
+        "in_archive",
         "date_issued",
         "type",
         "doi",
@@ -984,3 +990,148 @@ async def test_authentication_report_does_not_claim_a_failed_login_succeeded():
 
     assert info["authentication"]["mode"] != "authenticated"
     assert "rejected" in info["authentication"]["reason"]
+
+
+async def test_compare_access_works_when_the_item_has_no_original_bundle():
+    """Zgłoszone z użycia: narzędzie zwierało się dokładnie w swoim przypadku.
+
+    Rekord, którego pliki są niedostępne, często nie ma widocznego bundla
+    ORIGINAL w ogóle. `list_bitstreams` rzuca wtedy „This item has no 'ORIGINAL'
+    bundle", więc `compare_access` odmawiało odpowiedzi właśnie wtedy, gdy
+    plików faktycznie brakuje — czyli w jedynej sytuacji, do której powstało.
+    """
+    thumb = bitstream_raw("cover.jpg", "image/jpeg", uuid=OTHER_UUID)
+    thumb["bundleName"] = "THUMBNAIL"
+    only_thumbnails = {
+        f"/core/items/{ITEM_UUID}/bundles": (
+            [bundle_ref("THUMBNAIL", THUMBNAIL_UUID)],
+            1,
+        ),
+        f"/core/bundles/{THUMBNAIL_UUID}/bitstreams": ([thumb], 1),
+    }
+    client = FakeClient(
+        routes={f"/core/items/{ITEM_UUID}": {"uuid": ITEM_UUID}},
+        pages=only_thumbnails,
+        anon_pages=only_thumbnails,
+        auth_state=AuthState.AUTHENTICATED,
+    )
+
+    result = await tools.compare_access(client, ITEM_UUID)
+
+    assert result["files"]["authenticated_only"] == []
+    assert [f["name"] for f in result["files"]["both"]] == ["cover.jpg"]
+
+
+async def test_compare_access_sees_past_the_original_bundle():
+    """Anonim widzi tylko miniaturę, konto — prawdziwy plik. To jest ten wynik."""
+    pdf = bitstream_raw("full-text.pdf", uuid=RESTRICTED_UUID)
+    thumb = bitstream_raw("cover.jpg", "image/jpeg", uuid=OTHER_UUID)
+    thumb["bundleName"] = "THUMBNAIL"
+    bundles = [
+        bundle_ref("ORIGINAL", ORIGINAL_UUID),
+        bundle_ref("THUMBNAIL", THUMBNAIL_UUID),
+    ]
+    client = FakeClient(
+        routes={f"/core/items/{ITEM_UUID}": {"uuid": ITEM_UUID}},
+        pages={
+            f"/core/items/{ITEM_UUID}/bundles": (bundles, 2),
+            f"/core/bundles/{ORIGINAL_UUID}/bitstreams": ([pdf], 1),
+            f"/core/bundles/{THUMBNAIL_UUID}/bitstreams": ([thumb], 1),
+        },
+        anon_pages={
+            f"/core/items/{ITEM_UUID}/bundles": (
+                [bundle_ref("THUMBNAIL", THUMBNAIL_UUID)],
+                1,
+            ),
+            f"/core/bundles/{THUMBNAIL_UUID}/bitstreams": ([thumb], 1),
+        },
+        auth_state=AuthState.AUTHENTICATED,
+    )
+
+    result = await tools.compare_access(client, ITEM_UUID)
+
+    assert [f["name"] for f in result["files"]["authenticated_only"]] == [
+        "full-text.pdf"
+    ]
+    assert [f["name"] for f in result["files"]["both"]] == ["cover.jpg"]
+
+
+# --- filtry discovery, bundle, widok anonimowy ------------------------------
+
+
+async def test_search_items_passes_a_declared_filter_through():
+    """D8 mówi, jakie filtry ma instancja — musi też dać się ich użyć."""
+    client = FakeClient(routes={"/discover/search/objects": {}})
+    client.caps = {"filters": ["author", "access_status"], "sorts": []}
+
+    await tools.search_items(client, filters={"access_status": "restricted"})
+
+    _, params = client.calls[-1]
+    assert params["f.access_status"] == "restricted,equals"
+
+
+async def test_search_items_keeps_an_explicit_operator():
+    client = FakeClient(routes={"/discover/search/objects": {}})
+    client.caps = {"filters": ["title"], "sorts": []}
+
+    await tools.search_items(client, filters={"title": "cancer,contains"})
+
+    _, params = client.calls[-1]
+    assert params["f.title"] == "cancer,contains"
+
+
+async def test_search_items_does_not_mistake_a_comma_in_the_value_for_an_operator():
+    """„Kowalski, Jan" ma przecinek, ale to nie jest operator."""
+    client = FakeClient(routes={"/discover/search/objects": {}})
+    client.caps = {"filters": ["author"], "sorts": []}
+
+    await tools.search_items(client, filters={"author": "Kowalski, Jan"})
+
+    _, params = client.calls[-1]
+    assert params["f.author"] == "Kowalski, Jan,equals"
+
+
+async def test_search_items_rejects_a_filter_the_instance_does_not_have():
+    """Nieznany filtr kończy się surowym 422 — lepiej powiedzieć to wprost."""
+    client = FakeClient(routes={"/discover/search/objects": {}})
+    client.caps = {"filters": ["author"], "sorts": []}
+
+    with pytest.raises(DSpaceError) as exc:
+        await tools.search_items(client, filters={"nosuchfilter": "x"})
+
+    assert "nosuchfilter" in str(exc.value)
+    assert "author" in str(exc.value)
+
+
+async def test_list_bundles_names_what_the_item_actually_has():
+    """Bez tego listę bundli poznaje się wyłącznie z komunikatu błędu."""
+    client = FakeClient(
+        pages={
+            f"/core/items/{ITEM_UUID}/bundles": (
+                [
+                    bundle_ref("ORIGINAL", ORIGINAL_UUID),
+                    bundle_ref("THUMBNAIL", THUMBNAIL_UUID),
+                ],
+                2,
+            )
+        }
+    )
+
+    result = await tools.list_bundles(client, ITEM_UUID)
+
+    assert [b["name"] for b in result["results"]] == ["ORIGINAL", "THUMBNAIL"]
+    assert result["results"][0]["uuid"] == ORIGINAL_UUID
+
+
+async def test_read_tools_can_ask_anonymously_while_logged_in():
+    """Bez tego jedyną drogą do widoku publicznego jest ominięcie serwera."""
+    client = FakeClient(
+        routes={"/discover/search/objects": {}},
+        anon_routes={"/discover/search/objects": {}},
+        auth_state=AuthState.AUTHENTICATED,
+    )
+
+    await tools.search_items(client, query="cancer", anonymous=True)
+
+    assert client.anon_calls, "zapytanie nie poszło torem anonimowym"
+    assert not client.calls, "zapytanie poszło tożsamością konta"

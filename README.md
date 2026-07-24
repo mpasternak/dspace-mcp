@@ -235,11 +235,24 @@ mixing them up.
 | `get_item` | Fetch one item by **UUID, Handle or DOI** — whichever identifier you happen to have. |
 | `list_communities` | Walk the community tree (up to 3 levels). |
 | `list_collections` | List collections, of one community or of the whole repository. |
+| `list_bundles` | Which bundles an item has — `ORIGINAL` for real files, `THUMBNAIL` for previews. The set differs per item. |
 | `list_bitstreams` | List an item's files with sizes, MIME types, checksums and download URLs. |
 | `get_bitstream_text` | Extract the text of a bitstream so the assistant can read or summarise it — PDF, Word (.docx/.doc), OpenDocument (.odt/.ods/.odp) and Office XML (.pptx/.xlsx). |
 | `list_facet_values` | Count values of a facet (authors, subjects, years) — the repository does the counting, so no records are downloaded. |
 | `get_item_statistics` | View count of an item. |
 | `get_repository_info` | Name, version, item counts, which search filters, sort fields and facets this instance actually supports, and whether the server is querying anonymously or as an account. |
+
+Two arguments worth knowing about, because they are easy to miss:
+
+- **`filters`** on `search_items` reaches any discovery filter the instance
+  declares — `get_repository_info` lists them. `{"access_status": "restricted"}`
+  finds material the public cannot open; `{"title": "cancer,contains"}` sets a
+  non-default operator. Note that `query` is full-text search and does **not**
+  reach these filters: `query="access_status:restricted"` looks like it works and
+  quietly returns zero.
+- **`as_anonymous`** on every read tool asks as the public instead of your
+  account, so you can see what a visitor sees without logging out. Without it the
+  only way to get the public view is to bypass this server entirely.
 
 Two more tools appear **only if you configure an account** — an anonymous
 install never sees them:

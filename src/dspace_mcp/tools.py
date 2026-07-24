@@ -42,6 +42,18 @@ MAX_COMMUNITY_DEPTH = 3
 
 _DOI_PREFIX_RE = re.compile(r"(?i)^\s*(?:https?://)?(?:dx\.)?doi\.org/|^\s*doi:\s*")
 
+# Operatory filtrów discovery. Służą do rozpoznania, czy wartość NIESIE już
+# operator, czy trzeba dokleić domyślny — bez tego „Kowalski, Jan" zostałby
+# potraktowany jako wartość „Kowalski" z operatorem „ Jan".
+FILTER_OPERATORS = (
+    "equals",
+    "notequals",
+    "contains",
+    "notcontains",
+    "authority",
+    "notauthority",
+)
+
 
 def _envelope(
     results: list[dict], total: int | None, truncated: bool
@@ -80,6 +92,19 @@ async def _require_filter(client: DSpaceClient, name: str, argument: str) -> Non
         )
 
 
+def _filter_value(raw: str) -> str:
+    """Domknij wartość filtra operatorem, jeśli go nie ma.
+
+    DSpace oczekuje ``wartość,operator``. Wartości bywają przecinkowe
+    („Kowalski, Jan"), więc rozpoznajemy operator po **nazwie**, a nie po samej
+    obecności przecinka.
+    """
+    head, _, tail = raw.rpartition(",")
+    if head and tail.strip() in FILTER_OPERATORS:
+        return raw
+    return f"{raw},equals"
+
+
 async def search_items(
     client: DSpaceClient,
     query: str | None = None,
@@ -90,6 +115,8 @@ async def search_items(
     sort: str | None = None,
     limit: int = 25,
     offset: int = 0,
+    filters: dict[str, str] | None = None,
+    anonymous: bool = False,
 ) -> dict[str, Any]:
     """Wyszukiwanie rekordów przez /discover/search/objects."""
     if limit < 0:
@@ -126,6 +153,13 @@ async def search_items(
         # nazwiska przyjętą w danym repozytorium.
         params["f.author"] = f"{author},contains"
 
+    for name, value in (filters or {}).items():
+        # D8 każe pytać instancję, jakie ma filtry — a skoro `get_repository_info`
+        # je ogłasza, model musi mieć jak ich użyć. Bez tego zna nazwę filtra i
+        # nie ma czym jej zastosować.
+        await _require_filter(client, name, f"filters['{name}']")
+        params[f"f.{name}"] = _filter_value(value)
+
     if sort:
         resolved = SORT_ALIASES.get(sort.lower(), sort)
         field = resolved.split(",")[0]
@@ -144,7 +178,7 @@ async def search_items(
     if limit:
         params["page"] = offset // limit
 
-    payload = await client.get("/discover/search/objects", params)
+    payload = await client.get("/discover/search/objects", params, anonymous=anonymous)
     hits, page = search_hits(payload)
     total = page.get("totalElements")
 
@@ -158,21 +192,27 @@ async def search_items(
 
 
 async def get_item(
-    client: DSpaceClient, id: str, full_metadata: bool = False
+    client: DSpaceClient,
+    id: str,
+    full_metadata: bool = False,
+    *,
+    anonymous: bool = False,
 ) -> dict[str, Any]:
     """Pojedynczy rekord po UUID, handlu albo DOI."""
     identifier = id.strip()
     uuid = (
         identifier
         if is_uuid(identifier)
-        else await _resolve_to_uuid(client, identifier)
+        else await _resolve_to_uuid(client, identifier, anonymous=anonymous)
     )
 
     # Zawsze pobieramy rekord po UUID, nawet gdy handle/DOI już go rozwiązały:
     # /pid/find odpowiada przekierowaniem, a przekierowanie gubi `?embed=`,
     # więc bez tego kroku ta sama publikacja miałaby inny kształt zależnie od
     # tego, jakim identyfikatorem o nią zapytano.
-    raw = await client.get(f"/core/items/{uuid}", {"embed": ITEM_EMBED})
+    raw = await client.get(
+        f"/core/items/{uuid}", {"embed": ITEM_EMBED}, anonymous=anonymous
+    )
 
     shaped = shape_item(raw, ui_url=await _ui_url(client), full=True)
     if not full_metadata:
@@ -183,14 +223,20 @@ async def get_item(
     return shaped
 
 
-async def _resolve_to_uuid(client: DSpaceClient, identifier: str) -> str:
+async def _resolve_to_uuid(
+    client: DSpaceClient, identifier: str, *, anonymous: bool = False
+) -> str:
     """Zamień handle albo DOI na UUID rekordu."""
     lowered = identifier.lower()
     if lowered.startswith("10.") or lowered.startswith("doi:") or "doi.org/" in lowered:
-        raw = await _resolve_doi(client, _DOI_PREFIX_RE.sub("", identifier).strip())
+        raw = await _resolve_doi(
+            client, _DOI_PREFIX_RE.sub("", identifier).strip(), anonymous=anonymous
+        )
     else:
         handle = re.sub(r"(?i)^hdl:", "", identifier)
-        raw = await client.get("/pid/find", {"id": f"hdl:{handle}"})
+        raw = await client.get(
+            "/pid/find", {"id": f"hdl:{handle}"}, anonymous=anonymous
+        )
 
     kind = raw.get("type")
     if kind and kind != "item":
@@ -206,12 +252,14 @@ async def _resolve_to_uuid(client: DSpaceClient, identifier: str) -> str:
     return str(uuid)
 
 
-async def _resolve_doi(client: DSpaceClient, doi: str) -> dict[str, Any]:
+async def _resolve_doi(
+    client: DSpaceClient, doi: str, *, anonymous: bool = False
+) -> dict[str, Any]:
     """DOI rozwiązujemy przez /pid/find, a gdy instancja go nie zna — przez
     wyszukiwanie: na wielu repozytoriach DOI żyje wyłącznie w metadanych,
     bez zarejestrowanego providera."""
     try:
-        return await client.get("/pid/find", {"id": f"doi:{doi}"})
+        return await client.get("/pid/find", {"id": f"doi:{doi}"}, anonymous=anonymous)
     except DSpaceError as exc:
         # Tylko „nie znaleziono" i „nie umiem takich identyfikatorów"
         # uzasadniają drugie podejście. Przy 429 czy timeoucie kolejne
@@ -261,6 +309,8 @@ async def list_communities(
     parent: str | None = None,
     depth: int = 1,
     _budget: int | None = None,
+    *,
+    anonymous: bool = False,
 ) -> dict[str, Any]:
     """Drzewo społeczności. Każdy poziom to osobne żądanie na każdą społeczność
     poziomu wyżej, więc `depth` ma twardy sufit, a limit obowiązuje globalnie
@@ -276,7 +326,7 @@ async def list_communities(
         path = "/core/communities/search/top"
 
     items, total, truncated = await client.get_all(
-        path, key="communities", limit=budget
+        path, key="communities", limit=budget, anonymous=anonymous
     )
     results = [shape_community(c) for c in items]
     budget -= len(results)
@@ -286,7 +336,9 @@ async def list_communities(
             if budget <= 0:
                 truncated = True
                 break
-            child = await list_communities(client, node["uuid"], depth - 1, budget)
+            child = await list_communities(
+                client, node["uuid"], depth - 1, budget, anonymous=anonymous
+            )
             node["subcommunities"] = child["results"]
             budget -= len(child["results"])
             truncated = truncated or child["truncated"]
@@ -295,7 +347,11 @@ async def list_communities(
 
 
 async def list_collections(
-    client: DSpaceClient, community: str | None = None, limit: int = 50
+    client: DSpaceClient,
+    community: str | None = None,
+    limit: int = 50,
+    *,
+    anonymous: bool = False,
 ) -> dict[str, Any]:
     """Kolekcje — całego repozytorium albo jednej społeczności."""
     limit = max(0, min(limit, client.config.max_results))
@@ -305,8 +361,30 @@ async def list_collections(
     else:
         path = "/core/collections"
 
-    items, total, truncated = await client.get_all(path, key="collections", limit=limit)
+    items, total, truncated = await client.get_all(
+        path, key="collections", limit=limit, anonymous=anonymous
+    )
     return _envelope([shape_collection(c) for c in items], total, truncated)
+
+
+async def list_bundles(
+    client: DSpaceClient, item: str, *, anonymous: bool = False
+) -> dict[str, Any]:
+    """Bundle rekordu — czyli jakie „szuflady" na pliki ten rekord w ogóle ma.
+
+    Bez tego jedynym sposobem poznania dostępnych bundli był komunikat błędu
+    ``list_bitstreams``, co czyniło z awarii interfejs.
+    """
+    uuid = require_uuid(item, "item")
+    bundles, page = await client.get_page(
+        f"/core/items/{uuid}/bundles", key="bundles", anonymous=anonymous
+    )
+    results = [
+        {"uuid": entry.get("uuid") or entry.get("id"), "name": entry.get("name")}
+        for entry in bundles
+    ]
+    total = page.get("totalElements")
+    return _envelope(results, total if isinstance(total, int) else len(results), False)
 
 
 async def list_bitstreams(
@@ -366,7 +444,11 @@ async def list_bitstreams(
 
 
 async def get_bitstream_text(
-    client: DSpaceClient, bitstream: str, max_chars: int = 20000
+    client: DSpaceClient,
+    bitstream: str,
+    max_chars: int = 20000,
+    *,
+    anonymous: bool = False,
 ) -> dict[str, Any]:
     """Tekst z pliku. Rozmiar i typ bierzemy z metadanych, ale limit egzekwuje
     strumień — `sizeBytes` bywa niezgodne z rzeczywistością. O tym, który
@@ -375,7 +457,9 @@ async def get_bitstream_text(
         raise DSpaceError("max_chars must be greater than zero.")
 
     uuid = require_uuid(bitstream, "bitstream")
-    raw = await client.get(f"/core/bitstreams/{uuid}", {"embed": "format"})
+    raw = await client.get(
+        f"/core/bitstreams/{uuid}", {"embed": "format"}, anonymous=anonymous
+    )
     fmt = raw.get("_embedded", {}).get("format", {})
     mimetype = fmt.get("mimetype")
     name = raw.get("name")
@@ -393,7 +477,9 @@ async def get_bitstream_text(
             f"Give the user this link instead: {url}"
         )
 
-    data = await client.stream_bytes(url, max_bytes=client.config.extract_max_bytes)
+    data = await client.stream_bytes(
+        url, max_bytes=client.config.extract_max_bytes, anonymous=anonymous
+    )
     try:
         extracted = dispatch(
             data, mimetype=mimetype, filename=name, max_chars=max_chars
@@ -418,6 +504,8 @@ async def list_facet_values(
     query: str | None = None,
     prefix: str | None = None,
     limit: int = 25,
+    *,
+    anonymous: bool = False,
 ) -> dict[str, Any]:
     """Wartości fasety wraz z licznikami — tanie odpowiedzi na pytania „ile
     czego jest”, liczone po stronie Solr."""
@@ -431,7 +519,9 @@ async def list_facet_values(
         params["prefix"] = prefix
 
     try:
-        payload = await client.get(f"/discover/facets/{facet}", params)
+        payload = await client.get(
+            f"/discover/facets/{facet}", params, anonymous=anonymous
+        )
     except DSpaceError as exc:
         # Tylko odpowiedzi znaczące „nie ma takiej fasety" zamieniamy na
         # podpowiedź. Przy 429 czy 500 faseta może istnieć, a wmówienie
@@ -462,12 +552,16 @@ async def _available_facets(client: DSpaceClient) -> list[str]:
     return [f.get("name", "?") for f in facets]
 
 
-async def get_item_statistics(client: DSpaceClient, item: str) -> dict[str, Any]:
+async def get_item_statistics(
+    client: DSpaceClient, item: str, *, anonymous: bool = False
+) -> dict[str, Any]:
     """Statystyki wyświetleń. Domyślnie publiczne we wszystkich wersjach 7+,
     ale instancja może je zamknąć — wtedy mówimy to wprost."""
     uuid = require_uuid(item, "item")
     try:
-        payload = await client.get(f"/statistics/usagereports/{uuid}_TotalVisits")
+        payload = await client.get(
+            f"/statistics/usagereports/{uuid}_TotalVisits", anonymous=anonymous
+        )
     except DSpaceError as exc:
         if exc.status in (401, 403):
             # Komunikat musi zależeć od tożsamości: po zalogowaniu słowo
@@ -522,7 +616,14 @@ async def compare_access(client: DSpaceClient, item: str) -> dict[str, Any]:
         else await _resolve_to_uuid(client, identifier)
     )
 
-    account = await list_bitstreams(client, uuid)
+    # Pusty `bundle` znaczy „wszystkie bundle". To nie jest kosmetyka: rekord,
+    # którego pliki są zamknięte, często nie ma widocznego bundla ORIGINAL, a
+    # `list_bitstreams` rzuca wtedy „This item has no 'ORIGINAL' bundle" — czyli
+    # narzędzie odmawiało odpowiedzi dokładnie w sytuacji, do której powstało.
+    # Przy okazji porównanie obejmuje miniatury i licencje, co jest uczciwsze:
+    # publiczność widząca wyłącznie THUMBNAIL to typowy przypadek embarga, a
+    # nazwa bundla i tak jedzie w każdym rekordzie.
+    account = await list_bitstreams(client, uuid, bundle="")
 
     visible_to_anonymous = True
     anonymous_files: list[dict] = []
@@ -537,9 +638,9 @@ async def compare_access(client: DSpaceClient, item: str) -> dict[str, Any]:
         visible_to_anonymous = False
     else:
         try:
-            anonymous_files = (await list_bitstreams(client, uuid, anonymous=True))[
-                "results"
-            ]
+            anonymous_files = (
+                await list_bitstreams(client, uuid, bundle="", anonymous=True)
+            )["results"]
         except DSpaceError as exc:
             # Rekord publiczny, ale jego pliki już nie — to normalny wynik
             # porównania (embargo na pełny tekst), nie awaria. Pozostałe błędy

@@ -20,6 +20,7 @@ EXPECTED_TOOLS = {
     "get_item",
     "list_communities",
     "list_collections",
+    "list_bundles",
     "list_bitstreams",
     "get_bitstream_text",
     "list_facet_values",

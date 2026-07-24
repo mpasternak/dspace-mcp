@@ -394,6 +394,64 @@ wpinając w konfigurację klienta MCP drugi, anonimowy egzemplarz `dspace-mcp`.
 `compare_access` musi to przebić wygodą (jedno wywołanie zamiast dwóch instalacji i
 ręcznego diffu), a nie samą możliwością.
 
+### A10. Widok anonimowy jako parametr — odwrócenie A9
+
+A9 odrzuciła parametr `as_anonymous` na narzędziach odczytu, argumentując
+kosztem tokenów: parametr wchodzi do schematu każdego narzędzia i płaci się za
+niego w każdej rozmowie, także czysto anonimowej. Rachunek był **zły** i zmieniam
+decyzję.
+
+Dowód przyszedł z użycia. Agent pracujący na zalogowanym serwerze potrzebował
+strony anonimowej porównania i — nie mając jak jej uzyskać — **ominął serwer w
+całości** i poszedł `curl`-em. To jest najgorszy możliwy wynik: żądanie wysłane
+poza serwerem nie ma wymuszonego GET-only, nie ma mapowania błędów na zdania dla
+modelu, nie ma limitu rozmiaru pobrania ani spłaszczania odpowiedzi. Model
+dostaje surowy HAL i interpretuje go na oko.
+
+Kilkadziesiąt tokenów w opisie narzędzia jest tańsze niż utrata wszystkich
+gwarancji, dla których ten serwer istnieje.
+
+`continue_anonymously` nie było obejściem i nie miało nim być: jest sesyjne,
+jednokierunkowe, a jego własny opis nakazuje wołać je dopiero na wyraźną prośbę
+użytkownika.
+
+Kształt: `as_anonymous: bool = False` na ośmiu narzędziach odczytu. Nie ma go w
+`get_repository_info` (opisuje instancję, nie zbiór danych) ani w
+`compare_access` (z definicji używa obu tożsamości). Parametr jest bezwarunkowy,
+więc instalacja anonimowa i kontowa mają nadal **identyczne** schematy — test z
+A9 tego pilnuje i pozostaje w mocy.
+
+### A11. Filtry discovery muszą być użyteczne, nie tylko ogłaszane
+
+`get_repository_info` ogłasza, jakie filtry ma instancja (D8), a `search_items`
+pozwalało użyć czterech z nich. Model dostawał więc nazwę filtra i nie miał czym
+jej zastosować. Zgłoszone z użycia: potrzebny był `access_status=restricted`,
+nieosiągalny przez MCP.
+
+Pułapka wykryta przy okazji: `query: "access_status:restricted"` **wygląda**, jakby
+działało, i cicho zwraca `total: 0` — bo `query` idzie do wyszukiwania
+pełnotekstowego, a nie w filtry Solr. Opis narzędzia mówi to teraz wprost.
+
+`search_items` przyjmuje `filters: {nazwa: wartość}`, każdą nazwę sprawdzając
+wobec tego, co instancja ogłasza. Wartość bez operatora dostaje domyślne
+`,equals`; operator rozpoznajemy **po nazwie** z zamkniętej listy, nie po samej
+obecności przecinka — inaczej „Kowalski, Jan" zostałby zinterpretowany jako
+wartość „Kowalski" z operatorem „ Jan".
+
+### A12. Poprawki zgłoszone z użycia
+
+- **`compare_access` zwierało się w swoim własnym przypadku.** Wołało
+  `list_bitstreams` z domyślnym bundlem `ORIGINAL`, a ten rzuca wyjątkiem, gdy
+  bundla nie ma — czyli narzędzie odmawiało odpowiedzi dokładnie wtedy, gdy
+  plików brakuje. Potwierdzone na żywej instancji: rekordy widoczne publicznie
+  mają tam często wyłącznie `THUMBNAIL`. Porównanie obejmuje teraz wszystkie
+  bundle, a nazwa bundla jedzie w każdym rekordzie.
+- **`list_bundles`** — wcześniej listę bundli poznawało się wyłącznie z
+  komunikatu błędu, czyli awaria pełniła funkcję interfejsu.
+- **Flagi stanu rekordu** (`withdrawn`, `discoverable`, `in_archive`) w
+  `shape_item`. Bez nich model nie odróżnia „wycofany" od „niedostępny dla
+  ciebie". `None` znaczy „instancja tego nie podała", nie „fałsz".
+
 ## Architektura
 
 Zmiany trzymają się dotychczasowego podziału warstw — nowy kod sieciowy trafia
