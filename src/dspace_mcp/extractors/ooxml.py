@@ -23,8 +23,14 @@ _PPTX = "PowerPoint presentation"
 _XLSX = "Excel workbook"
 
 
-def _slide_number(name: str) -> int:
-    """Numer slajdu z ``ppt/slides/slide12.xml`` → 12 (do sortowania)."""
+def _trailing_number(name: str) -> int:
+    """Końcowa liczba z nazwy części archiwum, do sortowania numerycznego.
+
+    ``ppt/slides/slide12.xml`` → 12, ``xl/worksheets/sheet2.xml`` → 2. Zwykły
+    ``sorted()`` posortowałby leksykograficznie (``sheet10`` przed ``sheet2``),
+    a kolejność slajdów/arkuszy musi odpowiadać kolejności w prezentacji/
+    skoroszycie, nie kolejności znaków w nazwie pliku.
+    """
     digits = "".join(ch for ch in name.rsplit("/", 1)[-1] if ch.isdigit())
     return int(digits) if digits else 0
 
@@ -49,7 +55,13 @@ def extract_docx(data: bytes, *, max_chars: int = 20000) -> dict:
 
 
 def extract_pptx(data: bytes, *, max_chars: int = 20000) -> dict:
-    """pptx: tekst slajdów po kolei (``a:t`` w ``ppt/slides/slideN.xml``)."""
+    """pptx: tekst slajdów po kolei (``a:t`` w ``ppt/slides/slideN.xml``).
+
+    Nazwy slajdów sortujemy z góry (jedno przejście po ``namelist()``), ale
+    samo czytanie+parsowanie każdej części odkładamy do leniwego generatora,
+    żeby ``assemble`` mogło przerwać po ``max_chars`` bez czytania reszty
+    archiwum (patrz ``pdf.py`` — ten sam wzorzec).
+    """
     zf = open_zip(data, _PPTX)
     try:
         slide_names = sorted(
@@ -58,52 +70,57 @@ def extract_pptx(data: bytes, *, max_chars: int = 20000) -> dict:
                 for n in zf.namelist()
                 if n.startswith("ppt/slides/slide") and n.endswith(".xml")
             ),
-            key=_slide_number,
+            key=_trailing_number,
         )
         if not slide_names:
             raise ExtractError(f"This file is not a readable {_PPTX}.")
-        slides = [
-            _slide_text(parse_xml(read_member(zf, n, _PPTX), _PPTX))
-            for n in slide_names
-        ]
+        return assemble(
+            (
+                _slide_text(parse_xml(read_member(zf, n, _PPTX), _PPTX))
+                for n in slide_names
+            ),
+            total=len(slide_names),
+            unit="slides",
+            max_chars=max_chars,
+            empty_message=f"This {_PPTX} contains no extractable text.",
+        )
     finally:
         zf.close()
 
-    return assemble(
-        iter(slides),
-        total=len(slides),
-        unit="slides",
-        max_chars=max_chars,
-        empty_message=f"This {_PPTX} contains no extractable text.",
-    )
-
 
 def extract_xlsx(data: bytes, *, max_chars: int = 20000) -> dict:
-    """xlsx: arkusze spłaszczone do wierszy (tab między kolumnami)."""
+    """xlsx: arkusze spłaszczone do wierszy (tab między kolumnami).
+
+    ``sharedStrings.xml`` to jedna, mała część — czytamy ją zachłannie z góry.
+    Same arkusze (potencjalnie dużo i duże) czytamy+parsujemy leniwie, jeden
+    generator na ``assemble``, żeby wczesne zatrzymanie po ``max_chars``
+    faktycznie oszczędzało pracę (patrz ``pdf.py``).
+    """
     zf = open_zip(data, _XLSX)
     try:
         shared = _shared_strings(zf)
         sheet_names = sorted(
-            n
-            for n in zf.namelist()
-            if n.startswith("xl/worksheets/sheet") and n.endswith(".xml")
+            (
+                n
+                for n in zf.namelist()
+                if n.startswith("xl/worksheets/sheet") and n.endswith(".xml")
+            ),
+            key=_trailing_number,
         )
         if not sheet_names:
             raise ExtractError(f"This file is not a readable {_XLSX}.")
-        sheets = [
-            _sheet_text(parse_xml(read_member(zf, n, _XLSX), _XLSX), shared)
-            for n in sheet_names
-        ]
+        return assemble(
+            (
+                _sheet_text(parse_xml(read_member(zf, n, _XLSX), _XLSX), shared)
+                for n in sheet_names
+            ),
+            total=len(sheet_names),
+            unit="sheets",
+            max_chars=max_chars,
+            empty_message=f"This {_XLSX} contains no extractable text.",
+        )
     finally:
         zf.close()
-
-    return assemble(
-        iter(sheets),
-        total=len(sheets),
-        unit="sheets",
-        max_chars=max_chars,
-        empty_message=f"This {_XLSX} contains no extractable text.",
-    )
 
 
 def _runs_text(paragraph) -> str:

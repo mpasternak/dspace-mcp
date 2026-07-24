@@ -49,7 +49,18 @@ def pptx_bytes(slides: list[list[str]]) -> bytes:
     return _zip(members)
 
 
-def xlsx_bytes(sheets: list[list[list[str]]]) -> bytes:
+def xlsx_bytes(sheets: list[list[list[str | tuple[str, str]]]]) -> bytes:
+    """Zbuduj xlsx z arkuszy wierszy komórek.
+
+    Domyślnie (komórka to zwykły ``str``) każda wartość ląduje w
+    ``sharedStrings`` — to zachowanie sprzed rozszerzenia, wciąż działa
+    niezmienione. Żeby ćwiczyć pozostałe dwie ścieżki ``_cell_value``, komórkę
+    można podać jako parę ``(kind, value)``:
+
+    - ``("s", "text")``         — shared string (jawnie, jak wyżej)
+    - ``("inlineStr", "text")`` — inline string (``t="inlineStr"``, ``<is><t>``)
+    - ``("n", "42")``           — liczba (bez ``t``, goły ``<v>``)
+    """
     strings: list[str] = []
     index: dict[str, int] = {}
 
@@ -59,14 +70,24 @@ def xlsx_bytes(sheets: list[list[list[str]]]) -> bytes:
             strings.append(value)
         return index[value]
 
+    def cell_xml(ref: str, cell: str | tuple[str, str]) -> str:
+        kind, text = ("s", cell) if isinstance(cell, str) else cell
+        if kind == "s":
+            return f'<c r="{ref}" t="s"><v>{sid(text)}</v></c>'
+        if kind == "inlineStr":
+            return f'<c r="{ref}" t="inlineStr"><is><t>{text}</t></is></c>'
+        if kind == "n":
+            return f'<c r="{ref}"><v>{text}</v></c>'
+        raise ValueError(f"unknown cell kind: {kind!r}")
+
     members: dict[str, str] = {}
     for i, rows in enumerate(sheets, 1):
         rows_xml = ""
         for r, row in enumerate(rows, 1):
-            cells = ""
-            for c, value in enumerate(row):
-                ref = f"{chr(ord('A') + c)}{r}"
-                cells += f'<c r="{ref}" t="s"><v>{sid(value)}</v></c>'
+            cells = "".join(
+                cell_xml(f"{chr(ord('A') + c)}{r}", value)
+                for c, value in enumerate(row)
+            )
             rows_xml += f'<row r="{r}">{cells}</row>'
         members[f"xl/worksheets/sheet{i}.xml"] = (
             f'<worksheet xmlns="{_S}"><sheetData>{rows_xml}</sheetData></worksheet>'

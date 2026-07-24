@@ -407,6 +407,18 @@ def test_extract_pptx_reads_slides_in_order():
     assert result["text"].index("one") < result["text"].index("two")
 
 
+def test_extract_pptx_reads_slides_in_numeric_not_lexicographic_order():
+    """slide2.xml musi wypaść przed slide10.xml - lexico dałoby odwrotnie."""
+    slides = [[f"Marker{i}"] for i in range(1, 12)]  # 11 slajdów: slide1..slide11
+    data = pptx_bytes(slides)
+    result = extract_pptx(data, max_chars=10000)
+    assert result["units_total"] == 11
+    text = result["text"]
+    assert text.index("Marker2") < text.index("Marker10")
+    assert text.index("Marker9") < text.index("Marker10")
+    assert text.index("Marker10") < text.index("Marker11")
+
+
 def test_extract_xlsx_flattens_cells_with_shared_strings():
     data = xlsx_bytes([[["Name", "City"], ["Ada", "London"]]])
     result = extract_xlsx(data, max_chars=1000)
@@ -414,3 +426,31 @@ def test_extract_xlsx_flattens_cells_with_shared_strings():
     assert result["unit"] == "sheets"
     assert result["units_total"] == 1
     assert "\t" in result["text"]  # kolumny rozdzielone tabem
+
+
+def test_extract_xlsx_reads_sheets_in_numeric_not_lexicographic_order():
+    """sheet2.xml musi wypaść przed sheet10.xml - lexico dałoby odwrotnie."""
+    sheets = [[[f"Marker{i}"]] for i in range(1, 12)]  # 11 arkuszy: sheet1..sheet11
+    data = xlsx_bytes(sheets)
+    result = extract_xlsx(data, max_chars=10000)
+    assert result["units_total"] == 11
+    text = result["text"]
+    assert text.index("Marker2") < text.index("Marker10")
+    assert text.index("Marker9") < text.index("Marker10")
+    assert text.index("Marker10") < text.index("Marker11")
+
+
+def test_extract_xlsx_reads_numeric_cell_without_type_attribute():
+    """Komórka bez ``t`` (goły ``<v>``) to liczba - trzecia gałąź _cell_value."""
+    data = xlsx_bytes([[[("n", "42"), "Label"]]])
+    result = extract_xlsx(data, max_chars=1000)
+    assert "42" in result["text"]
+    assert "Label" in result["text"]
+
+
+def test_extract_xlsx_reads_inline_string_cell():
+    """``t="inlineStr"`` z zagnieżdżonym ``<is><t>`` - druga gałąź _cell_value."""
+    data = xlsx_bytes([[[("inlineStr", "Direct text"), "Shared text"]]])
+    result = extract_xlsx(data, max_chars=1000)
+    assert "Direct text" in result["text"]
+    assert "Shared text" in result["text"]
