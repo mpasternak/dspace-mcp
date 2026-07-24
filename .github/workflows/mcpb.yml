@@ -1,0 +1,104 @@
+name: Pack .mcpb bundle
+
+# Builds the MCP Bundle (.mcpb) — the one-click installer for Claude Desktop —
+# and attaches it to the GitHub Release.
+#
+# The README's "Install in Claude Desktop" badge links to
+#   /releases/latest/download/dspace-mcp.mcpb
+# so every published release has to carry that asset or the badge 404s.
+#
+# Kept separate from publish.yml and PyPI publishing, which holds `id-token: write`
+# and must not also gain `contents: write` just to upload a file.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mcpb-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # to upload the release asset
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          python-version: "3.13"
+
+      # manifest.json carries its own version field, and a stale one would ship a
+      # bundle claiming the wrong release. pyproject.toml is the single source of
+      # truth, so reconcile before packing rather than asking a human to keep two
+      # files in sync.
+      - name: Sync manifest version with pyproject.toml
+        run: |
+          python3 - <<'PY'
+          import json
+          import pathlib
+          import tomllib
+
+          with open("pyproject.toml", "rb") as fh:
+              version = tomllib.load(fh)["project"]["version"]
+
+          path = pathlib.Path("manifest.json")
+          manifest = json.loads(path.read_text())
+
+          if manifest["version"] != version:
+              print(f"manifest.json: {manifest['version']} -> {version}")
+              manifest["version"] = version
+              path.write_text(json.dumps(manifest, indent=2) + "\n")
+          else:
+              print(f"manifest.json already at {version}")
+
+          with open("bundle.env", "w") as fh:
+              fh.write(f"BUNDLE={manifest['name']}.mcpb\n")
+          PY
+          cat bundle.env >> "$GITHUB_ENV"
+
+      - name: Pack bundle
+        run: npx -y @anthropic-ai/mcpb@2.1.2 pack . "$BUNDLE"
+
+      # A bundle that installs but cannot start is worse than no bundle: Claude
+      # Desktop accepts it and every tool call then fails. Unpack it and import the
+      # entry module through uv exactly as the host will, which proves the bundled
+      # pyproject.toml resolves, the package installs, and `mcpb/launch.py` can
+      # reach it despite the package-relative imports in `server.py`.
+      #
+      # An import rather than a full stdio handshake on purpose: some of these
+      # servers validate configuration (or authenticate) at startup and would need
+      # a live backend to reach `initialize`. Protocol behaviour is covered by the
+      # test suite in ci.yml; this step covers packaging.
+      - name: Smoke-test the packed bundle
+        run: |
+          set -euo pipefail
+          unzip -q "$BUNDLE" -d unpacked
+          uv run --directory unpacked python -c "
+          from dspace_mcp.server import main
+          assert callable(main), 'entry point is not callable'
+          print('bundle imports cleanly')
+          "
+
+      # TAG travels through env rather than being spliced into the shell line with
+      # `${{ }}`: a tag name is author-supplied text and would otherwise be
+      # evaluated by bash.
+      - name: Attach to release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: gh release upload "$TAG" "$BUNDLE" --clobber
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: mcpb-bundle
+          path: ${{ env.BUNDLE }}
+          if-no-files-found: error

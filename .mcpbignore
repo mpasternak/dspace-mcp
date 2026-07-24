@@ -1,0 +1,20 @@
+# Kept out of the .mcpb bundle. The uv runtime resolves dependencies from the
+# bundled pyproject.toml, so a virtualenv must NOT be shipped.
+.git/
+.github/
+.venv/
+venv/
+server/lib/
+server/venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+tests/
+docs/
+site/
+mkdocs.yml
+.pre-commit-config.yaml
+*.mcpb

@@ -5,6 +5,15 @@
 [![Python](https://img.shields.io/pypi/pyversions/dspace-mcp)](https://pypi.org/project/dspace-mcp/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+[![Install in Claude Desktop](https://img.shields.io/badge/Install_in-Claude_Desktop-D97757?style=for-the-badge&logo=anthropic&logoColor=white)](https://github.com/mpasternak/dspace-mcp/releases/latest/download/dspace-mcp.mcpb)
+[![Install in Cursor](https://img.shields.io/badge/Install_in-Cursor-000000?style=for-the-badge&logo=cursor&logoColor=white)](https://cursor.com/en/install-mcp?name=dspace-mcp&config=eyJjb21tYW5kIjoidXZ4IiwiYXJncyI6WyJkc3BhY2UtbWNwIl0sImVudiI6eyJEU1BBQ0VfQkFTRV9VUkwiOiIifX0=)
+[![Install in VS Code](https://img.shields.io/badge/Install_in-VS_Code-0098FF?style=for-the-badge&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect?url=vscode:mcp/install?%7B%22name%22%3A%22dspace-mcp%22%2C%22command%22%3A%22uvx%22%2C%22args%22%3A%5B%22dspace-mcp%22%5D%2C%22env%22%3A%7B%22DSPACE_BASE_URL%22%3A%22%22%7D%7D)
+
+> The Claude Desktop installer prompts for your repository URL. The Cursor and
+> VS Code links carry `DSPACE_BASE_URL` empty on purpose — fill in your own
+> instance (the `/server` REST endpoint), or the server refuses to start rather
+> than guess and hand you someone else's repository.
+
 A read-only [MCP](https://modelcontextprotocol.io/) server that lets an AI
 assistant talk to any [DSpace](https://dspace.org/) 7+ repository.
 

@@ -1,0 +1,71 @@
+{
+  "manifest_version": "0.4",
+  "name": "dspace-mcp",
+  "display_name": "DSpace Repository (read-only)",
+  "version": "0.2.0",
+  "description": "Read-only MCP server for DSpace 7+ repositories",
+  "long_description": "Searches and reads any DSpace 7+ repository over its REST API: discovery search, items by UUID / handle / DOI, communities and collections, bitstream listings, faceted counts, and text extraction from PDF, Word, OpenDocument and Office XML files. Anonymous and GET-only — it holds no credentials and cannot modify the repository.\n\nPoint it at your own instance with the base URL below (the `/server` endpoint, not the user-facing site).",
+  "author": {
+    "name": "Michał Pasternak",
+    "email": "michal.dtz@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mpasternak/dspace-mcp"
+  },
+  "homepage": "https://github.com/mpasternak/dspace-mcp#readme",
+  "documentation": "https://github.com/mpasternak/dspace-mcp#readme",
+  "support": "https://github.com/mpasternak/dspace-mcp/issues",
+  "license": "MIT",
+  "keywords": [
+    "dspace",
+    "mcp",
+    "repository",
+    "oai",
+    "llm",
+    "open-access"
+  ],
+  "server": {
+    "type": "uv",
+    "entry_point": "mcpb/launch.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": ["run", "--directory", "${__dirname}", "mcpb/launch.py"],
+      "env": {
+        "DSPACE_BASE_URL": "${user_config.base_url}",
+        "DSPACE_MAX_RESULTS": "${user_config.max_results}",
+        "DSPACE_EXTRACT_MAX_MB": "${user_config.extract_max_mb}"
+      }
+    }
+  },
+  "user_config": {
+    "base_url": {
+      "type": "string",
+      "title": "DSpace base URL",
+      "description": "REST API root of your repository, e.g. https://demo.dspace.org/server — the /server endpoint, not the public web UI. Required: the server refuses to start without it rather than guess and hand you someone else's data.",
+      "required": true
+    },
+    "max_results": {
+      "type": "number",
+      "title": "Max results per tool call",
+      "description": "Hard cap on how many objects any single tool may return.",
+      "required": false,
+      "default": 50,
+      "min": 1
+    },
+    "extract_max_mb": {
+      "type": "number",
+      "title": "Text extraction size limit (MB)",
+      "description": "Refuse to download bitstreams larger than this when extracting text (PDF, Word, OpenDocument, Office XML).",
+      "required": false,
+      "default": 20,
+      "min": 1
+    }
+  },
+  "compatibility": {
+    "platforms": ["darwin", "linux", "win32"],
+    "runtimes": {
+      "python": ">=3.10"
+    }
+  }
+}
