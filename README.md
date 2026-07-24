@@ -94,75 +94,119 @@ Three things worth knowing:
 
 ## Install
 
-Nothing to install if you have [uv](https://docs.astral.sh/uv/):
+Nothing to install by hand, and nothing to keep running. Your assistant starts
+the server itself, when it needs it, and talks to it over the process's standard
+input and output. So the only real step is
+[telling your client how to launch it](#configure-your-mcp-client) — with
+[uv](https://docs.astral.sh/uv/) present, that is the whole setup.
+
+If you would rather have the command on your `PATH`, `pip install dspace-mcp`
+works too, but it is not required.
+
+### Checking it works, before wiring it up
+
+You can run it yourself to see whether it reaches your repository:
 
 ```bash
 uvx dspace-mcp --base-url https://demo.dspace.org/server
 ```
 
-Or with pip:
+It prints a startup line and then sits there in silence. **That is what success
+looks like**: it is waiting for an MCP client on its standard input. Press Ctrl-C
+to quit.
 
-```bash
-pip install dspace-mcp
-```
+This is a smoke test, not a service. You cannot point an assistant at the process
+you just started — every client launches its own copy — and there is no reason to
+leave it running. It is useful for exactly two things: confirming the base URL is
+right, and, if you configured an account, seeing whether the login succeeded. A
+failed login says so on that first line, naming the reason.
 
 ## Configure your MCP client
 
-**Claude Code:**
+### Claude Code (command line)
+
+**Anonymously** — sees what any visitor sees:
 
 ```bash
-claude mcp add dspace -- uvx dspace-mcp --base-url https://demo.dspace.org/server
+claude mcp add dspace -- uvx dspace-mcp@latest \
+  --base-url https://repo.example.org/server
 ```
 
-With an account, so it also reads what is not public — credentials go in `-e`
-variables, *before* the `--`:
+**With an account** — also reads what that account can read. Credentials go in
+`-e` variables, and they must come **before** the `--`, because everything after
+it is handed to the server as its own arguments:
 
 ```bash
 claude mcp add dspace \
   -e DSPACE_USERNAME='you@example.org' \
   -e DSPACE_PASSWORD='your-password' \
-  -- uvx dspace-mcp --base-url https://repo.example.org/server
+  -- uvx dspace-mcp@latest --base-url https://repo.example.org/server
 ```
 
-To keep the password out of your shell history, read it in first and pass the
-variable:
+To keep the password out of your shell history, read it in first:
 
 ```bash
 read -rs DSPACE_PASSWORD
 claude mcp add dspace \
   -e DSPACE_USERNAME='you@example.org' \
   -e "DSPACE_PASSWORD=$DSPACE_PASSWORD" \
-  -- uvx dspace-mcp --base-url https://repo.example.org/server
+  -- uvx dspace-mcp@latest --base-url https://repo.example.org/server
 ```
 
-Either way the value is stored in plain text in Claude Code's configuration
-file, so use an account with the least privilege that covers what you need. Add
-`-s user` to share the server across all your projects instead of just the
-current one. If you prefer the password in your operating system's keychain,
-install the `.mcpb` bundle instead — the badge at the top of this page.
+Then check it:
 
-**Claude Desktop / any client using `mcp.json`:**
+```bash
+claude mcp list          # should show: dspace: uvx dspace-mcp@latest … - ✔ Connected
+```
+
+Inside a Claude Code session, `/mcp` lists the server and its tools. Ask
+*"what repository are you connected to?"* and the assistant will call
+`get_repository_info`, which also reports whether it is querying anonymously or
+as your account.
+
+Useful extras:
+
+- `-s user` registers the server for all your projects instead of only the
+  current directory.
+- `claude mcp remove dspace` undoes it; re-add to change the URL or credentials.
+
+**Why `dspace-mcp@latest` and not plain `dspace-mcp`:** `uvx` may reuse a copy
+already sitting in uv's cache, which can be an older release — that is how you
+end up running a version you thought you had upgraded past. `@latest` asks for
+the newest each time; pin a specific one (`dspace-mcp@0.3.2`) if you would rather
+control upgrades yourself. In a terminal, `uvx --refresh dspace-mcp …` forces a
+one-off update.
+
+**Where the password ends up:** in Claude Code's configuration file, in plain
+text. Use an account with the least privilege that covers what you need. If you
+want it in your operating system's keychain instead, install the `.mcpb` bundle —
+the badge at the top of this page — which asks for the password in a form and
+stores it there.
+
+### Claude Desktop, Cursor, VS Code — any client using `mcp.json`
+
+Anonymously:
 
 ```json
 {
   "mcpServers": {
     "dspace": {
       "command": "uvx",
-      "args": ["dspace-mcp", "--base-url", "https://demo.dspace.org/server"]
+      "args": ["dspace-mcp@latest", "--base-url", "https://repo.example.org/server"]
     }
   }
 }
 ```
 
-With an account, add an `env` block — omit it, or leave both fields empty, and
-the server queries anonymously:
+With an account, add an `env` block. Omit it, or leave both fields empty, and the
+server queries anonymously:
 
 ```json
 {
   "mcpServers": {
     "dspace": {
       "command": "uvx",
-      "args": ["dspace-mcp", "--base-url", "https://repo.example.org/server"],
+      "args": ["dspace-mcp@latest", "--base-url", "https://repo.example.org/server"],
       "env": {
         "DSPACE_USERNAME": "you@example.org",
         "DSPACE_PASSWORD": "your-password"
@@ -171,6 +215,9 @@ the server queries anonymously:
   }
 }
 ```
+
+For Claude Desktop the `.mcpb` bundle is easier than editing this file by hand,
+and it keeps the password in your keychain rather than in plain text.
 
 Point `--base-url` at your own repository's REST API — usually your DSpace URL
 with `/server` appended. If you leave `/server` off, the server detects it and
