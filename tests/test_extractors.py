@@ -16,6 +16,7 @@ import pytest
 
 from dspace_mcp.extractors import ExtractError, dispatch, extract_pdf
 from dspace_mcp.extractors.base import normalize
+from dspace_mcp.extractors.msword import _scrape_text, extract_doc
 from dspace_mcp.extractors.ooxml import extract_docx, extract_pptx, extract_xlsx
 from dspace_mcp.extractors.opendocument import extract_odp, extract_ods, extract_odt
 from office_samples import (
@@ -493,3 +494,24 @@ def test_extract_odp_reads_pages():
 def test_extract_odt_bad_zip_raises():
     with pytest.raises(ExtractError):
         extract_odt(b"not a zip", max_chars=100)
+
+
+# --- legacy .doc (OLE) ---------------------------------------------------
+
+
+def test_scrape_text_keeps_readable_lines():
+    raw = b"\x00\x01Hello world\x00\x07\x0cthis is a document\x00"
+    out = _scrape_text(raw)
+    assert "Hello world" in out
+    assert "this is a document" in out
+
+
+def test_scrape_text_drops_control_noise():
+    raw = bytes(range(0, 32)) + b"\x00\x00"
+    assert _scrape_text(raw) == ""
+
+
+def test_extract_doc_rejects_non_ole():
+    with pytest.raises(ExtractError) as exc:
+        extract_doc(b"plain bytes, not OLE", max_chars=100)
+    assert "not a readable" in str(exc.value)
