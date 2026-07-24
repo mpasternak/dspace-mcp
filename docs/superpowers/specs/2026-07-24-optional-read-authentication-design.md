@@ -70,6 +70,7 @@ rzeczywistych odpowiedzi, nie z dokumentacji.
 | Czas życia tokenu | **~30 minut** (`exp` = logowanie + 1800 s, czyli domyślne `jwt.login.token.expiration`) |
 | GET **publicznego** endpointu z nieważnym tokenem | **`200` i normalne dane anonimowe** — nie `401` |
 | GET endpointu **wymagającego uprawnień** z nieważnym tokenem | `401`, identycznie jak anonimowo |
+| Drugie i trzecie `GET /api/authn/status` w tej samej sesji | **brak** nagłówka `dspace-xsrf-token`; wartość żyje tylko w ciasteczku |
 
 Trzy z tych obserwacji obaliły założenia, na których opierałem wcześniejsze wersje
 projektu:
@@ -82,6 +83,18 @@ projektu:
    traktuje je jak anonimowe i zwraca `200` z danymi publicznymi. To ustalenie
    przewraca całą pierwotną strategię odnawiania tokenu (patrz A4) i jest
    najważniejszym pomiarem w tym dokumencie.
+4. **Nagłówek `DSPACE-XSRF-TOKEN` przychodzi tylko przy wystawianiu nowego
+   tokenu.** Przy kolejnych żądaniach w tej samej sesji wartość jest wyłącznie w
+   ciasteczku `DSPACE-XSRF-COOKIE` — klasyczny double-submit. Czytanie samego
+   nagłówka wystarcza dokładnie raz, więc **drugie** logowanie (po wygaśnięciu
+   tokenu, czyli po ~30 minutach pracy) poleciałoby bez `X-XSRF-TOKEN` i dostało
+   `403`. Ciasteczko jest tu pełnoprawnym źródłem, a nie awaryjnym.
+
+   To ustalenie kosztowało najwięcej: `curl` go **maskuje**, bo każde wywołanie w
+   osobnym procesie startuje ze świeżym słoikiem ciasteczek i zawsze dostaje
+   nagłówek. Ujawnił je dopiero test kontraktowy wobec żywej instancji, wykonany
+   prawdziwym, długo żyjącym klientem HTTP. Wniosek na przyszłość: przy protokole
+   zależnym od stanu sesji `curl` nie jest wiarygodnym modelem klienta.
 
 Zastrzeżenie do punktu 3: mierzone tokenem o niepoprawnym **podpisie**, nie
 tokenem wygasłym z podpisem poprawnym — sfabrykowanie tego drugiego wymagałoby

@@ -13,7 +13,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from .client import DSpaceClient, DSpaceError, is_uuid, require_uuid
+from .client import AuthState, DSpaceClient, DSpaceError, is_uuid, require_uuid
 from .extractors import ExtractError, dispatch
 from .shaping import (
     link_href,
@@ -310,7 +310,11 @@ async def list_collections(
 
 
 async def list_bitstreams(
-    client: DSpaceClient, item: str, bundle: str = "ORIGINAL"
+    client: DSpaceClient,
+    item: str,
+    bundle: str = "ORIGINAL",
+    *,
+    anonymous: bool = False,
 ) -> dict[str, Any]:
     """Pliki rekordu.
 
@@ -320,7 +324,9 @@ async def list_bitstreams(
     osobnym zasobie `format`, więc dociągamy go embedem.
     """
     uuid = require_uuid(item, "item")
-    bundles, _ = await client.get_page(f"/core/items/{uuid}/bundles", key="bundles")
+    bundles, _ = await client.get_page(
+        f"/core/items/{uuid}/bundles", key="bundles", anonymous=anonymous
+    )
 
     names = sorted({entry.get("name", "?") for entry in bundles})
     selected = [e for e in bundles if not bundle or e.get("name") == bundle]
@@ -344,6 +350,7 @@ async def list_bitstreams(
             {"embed": "format"},
             key="bitstreams",
             limit=max(budget, 0),
+            anonymous=anonymous,
         )
         for raw in items:
             fmt = raw.get("_embedded", {}).get("format", {})
@@ -463,6 +470,14 @@ async def get_item_statistics(client: DSpaceClient, item: str) -> dict[str, Any]
         payload = await client.get(f"/statistics/usagereports/{uuid}_TotalVisits")
     except DSpaceError as exc:
         if exc.status in (401, 403):
+            # Komunikat musi zależeć od tożsamości: po zalogowaniu słowo
+            # „anonymously" jest po prostu nieprawdziwe i wysyła model (a przez
+            # niego użytkownika) w stronę logowania, które już nastąpiło.
+            if getattr(client, "auth_state", None) is AuthState.AUTHENTICATED:
+                raise DSpaceError(
+                    "This repository does not expose usage statistics to the "
+                    f"account this server is logged in as ({client.config.username})."
+                ) from exc
             raise DSpaceError(
                 "This repository does not expose usage statistics anonymously."
             ) from exc
@@ -477,6 +492,89 @@ async def get_item_statistics(client: DSpaceClient, item: str) -> dict[str, Any]
         "views": views,
         "report_type": payload.get("report-type"),
     }
+
+
+async def compare_access(client: DSpaceClient, item: str) -> dict[str, Any]:
+    """Co z tego rekordu widzi konto, a czego nie widzi publiczność (decyzja A9).
+
+    Zwraca **różnicę**, a nie dwa komplety danych: model dostaje gotową
+    odpowiedź na pytanie „użytkownik twierdzi, że brakuje plików", zamiast
+    porównywać na oko dwie długie listy.
+
+    Widok anonimowy leci osobnym klientem HTTP, bez tokenu i bez ciasteczek
+    sesji — inaczej „anonim" bywałby po cichu uwierzytelniony i całe porównanie
+    nie znaczyłoby nic.
+    """
+    identifier = item.strip()
+    uuid = (
+        identifier
+        if is_uuid(identifier)
+        else await _resolve_to_uuid(client, identifier)
+    )
+
+    account = await list_bitstreams(client, uuid)
+
+    visible_to_anonymous = True
+    anonymous_files: list[dict] = []
+    try:
+        await client.get(f"/core/items/{uuid}", anonymous=True)
+    except DSpaceError:
+        visible_to_anonymous = False
+    else:
+        try:
+            anonymous_files = (await list_bitstreams(client, uuid, anonymous=True))[
+                "results"
+            ]
+        except DSpaceError:
+            # Rekord publiczny, ale jego pliki już nie — to normalny wynik
+            # porównania (embargo na pełny tekst), nie awaria.
+            anonymous_files = []
+
+    public_uuids = {entry.get("uuid") for entry in anonymous_files}
+    both = [f for f in account["results"] if f.get("uuid") in public_uuids]
+    restricted = [f for f in account["results"] if f.get("uuid") not in public_uuids]
+
+    return {
+        "item": uuid,
+        "visible_to_anonymous": visible_to_anonymous,
+        "files": {"both": both, "authenticated_only": restricted},
+        "summary": _access_summary(
+            len(account["results"]), len(restricted), visible_to_anonymous
+        ),
+    }
+
+
+def _access_summary(total: int, restricted: int, item_public: bool) -> str:
+    """Jedno zdanie, które model może powtórzyć użytkownikowi."""
+    if not item_public:
+        return (
+            "The item itself is not visible to the public, so none of its "
+            f"{total} file(s) can be reached anonymously."
+        )
+    if restricted == 0:
+        return (
+            f"All {total} file(s) are public: no files are hidden from anonymous users."
+        )
+    return f"{restricted} of {total} file(s) are not available to anonymous users."
+
+
+def _authentication_report(client: DSpaceClient) -> dict[str, Any]:
+    """Czyimi oczami patrzy serwer (decyzja A5).
+
+    Buduje się wyłącznie z tego, co i tak mamy: nazwa konta pochodzi z
+    konfiguracji, bo ``/authn/status`` podaje ``eperson`` samym linkiem, a
+    dociąganie go kosztowałoby dodatkowe żądanie przy każdym starcie.
+    """
+    state = getattr(client, "auth_state", None)
+    if state is None or state is AuthState.ANONYMOUS:
+        return {"mode": "anonymous"}
+    if state is AuthState.ANONYMOUS_BY_CHOICE:
+        return {"mode": "anonymous_by_choice", "user": client.config.username}
+    report: dict[str, Any] = {"mode": "authenticated", "user": client.config.username}
+    offered = getattr(client, "offered_methods", [])
+    if offered:
+        report["methods_offered"] = offered
+    return report
 
 
 async def get_repository_info(client: DSpaceClient) -> dict[str, Any]:
@@ -510,4 +608,5 @@ async def get_repository_info(client: DSpaceClient) -> dict[str, Any]:
         "sort_fields": caps.get("sorts", []),
         "sort_aliases": list(SORT_ALIASES),
         "facets": await _available_facets(client),
+        "authentication": _authentication_report(client),
     }

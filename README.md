@@ -24,14 +24,66 @@ querying the DSpace REST API directly.
 
 ## Read-only by construction, not by promise
 
-The server holds no credentials and never issues a request other than `GET`.
-It cannot deposit, edit or delete anything, and it cannot read what the public
-cannot already see — embargoed items, workflow submissions and restricted
-collections stay invisible.
+The server cannot deposit, edit or delete anything. Every request that carries
+data is a `GET`; the only other request it can make in its entire codebase is
+the login `POST` described below, to one hard-coded path. There is no code
+path that sends `PUT`, `PATCH`, `DELETE`, or a `POST` anywhere else — so there
+is nothing to prompt-inject your way into.
 
-That is a property of the code, not of the model's behaviour: there is nothing
-to prompt-inject your way into. A test in the suite asserts that no other HTTP
-method ever leaves the process.
+That is a property of the code, not of the model's behaviour, and the test
+suite holds it in place: one test asserts that the only non-`GET` request ever
+sent goes to exactly `<base-url>/api/authn/login`, and another reads the
+package source to confirm no mutating method appears anywhere in it.
+
+By default the server queries **anonymously** and sees exactly what any visitor
+sees: embargoed items, workflow submissions and restricted collections stay
+invisible. Give it an account (below) and it reads what that account can read —
+and still cannot change a thing.
+
+## Reading non-public material (optional)
+
+Set a username and password and the server logs in at startup, then reads with
+your account's permissions:
+
+```bash
+export DSPACE_USERNAME='you@example.org'
+export DSPACE_PASSWORD='...'
+uvx dspace-mcp --base-url https://repo.example.org/server
+```
+
+**Use the least-privileged account that covers what you need.** The server
+reads everything that account is allowed to read, so pointing it at an
+administrator account gives the assistant an administrator's view. It cannot
+modify anything either way, but it can *see* a great deal.
+
+Logging in adds one tool, `compare_access`, which answers the question this
+feature exists for — *"the user says files are missing"*:
+
+```
+compare_access(item="123456789/4271")
+→ { "visible_to_anonymous": true,
+    "files": { "both": ["abstract.pdf"],
+               "authenticated_only": ["full-text.pdf"] },
+    "summary": "1 of 2 file(s) are not available to anonymous users." }
+```
+
+It asks twice — once as your account, once anonymously through a separate
+connection with its own cookie jar — and reports only the difference.
+
+Three things worth knowing:
+
+- **If the login fails, the server stops and asks.** It does not quietly fall
+  back to anonymous access, because that would make the assistant report *"no
+  such record"* for material you can plainly see. Instead every tool returns a
+  question, and the assistant puts the choice to you: fix the credentials and
+  restart, or explicitly continue with public data only.
+- **Only password login is supported.** Repositories that authenticate solely
+  through ORCID or Shibboleth need a browser, which a stdio process has no way
+  to open. The server detects this from the instance itself and says so rather
+  than failing obscurely.
+- **Prefer the environment variable over `--password`.** A command line is
+  visible to every process on the machine. The `.mcpb` bundle stores the
+  password in your operating system's keychain.
 
 ## Install
 
@@ -109,9 +161,15 @@ instead of downloading records and counting them.
 | `DSPACE_TIMEOUT` | `15` | seconds per HTTP request |
 | `DSPACE_MAX_RESULTS` | `50` | hard ceiling on how many records any tool may return |
 | `DSPACE_EXTRACT_MAX_MB` | `20` | refuse to download bitstreams larger than this for text extraction |
+| `DSPACE_USERNAME` | *(none)* | log in as this account to also read non-public material |
+| `DSPACE_PASSWORD` | *(none)* | password for that account |
 
 Every variable has a matching flag: `--base-url`, `--timeout`,
-`--max-results`, `--extract-max-mb`.
+`--max-results`, `--extract-max-mb`, `--username`, `--password`.
+
+Set both `DSPACE_USERNAME` and `DSPACE_PASSWORD` or neither — half an account
+is a configuration mistake, and the server says so at startup instead of
+silently querying anonymously.
 
 `DSPACE_PDF_MAX_MB` / `--pdf-max-mb` still work as backward-compatible aliases
 for `DSPACE_EXTRACT_MAX_MB` / `--extract-max-mb` from before text extraction

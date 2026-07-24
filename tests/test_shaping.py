@@ -10,8 +10,9 @@ from __future__ import annotations
 
 import pytest
 
-from conftest import fixture_json
+from conftest import fixture_json, fixture_text
 from dspace_mcp.shaping import (
+    auth_methods,
     flatten_metadata,
     link_href,
     metadata_value,
@@ -745,3 +746,28 @@ def test_zadna_funkcja_nie_rzuca_na_pustym_dict():
     assert shape_collection({})["uuid"] is None
     assert shape_bitstream({})["uuid"] is None
     assert shape_facet_value({})["label"] is None
+
+
+# --- auth_methods (A6) ------------------------------------------------------
+
+
+def _www_authenticate_from_fixture() -> str:
+    """Wartość nagłówka ``WWW-Authenticate`` z surowego zrzutu z demo."""
+    for line in fixture_text("dspace10_authn_status_headers.txt").splitlines():
+        if line.lower().startswith("www-authenticate:"):
+            return line.split(":", 1)[1].strip()
+    raise AssertionError("fixture nie zawiera nagłówka WWW-Authenticate")
+
+
+def test_auth_methods_lists_what_the_instance_offers() -> None:
+    """Demo ogłasza logowanie hasłem i ORCID-em; ``location=`` to nie metoda."""
+    assert auth_methods(_www_authenticate_from_fixture()) == ["password", "orcid"]
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [None, "", "   ", "{}", 'location="https://example.test/oauth"', "realm=", 42],
+)
+def test_auth_methods_never_raises_on_junk(raw: object) -> None:
+    """Reguła shaping.py: śmieciowe wejście daje pustą listę, nie wyjątek."""
+    assert auth_methods(raw) == []  # type: ignore[arg-type]

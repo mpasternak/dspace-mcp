@@ -55,6 +55,32 @@ Pliki `*_headers.txt` zawierają surowe nagłówki odpowiedzi. Cookies `AWSALB*`
 `DSPACE-XSRF-COOKIE` to efemeryczne cookies publicznej instancji demo — nie są
 sekretami.
 
+## Fixtury uwierzytelniania (zebrane 2026-07-24)
+
+Wyjątek od reguły „anonimowo, wyłącznie GET" z nagłówka tego pliku: tych trzech
+nie da się zdobyć inaczej. Konto to **publiczne konto demonstracyjne** z
+dokumentacji DSpace (`dspacedemo+admin@gmail.com` / `dspace`), nie czyjeś realne
+poświadczenia.
+
+| Plik | Polecenie |
+|---|---|
+| `dspace10_authn_status_anonymous.json`, `dspace10_authn_status_headers.txt` | `curl -sS -D dspace10_authn_status_headers.txt "$D/authn/status"` |
+| `dspace10_authn_status_authenticated.json` | to samo, ale z `Authorization: Bearer <token>` po zalogowaniu |
+| `dspace10_authn_login_401.json` | `curl -sS -X POST "$D/authn/login" -H "X-XSRF-TOKEN: …" -d 'user=…&password=<złe>'` (HTTP **401**) |
+
+Odpowiedzi **udanego** logowania świadomie tu nie ma: niosłaby prawdziwy JWT, a
+token w publicznym repozytorium to dokładnie ten wzorzec, który wyłapują skanery
+sekretów. Testy budują ją inline (`tests/test_client.py::mock_login`).
+
+Co z nich wynika dla kodu:
+
+- `dspace10_authn_status_headers.txt` niesie `dspace-xsrf-token` (token CSRF,
+  **rotuje** przy logowaniu) oraz `www-authenticate` z listą metod logowania
+  obsługiwanych przez instancję (`password`, `orcid`) — stąd `shaping.auth_methods`.
+- Body statusu **nie osadza** obiektu `eperson`, podaje tylko link. Dlatego nazwa
+  zalogowanego konta w `get_repository_info` pochodzi z konfiguracji, a nie z
+  dodatkowego żądania (decyzja A5).
+
 ## Najważniejsze cechy struktury (skrót)
 
 - Rekordy wyszukiwania: `_embedded.searchResult._embedded.objects[]._embedded.indexableObject`

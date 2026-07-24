@@ -5,8 +5,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What this is
 
 A **read-only** MCP server that lets an LLM query any DSpace 7+ repository over its
-REST API. Anonymous access only, GET requests only — no credentials, no writes,
-one DSpace instance per process. Published on PyPI as `dspace-mcp`.
+REST API. No writes, one DSpace instance per process. Published on PyPI as `dspace-mcp`.
+
+Anonymous by default. Optionally, credentials can be configured to *also read*
+non-public material (design `2026-07-24-optional-read-authentication-design.md`,
+decisions A1–A9) — which makes the login `POST` the single non-GET request in the
+codebase. Read scope became configurable; inability to write did not.
 
 ## Commands
 
@@ -38,10 +42,17 @@ and shaped results flow back **outward**. Respect the layer boundaries when edit
 - **`tools.py`** — all orchestration logic, and it knows **nothing about MCP**. Every
   function takes a `DSpaceClient` and returns a plain dict, so tools are tested without
   running a server. List responses use the shared `_envelope(results, total, truncated)`.
-- **`client.py`** — the **only** module that touches the network, and it sends **GET
-  only**. Owns URL joining, HTTP-status → model-readable error mapping, HAL pagination
-  (`get_all` follows `_links.next` up to `MAX_PAGE_REQUESTS`), the startup probe, and
-  capability detection. This GET-only funnel is the project's core safety guarantee.
+- **`client.py`** — the **only** module that touches the network. Every data request is
+  a **GET**; the one exception in the whole package is `_login()`, whose path is
+  hard-coded (`f"{self._api_url}/authn/login"`, no path parameter) and which runs with
+  `follow_redirects=False` — httpx replays 307/308 *with the body*, so a redirect would
+  hand the password to another host. Owns URL joining, HTTP-status → model-readable
+  error mapping, HAL pagination (`get_all` follows `_links.next` up to
+  `MAX_PAGE_REQUESTS`), the startup probe, capability detection, and the auth state
+  machine. This funnel is the project's core safety guarantee.
+  Every request method takes `anonymous: bool` — the token lives in a client *field* and
+  is attached per request, never on the shared `httpx.AsyncClient`, so the anonymous
+  track (its own client, its own cookie jar) is genuinely anonymous.
 - **`shaping.py`** — **pure** functions (no I/O, no imports beyond stdlib) that flatten
   HAL/DSpace JSON into compact records. **Nothing here may raise**: instance responses
   are untrusted input, so a missing key or wrong-typed value must yield empty output, not
@@ -83,9 +94,16 @@ and shaped results flow back **outward**. Respect the layer boundaries when edit
 - Fixtures in `tests/fixtures/` are **raw, unmodified** responses captured from live DSpace
   instances (7.6.5, 8.x, 10.1, 11.0-SNAPSHOT) — their value is being byte-for-byte real, so
   don't hand-edit them (pre-commit excludes them from whitespace fixers).
-- Unit tests mock HTTP with `respx` (`@respx.mock`). `test_client.py::test_client_only_ever_sends_get`
-  is the guard for the read-only guarantee: it asserts `{call.request.method for call in respx.calls} == {"GET"}`.
-  If you add any request path, that invariant must still hold.
+- Unit tests mock HTTP with `respx` (`@respx.mock`). Two tests guard the read-only
+  guarantee, and any new request path must keep both green:
+  `test_client_sends_get_everywhere_except_the_login_endpoint` asserts every request is a
+  GET except POSTs whose URL **equals** `f"{API}/authn/login"` (equality, not `endswith` —
+  `https://evil.test/authn/login` must not pass), and
+  `test_no_mutating_http_method_exists_anywhere_in_the_package` greps the package source
+  for exactly one `.post(` and zero `.put(`/`.patch(`/`.delete(`/`.request(`.
+- Some auth fixtures were necessarily captured **logged in** and via **POST**, unlike every
+  other fixture — see `tests/fixtures/README.md`. No successful-login response is stored,
+  because it would carry a real JWT.
 - `asyncio_mode = "auto"` — async tests need no decorator.
 
 ## Design rationale

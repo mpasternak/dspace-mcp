@@ -19,6 +19,8 @@ ENV_BASE_URL = "DSPACE_BASE_URL"
 ENV_TIMEOUT = "DSPACE_TIMEOUT"
 ENV_MAX_RESULTS = "DSPACE_MAX_RESULTS"
 ENV_EXTRACT_MAX_MB = "DSPACE_EXTRACT_MAX_MB"
+ENV_USERNAME = "DSPACE_USERNAME"
+ENV_PASSWORD = "DSPACE_PASSWORD"
 # Alias wsteczny: do 0.1.x limit nazywał się „pdf" - zostaje jako fallback.
 ENV_PDF_MAX_MB = "DSPACE_PDF_MAX_MB"
 
@@ -35,9 +37,13 @@ _N = TypeVar("_N", int, float)
 class Config:
     """Komplet ustawień serwera.
 
-    Pola ``username``, ``password`` i ``enable_write`` istnieją od początku, żeby
-    format konfiguracji nie musiał się zmieniać, gdyby kiedyś doszedł tryb zapisu
-    (decyzja D7). Dzisiaj nie są przez nic czytane.
+    Pola ``username`` i ``password`` czekały tu od pierwszej wersji na wypadek,
+    gdyby doszło logowanie (decyzja D7), i doczekały się: czyta je teraz
+    uwierzytelnianie tylko-do-odczytu (decyzja A7). Format konfiguracji nie
+    musiał się przez to zmienić, dokładnie jak zakładało D7.
+
+    ``enable_write`` nadal nie jest przez nic czytane: tryb zapisu pozostaje
+    poza zakresem (D1/A1), a samo podanie konta go nie włącza.
     """
 
     base_url: str
@@ -92,6 +98,42 @@ def normalize_base_url(raw: str) -> str:
         cleaned = f"https://{cleaned}"
 
     return cleaned
+
+
+def _blank_to_none(raw: str | None) -> str | None:
+    """Pusta wartość znaczy „nie podano", nie „podano pustkę".
+
+    Host MCP podstawiający za niewypełnione pole formularza pusty string jest
+    realnym scenariuszem (paczka ``.mcpb``), a bez tej reguły anonimowa
+    instalacja próbowałaby się logować jako użytkownik o pustej nazwie.
+    """
+    if raw is None:
+        return None
+    return raw.strip() or None
+
+
+def resolve_account(
+    username: str | None, password: str | None
+) -> tuple[str | None, str | None]:
+    """Sprowadź parę login/hasło do postaci „komplet albo nic" (decyzja A7).
+
+    Sama nazwa użytkownika bez hasła (albo odwrotnie) to pomyłka w konfiguracji,
+    a nie prośba o dostęp anonimowy — ciche zignorowanie połowy ustawień
+    kończyłoby się serwerem, który widzi mniej, niż użytkownik zamówił, i nie
+    mówi dlaczego.
+
+    Reguła dotyczy wartości **po rozstrzygnięciu** pierwszeństwa flaga > zmienna,
+    więc login z flagi i hasło ze zmiennej to poprawna konfiguracja.
+    """
+    user = _blank_to_none(username)
+    secret = _blank_to_none(password)
+    if (user is None) != (secret is None):
+        missing = ENV_PASSWORD if user is not None else ENV_USERNAME
+        raise ValueError(
+            f"Incomplete credentials: set both {ENV_USERNAME} and {ENV_PASSWORD} "
+            f"(or neither, to query anonymously). Missing: {missing}."
+        )
+    return user, secret
 
 
 def _coerce_positive(
@@ -167,8 +209,12 @@ def config_from_env(env: Mapping[str, str] | None = None) -> Config:
             "(or pass --base-url on the command line)."
         )
 
+    username, password = resolve_account(env.get(ENV_USERNAME), env.get(ENV_PASSWORD))
+
     return Config(
         base_url=normalize_base_url(raw_base_url),
+        username=username,
+        password=password,
         timeout=_number_from_env(
             env, ENV_TIMEOUT, converter=float, kind="number", default=DEFAULT_TIMEOUT
         ),
@@ -230,6 +276,26 @@ def _build_parser() -> argparse.ArgumentParser:
             f"Refuse to download bitstreams larger than this for text extraction "
             f"(default: {DEFAULT_EXTRACT_MAX_MB}, or ${ENV_EXTRACT_MAX_MB}; "
             f"alias: --pdf-max-mb / ${ENV_PDF_MAX_MB})."
+        ),
+    )
+    parser.add_argument(
+        "--username",
+        metavar="USER",
+        default=None,
+        help=(
+            "Log in as this DSpace account to also read material that is not "
+            f"public (default: ${ENV_USERNAME}). Requires --password. "
+            "The server stays read-only either way."
+        ),
+    )
+    parser.add_argument(
+        "--password",
+        metavar="PASSWORD",
+        default=None,
+        help=(
+            f"Password for --username (default: ${ENV_PASSWORD}). Prefer the "
+            "environment variable: a command line is visible to every process "
+            "on the machine (e.g. in `ps`)."
         ),
     )
     parser.add_argument(
@@ -305,8 +371,18 @@ def parse_args(argv: list[str] | None = None) -> Config:
     except ValueError as exc:
         parser.error(str(exc))
 
+    try:
+        username, password = resolve_account(
+            args.username if args.username is not None else env.get(ENV_USERNAME),
+            args.password if args.password is not None else env.get(ENV_PASSWORD),
+        )
+    except ValueError as exc:
+        parser.error(str(exc))
+
     return Config(
         base_url=base_url,
+        username=username,
+        password=password,
         timeout=_resolve_number(
             parser,
             args.timeout,

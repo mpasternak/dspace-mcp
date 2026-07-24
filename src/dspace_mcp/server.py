@@ -17,7 +17,7 @@ from typing import Any
 from mcp.server.fastmcp import Context, FastMCP
 
 from . import tools
-from .client import DSpaceClient, DSpaceError
+from .client import AuthState, DSpaceClient, DSpaceError, NeedsDecision
 from .config import Config, parse_args
 
 
@@ -32,17 +32,52 @@ def _client(ctx: Context) -> DSpaceClient:
     return ctx.request_context.lifespan_context.client
 
 
+def _decision_prompt(client: DSpaceClient) -> dict[str, Any]:
+    """Pytanie do użytkownika, zadane jego własnymi ustami — przez model (A3).
+
+    Proces stdio nie ma własnego kanału do człowieka, więc jedyną drogą jest
+    model. Struktura jest **jedna** dla obu torów: bramki (stan zastany przed
+    wejściem do narzędzia) i wyjątku ``NeedsDecision`` (logowanie padło w
+    trakcie już trwającego wywołania). Inaczej to samo zdarzenie raz wyglądałoby
+    jak pytanie, a raz jak zwykły błąd.
+    """
+    return {
+        "needs_user_decision": True,
+        "error": (
+            f"Login as {client.config.username} at {client.config.base_url} "
+            f"failed: {client.auth_reason}. Ask the user how to proceed: either "
+            f"correct the username and password in this server's configuration "
+            f"and restart it, or — if they agree to work with public data only — "
+            f"call continue_anonymously."
+        ),
+    }
+
+
 def _guard(fn: Callable) -> Callable:
     """Zamień wyjątki przeznaczone dla modelu na zwykłą odpowiedź.
 
     Model, który dostaje ślad stosu, ponawia w kółko; model, który dostaje
     zdanie po angielsku, zmienia zapytanie albo pyta użytkownika.
+
+    Tu też mieszka bramka z A3: gdy podano konto, a logowanie padło, narzędzie
+    nie rusza sieci — bo cichy odczyt anonimowy zwróciłby „nie ma takiego
+    rekordu" na materiały, do których użytkownik ma pełny dostęp.
     """
 
     @functools.wraps(fn)
     async def wrapper(*args: Any, **kwargs: Any) -> Any:
+        ctx = kwargs.get("ctx") or (args[0] if args else None)
+        client = _client(ctx) if ctx is not None else None
+        if client is not None and client.auth_state is AuthState.NEEDS_DECISION:
+            return _decision_prompt(client)
         try:
             return await fn(*args, **kwargs)
+        except NeedsDecision:
+            return (
+                _decision_prompt(client)
+                if client is not None
+                else {"error": "login failed"}
+            )
         except DSpaceError as exc:
             return {"error": str(exc)}
 
@@ -219,6 +254,42 @@ async def get_repository_info(ctx: Context) -> dict[str, Any]:
     return await tools.get_repository_info(_client(ctx))
 
 
+async def continue_anonymously(ctx: Context) -> dict[str, Any]:
+    """Give up on logging in and work with publicly available data only.
+
+    Call this ONLY after the user has explicitly said they want to continue
+    without an account. If they would rather fix the credentials, they need to
+    correct this server's configuration and restart it — nothing you can do
+    from here.
+
+    After this, restricted items and files stay invisible for the rest of the
+    session, exactly as if no account had been configured.
+    """
+    client = _client(ctx)
+    client.accept_anonymous()
+    return {
+        "mode": client.auth_state.value,
+        "message": (
+            "Working with publicly available data only. Restricted items and "
+            "files will not appear in any result."
+        ),
+    }
+
+
+@_guard
+async def compare_access(ctx: Context, item: str) -> dict[str, Any]:
+    """Compare what this account can see against what the public can see.
+
+    Answers "the user says files are missing": it fetches the item and its
+    files twice — once as the logged-in account, once anonymously — and returns
+    the difference, telling you which files are not publicly available.
+
+    Args:
+        item: UUID, Handle or DOI of the item.
+    """
+    return await tools.compare_access(_client(ctx), item)
+
+
 READ_TOOLS = (
     search_items,
     get_item,
@@ -238,8 +309,11 @@ def build_server(config: Config) -> FastMCP:
     @asynccontextmanager
     async def lifespan(_: FastMCP) -> AsyncIterator[AppContext]:
         http = DSpaceClient.build_http(config)
-        client = DSpaceClient(config, http)
-        async with http:
+        # Drugi klient to tor anonimowy (A9) — osobny, żeby miał własny cookie
+        # jar: ciasteczka sesyjne z logowania uczyniłyby „anonima" nieanonimowym.
+        anon_http = DSpaceClient.build_http(config)
+        client = DSpaceClient(config, http, anon_http)
+        async with http, anon_http:
             # Sonda przy starcie robi dwie rzeczy: mówi od razu, że adres jest
             # zły (zamiast pozwolić modelowi zderzyć się z tym w trakcie), i
             # koryguje brakujące „/server" zanim poleci pierwsze zapytanie.
@@ -249,15 +323,29 @@ def build_server(config: Config) -> FastMCP:
                 await client.probe()
             except DSpaceError as exc:
                 print(f"dspace-mcp: startup check failed: {exc}", file=sys.stderr)
+            # DOPIERO teraz logowanie: sonda mogła właśnie skorygować adres API
+            # o brakujące „/server", a POST musi trafić pod poprawiony adres.
+            await client.authenticate()
+            if client.auth_state is AuthState.NEEDS_DECISION:
+                print(
+                    f"dspace-mcp: login as {config.username} failed: "
+                    f"{client.auth_reason}",
+                    file=sys.stderr,
+                )
             yield AppContext(client=client)
 
     mcp = FastMCP("dspace-mcp", lifespan=lifespan)
     for fn in READ_TOOLS:
         mcp.tool()(fn)
 
-    # Narzędzia zapisu nie istnieją (decyzja D1). Gdyby kiedyś powstały,
-    # rejestrujemy je wyłącznie przy jawnym `config.enable_write` i podanym
-    # koncie — sam kod na dysku nie ma wtedy prawa niczego zmienić.
+    # Narzędzia zależne od stanu (D7 pkt 4): instalacja anonimowa nie widzi ani
+    # jednego bajta ich opisów, więc nie płaci za nie tokenami w każdej rozmowie.
+    if config.username and config.password:
+        mcp.tool()(continue_anonymously)
+        mcp.tool()(compare_access)
+
+    # Narzędzia zapisu nie istnieją (decyzja D1/A1) i podanie konta ich nie
+    # włącza: uwierzytelnianie poszerza zakres ODCZYTU, nic więcej.
     return mcp
 
 

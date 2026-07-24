@@ -18,7 +18,7 @@ import os
 import pytest
 
 from dspace_mcp import tools
-from dspace_mcp.client import DSpaceClient
+from dspace_mcp.client import AuthState, DSpaceClient
 from dspace_mcp.config import Config
 
 pytestmark = pytest.mark.live
@@ -147,3 +147,50 @@ async def test_unknown_facet_is_explained_not_crashed(client):
     with pytest.raises(DSpaceError) as exc:
         await tools.list_facet_values(client, "definitely_not_a_facet")
     assert "available facets" in str(exc.value).lower()
+
+
+# --- uwierzytelnianie (A2-A9) -----------------------------------------------
+
+
+async def test_instance_advertises_its_login_methods(client):
+    """Kontrakt, na którym stoi A6: instancja sama mówi, jak się do niej logować.
+
+    Nie wymaga konta — nagłówek ``WWW-Authenticate`` jest publiczny.
+    """
+    token = await client._csrf_token()
+    assert token, "brak nagłówka dspace-xsrf-token — logowanie byłoby niemożliwe"
+    assert client.offered_methods, "instancja nie ogłasza żadnej metody logowania"
+
+
+@pytest.mark.skipif(
+    not os.environ.get("DSPACE_TEST_USERNAME"),
+    reason="ustaw DSPACE_TEST_USERNAME i DSPACE_TEST_PASSWORD",
+)
+async def test_login_against_a_live_instance():
+    """Pełny przepływ logowania wobec żywego DSpace'a.
+
+    Konto podaje się przez zmienne środowiskowe — dla demo.dspace.org działa
+    publiczne konto z dokumentacji DSpace.
+    """
+    config = Config(
+        base_url=BASE_URL,
+        timeout=30,
+        username=os.environ["DSPACE_TEST_USERNAME"],
+        password=os.environ.get("DSPACE_TEST_PASSWORD", ""),
+    )
+    http = DSpaceClient.build_http(config)
+    anon_http = DSpaceClient.build_http(config)
+    async with http, anon_http:
+        live = DSpaceClient(config, http, anon_http)
+        await live.probe()
+        await live.authenticate()
+
+        assert live.auth_state is AuthState.AUTHENTICATED, live.auth_reason
+
+        # Token faktycznie działa: /authn/status potwierdza sesję.
+        status = await live.get("/authn/status")
+        assert status["authenticated"] is True
+
+        # …a tor anonimowy w tym samym procesie nadal jest anonimowy (A9).
+        anon_status = await live.get("/authn/status", anonymous=True)
+        assert anon_status["authenticated"] is False

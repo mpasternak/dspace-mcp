@@ -4,7 +4,7 @@
   "display_name": "DSpace Repository (read-only)",
   "version": "0.2.0",
   "description": "Read-only MCP server for DSpace 7+ repositories",
-  "long_description": "Searches and reads any DSpace 7+ repository over its REST API: discovery search, items by UUID / handle / DOI, communities and collections, bitstream listings, faceted counts, and text extraction from PDF, Word, OpenDocument and Office XML files. Anonymous and GET-only — it holds no credentials and cannot modify the repository.\n\nPoint it at your own instance with the base URL below (the `/server` endpoint, not the user-facing site).",
+  "long_description": "Searches and reads any DSpace 7+ repository over its REST API: discovery search, items by UUID / handle / DOI, communities and collections, bitstream listings, faceted counts, and text extraction from PDF, Word, OpenDocument and Office XML files.\n\nRead-only by construction: it can send no request that would modify the repository. By default it queries anonymously and sees exactly what the public sees. Optionally give it a DSpace account and it will also read what that account can see — embargoed items, restricted collections and closed files — and can then tell you which files the public cannot reach.\n\nPoint it at your own instance with the base URL below (the `/server` endpoint, not the user-facing site).",
   "author": {
     "name": "Michał Pasternak",
     "email": "michal.dtz@gmail.com"
@@ -34,7 +34,9 @@
       "env": {
         "DSPACE_BASE_URL": "${user_config.base_url}",
         "DSPACE_MAX_RESULTS": "${user_config.max_results}",
-        "DSPACE_EXTRACT_MAX_MB": "${user_config.extract_max_mb}"
+        "DSPACE_EXTRACT_MAX_MB": "${user_config.extract_max_mb}",
+        "DSPACE_USERNAME": "${user_config.username}",
+        "DSPACE_PASSWORD": "${user_config.password}"
       }
     }
   },
@@ -60,6 +62,19 @@
       "required": false,
       "default": 20,
       "min": 1
+    },
+    "username": {
+      "type": "string",
+      "title": "Username (optional)",
+      "description": "Leave empty to query anonymously, like any visitor. Fill both this and the password to also read material only your account can see: embargoed items, restricted collections and closed files. Use an account with the least privilege that covers what you need — the server reads everything that account is allowed to read. It still cannot modify anything.",
+      "required": false
+    },
+    "password": {
+      "type": "string",
+      "title": "Password (optional)",
+      "description": "Password for the account above. Required if you filled in a username, ignored otherwise. Only password login is supported: repositories that authenticate solely through ORCID or Shibboleth cannot be used this way, and the server will say so instead of failing silently.",
+      "required": false,
+      "sensitive": true
     }
   },
   "compatibility": {
