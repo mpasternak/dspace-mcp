@@ -114,6 +114,33 @@ pip install dspace-mcp
 claude mcp add dspace -- uvx dspace-mcp --base-url https://demo.dspace.org/server
 ```
 
+With an account, so it also reads what is not public — credentials go in `-e`
+variables, *before* the `--`:
+
+```bash
+claude mcp add dspace \
+  -e DSPACE_USERNAME='you@example.org' \
+  -e DSPACE_PASSWORD='your-password' \
+  -- uvx dspace-mcp --base-url https://repo.example.org/server
+```
+
+To keep the password out of your shell history, read it in first and pass the
+variable:
+
+```bash
+read -rs DSPACE_PASSWORD
+claude mcp add dspace \
+  -e DSPACE_USERNAME='you@example.org' \
+  -e "DSPACE_PASSWORD=$DSPACE_PASSWORD" \
+  -- uvx dspace-mcp --base-url https://repo.example.org/server
+```
+
+Either way the value is stored in plain text in Claude Code's configuration
+file, so use an account with the least privilege that covers what you need. Add
+`-s user` to share the server across all your projects instead of just the
+current one. If you prefer the password in your operating system's keychain,
+install the `.mcpb` bundle instead — the badge at the top of this page.
+
 **Claude Desktop / any client using `mcp.json`:**
 
 ```json
@@ -122,6 +149,24 @@ claude mcp add dspace -- uvx dspace-mcp --base-url https://demo.dspace.org/serve
     "dspace": {
       "command": "uvx",
       "args": ["dspace-mcp", "--base-url", "https://demo.dspace.org/server"]
+    }
+  }
+}
+```
+
+With an account, add an `env` block — omit it, or leave both fields empty, and
+the server queries anonymously:
+
+```json
+{
+  "mcpServers": {
+    "dspace": {
+      "command": "uvx",
+      "args": ["dspace-mcp", "--base-url", "https://repo.example.org/server"],
+      "env": {
+        "DSPACE_USERNAME": "you@example.org",
+        "DSPACE_PASSWORD": "your-password"
+      }
     }
   }
 }
