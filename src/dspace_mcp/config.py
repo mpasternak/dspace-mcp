@@ -18,11 +18,13 @@ from typing import TypeVar
 ENV_BASE_URL = "DSPACE_BASE_URL"
 ENV_TIMEOUT = "DSPACE_TIMEOUT"
 ENV_MAX_RESULTS = "DSPACE_MAX_RESULTS"
+ENV_EXTRACT_MAX_MB = "DSPACE_EXTRACT_MAX_MB"
+# Alias wsteczny: do 0.1.x limit nazywał się „pdf" - zostaje jako fallback.
 ENV_PDF_MAX_MB = "DSPACE_PDF_MAX_MB"
 
 DEFAULT_TIMEOUT = 15.0
 DEFAULT_MAX_RESULTS = 50
-DEFAULT_PDF_MAX_MB = 20
+DEFAULT_EXTRACT_MAX_MB = 20
 
 EXAMPLE_BASE_URL = "https://demo.dspace.org/server"
 
@@ -41,7 +43,7 @@ class Config:
     base_url: str
     timeout: float = DEFAULT_TIMEOUT
     max_results: int = DEFAULT_MAX_RESULTS
-    pdf_max_mb: int = DEFAULT_PDF_MAX_MB
+    extract_max_mb: int = DEFAULT_EXTRACT_MAX_MB
     username: str | None = None
     password: str | None = None
     enable_write: bool = False
@@ -52,9 +54,19 @@ class Config:
         return f"{self.base_url}/api"
 
     @property
+    def extract_max_bytes(self) -> int:
+        """Limit ekstrakcji w bajtach, bo strumień liczymy w bajtach."""
+        return self.extract_max_mb * 1024 * 1024
+
+    # Aliasy wsteczne: do 0.1.x limit nazywał się „pdf". Zostają, bo obce
+    # konfiguracje MCP mogą ich używać, a to już nie tylko PDF.
+    @property
+    def pdf_max_mb(self) -> int:
+        return self.extract_max_mb
+
+    @property
     def pdf_max_bytes(self) -> int:
-        """Limit z konfiguracji w bajtach, bo strumień liczymy w bajtach."""
-        return self.pdf_max_mb * 1024 * 1024
+        return self.extract_max_bytes
 
 
 def normalize_base_url(raw: str) -> str:
@@ -142,12 +154,18 @@ def config_from_env(env: Mapping[str, str] | None = None) -> Config:
             kind="integer",
             default=DEFAULT_MAX_RESULTS,
         ),
-        pdf_max_mb=_number_from_env(
+        extract_max_mb=_number_from_env(
             env,
-            ENV_PDF_MAX_MB,
+            ENV_EXTRACT_MAX_MB,
             converter=int,
             kind="integer",
-            default=DEFAULT_PDF_MAX_MB,
+            default=_number_from_env(
+                env,
+                ENV_PDF_MAX_MB,
+                converter=int,
+                kind="integer",
+                default=DEFAULT_EXTRACT_MAX_MB,
+            ),
         ),
     )
 
@@ -189,13 +207,16 @@ def _build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--extract-max-mb",
         "--pdf-max-mb",
+        dest="extract_max_mb",
         metavar="MB",
         type=int,
         default=None,
         help=(
             f"Refuse to download bitstreams larger than this for text extraction "
-            f"(default: {DEFAULT_PDF_MAX_MB}, or ${ENV_PDF_MAX_MB})."
+            f"(default: {DEFAULT_EXTRACT_MAX_MB}, or ${ENV_EXTRACT_MAX_MB}; "
+            f"alias: --pdf-max-mb / ${ENV_PDF_MAX_MB})."
         ),
     )
     parser.add_argument(
@@ -249,6 +270,19 @@ def parse_args(argv: list[str] | None = None) -> Config:
     except ValueError as exc:
         parser.error(str(exc))
 
+    # Domyślna wartość dla --extract-max-mb, gdyby ani flaga, ani
+    # DSPACE_EXTRACT_MAX_MB nie były podane: sięgamy do starego aliasu.
+    try:
+        alias_default = _number_from_env(
+            env,
+            ENV_PDF_MAX_MB,
+            converter=int,
+            kind="integer",
+            default=DEFAULT_EXTRACT_MAX_MB,
+        )
+    except ValueError as exc:
+        parser.error(str(exc))
+
     return Config(
         base_url=base_url,
         timeout=_resolve_number(
@@ -271,14 +305,14 @@ def parse_args(argv: list[str] | None = None) -> Config:
             kind="integer",
             default=DEFAULT_MAX_RESULTS,
         ),
-        pdf_max_mb=_resolve_number(
+        extract_max_mb=_resolve_number(
             parser,
-            args.pdf_max_mb,
-            "--pdf-max-mb",
+            args.extract_max_mb,
+            "--extract-max-mb",
             env,
-            ENV_PDF_MAX_MB,
+            ENV_EXTRACT_MAX_MB,
             converter=int,
             kind="integer",
-            default=DEFAULT_PDF_MAX_MB,
+            default=alias_default,
         ),
     )
