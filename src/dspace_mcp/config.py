@@ -129,6 +129,31 @@ def _number_from_env(
     return _coerce_positive(raw, label=var, converter=converter, kind=kind)
 
 
+def _extract_max_mb_from_env(env: Mapping[str, str]) -> int:
+    """``extract_max_mb`` ze środowiska: kanoniczna zmienna > alias > domyślna.
+
+    Alias (``DSPACE_PDF_MAX_MB``) czytamy dopiero, gdy kanonicznej zmiennej nie
+    ma w ogóle - zepsuty alias nie może zablokować wywołania, w którym
+    kanoniczna zmienna jest poprawnie ustawiona (albo w ogóle nie potrzebna,
+    patrz ``_resolve_extract_max_mb``).
+    """
+    if ENV_EXTRACT_MAX_MB in env:
+        return _number_from_env(
+            env,
+            ENV_EXTRACT_MAX_MB,
+            converter=int,
+            kind="integer",
+            default=DEFAULT_EXTRACT_MAX_MB,
+        )
+    return _number_from_env(
+        env,
+        ENV_PDF_MAX_MB,
+        converter=int,
+        kind="integer",
+        default=DEFAULT_EXTRACT_MAX_MB,
+    )
+
+
 def config_from_env(env: Mapping[str, str] | None = None) -> Config:
     """Zbuduj ``Config`` ze zmiennych środowiskowych (domyślnie ``os.environ``)."""
     if env is None:
@@ -154,19 +179,7 @@ def config_from_env(env: Mapping[str, str] | None = None) -> Config:
             kind="integer",
             default=DEFAULT_MAX_RESULTS,
         ),
-        extract_max_mb=_number_from_env(
-            env,
-            ENV_EXTRACT_MAX_MB,
-            converter=int,
-            kind="integer",
-            default=_number_from_env(
-                env,
-                ENV_PDF_MAX_MB,
-                converter=int,
-                kind="integer",
-                default=DEFAULT_EXTRACT_MAX_MB,
-            ),
-        ),
+        extract_max_mb=_extract_max_mb_from_env(env),
     )
 
 
@@ -253,6 +266,28 @@ def _resolve_number(
         parser.error(str(exc))
 
 
+def _resolve_extract_max_mb(
+    parser: argparse.ArgumentParser,
+    cli_value: int | None,
+    env: Mapping[str, str],
+) -> int:
+    """Jak ``_resolve_number``, ale z aliasem wstecznym dla środowiska.
+
+    Kolejność: flaga > ``DSPACE_EXTRACT_MAX_MB`` > ``DSPACE_PDF_MAX_MB`` >
+    wartość domyślna. Gdy flaga jest podana, żadnej ze zmiennych środowiskowych
+    (ani kanonicznej, ani aliasu) w ogóle nie czytamy - zepsuta zmienna nie
+    może blokować wywołania, które i tak jej nie używa.
+    """
+    if cli_value is not None:
+        if cli_value <= 0:
+            parser.error(f"--extract-max-mb: {cli_value} must be greater than 0")
+        return cli_value
+    try:
+        return _extract_max_mb_from_env(env)
+    except ValueError as exc:
+        parser.error(str(exc))
+
+
 def parse_args(argv: list[str] | None = None) -> Config:
     """Zbuduj ``Config`` z argumentów CLI, biorąc domyślne wartości ze środowiska."""
     env: Mapping[str, str] = os.environ
@@ -267,19 +302,6 @@ def parse_args(argv: list[str] | None = None) -> Config:
         )
     try:
         base_url = normalize_base_url(raw_base_url)
-    except ValueError as exc:
-        parser.error(str(exc))
-
-    # Domyślna wartość dla --extract-max-mb, gdyby ani flaga, ani
-    # DSPACE_EXTRACT_MAX_MB nie były podane: sięgamy do starego aliasu.
-    try:
-        alias_default = _number_from_env(
-            env,
-            ENV_PDF_MAX_MB,
-            converter=int,
-            kind="integer",
-            default=DEFAULT_EXTRACT_MAX_MB,
-        )
     except ValueError as exc:
         parser.error(str(exc))
 
@@ -305,14 +327,5 @@ def parse_args(argv: list[str] | None = None) -> Config:
             kind="integer",
             default=DEFAULT_MAX_RESULTS,
         ),
-        extract_max_mb=_resolve_number(
-            parser,
-            args.extract_max_mb,
-            "--extract-max-mb",
-            env,
-            ENV_EXTRACT_MAX_MB,
-            converter=int,
-            kind="integer",
-            default=alias_default,
-        ),
+        extract_max_mb=_resolve_extract_max_mb(parser, args.extract_max_mb, env),
     )

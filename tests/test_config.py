@@ -380,3 +380,47 @@ def test_extract_max_mb_cli_flag() -> None:
 def test_pdf_max_mb_cli_flag_still_works() -> None:
     cfg = parse_args(["--base-url", "https://x/server", "--pdf-max-mb", "3"])
     assert cfg.extract_max_mb == 3
+
+
+# --- extract_max_mb: alias nie może być czytany zachłannie ------------------
+#
+# Regresja: alias `DSPACE_PDF_MAX_MB` był wcześniej czytany bezwarunkowo jako
+# wyrażenie domyślne (eagerly), więc zepsuty alias psuł wywołania, które w
+# ogóle go nie potrzebowały. Każde źródło ma być czytane leniwie - tylko to,
+# które faktycznie wygrywa, wolno mu zgłosić błąd.
+
+
+def test_config_from_env_canonical_wins_even_when_alias_is_malformed() -> None:
+    cfg = config_from_env(
+        {
+            "DSPACE_BASE_URL": "https://x/server",
+            "DSPACE_EXTRACT_MAX_MB": "5",
+            "DSPACE_PDF_MAX_MB": "garbage",
+        }
+    )
+    assert cfg.extract_max_mb == 5
+
+
+def test_config_from_env_alias_malformed_raises_naming_alias() -> None:
+    """Alias jest jedynym źródłem - kanoniczna zmienna nie jest w ogóle ustawiona."""
+    with pytest.raises(ValueError) as excinfo:
+        config_from_env(
+            {"DSPACE_BASE_URL": "https://x/server", "DSPACE_PDF_MAX_MB": "garbage"}
+        )
+    assert "DSPACE_PDF_MAX_MB" in str(excinfo.value)
+
+
+def test_config_from_env_canonical_malformed_raises_naming_canonical() -> None:
+    with pytest.raises(ValueError) as excinfo:
+        config_from_env(
+            {"DSPACE_BASE_URL": "https://x/server", "DSPACE_EXTRACT_MAX_MB": "garbage"}
+        )
+    assert "DSPACE_EXTRACT_MAX_MB" in str(excinfo.value)
+
+
+def test_parse_args_flag_wins_even_when_alias_env_is_malformed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("DSPACE_PDF_MAX_MB", "garbage")
+    cfg = parse_args(["--base-url", "https://x/server", "--extract-max-mb", "9"])
+    assert cfg.extract_max_mb == 9
