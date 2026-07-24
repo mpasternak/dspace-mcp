@@ -9,6 +9,7 @@ resztę przypadków (pusta strona, szyfrowanie) załatwia ``pypdf.PdfWriter``.
 from __future__ import annotations
 
 import io
+import struct
 from collections.abc import Sequence
 
 import pypdf
@@ -514,4 +515,85 @@ def test_scrape_text_drops_control_noise():
 def test_extract_doc_rejects_non_ole():
     with pytest.raises(ExtractError) as exc:
         extract_doc(b"plain bytes, not OLE", max_chars=100)
+    assert "not a readable" in str(exc.value)
+
+
+def _ole_dir_entry(
+    name: str, obj_type: int, child: int, start_sector: int, size: int
+) -> bytes:
+    """Zbuduj 128-bajtowy wpis katalogu OLE (MS-CFB 2.6.1)."""
+    entry = bytearray(128)
+    name_utf16 = name.encode("utf-16-le")
+    entry[: len(name_utf16)] = name_utf16
+    struct.pack_into("<H", entry, 64, len(name_utf16) + 2)  # dł. nazwy + NUL
+    entry[66] = obj_type
+    entry[67] = 1  # color flag: black
+    struct.pack_into("<I", entry, 68, 0xFFFFFFFF)  # left sibling: brak
+    struct.pack_into("<I", entry, 72, 0xFFFFFFFF)  # right sibling: brak
+    struct.pack_into("<I", entry, 76, child)
+    struct.pack_into("<I", entry, 116, start_sector)
+    struct.pack_into("<Q", entry, 120, size)
+    return bytes(entry)
+
+
+def _ole_bytes_with_worddocument_as_storage() -> bytes:
+    """Poprawny nagłówkowo plik OLE, w którym ``WordDocument`` jest STORAGE
+    (katalogiem), a nie STREAM.
+
+    To odtwarza usterkę z audytu: konstrukcja ``olefile.OleFileIO`` przechodzi
+    bez zarzutu (wpis katalogu jest formalnie poprawny), ``ole.exists(...)``
+    też zwraca ``True`` — błąd ujawnia się dopiero przy ``ole.openstream(...)``,
+    czyli w DRUGIM bloku ``try`` w ``extract_doc``, którego przed poprawką nic
+    nie osłaniało. ``olefile`` rzuca wtedy gołym ``OSError``, a nie
+    ``ExtractError``.
+    """
+    endofchain = 0xFFFFFFFE
+    freesect = 0xFFFFFFFF
+    fatsect = 0xFFFFFFFD
+
+    header = bytearray(512)
+    header[0:8] = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"
+    struct.pack_into("<H", header, 24, 0x003E)  # minor version
+    struct.pack_into("<H", header, 26, 0x0003)  # major version 3 (sektory 512 B)
+    struct.pack_into("<H", header, 28, 0xFFFE)  # byte order
+    struct.pack_into("<H", header, 30, 9)  # sector shift -> 512
+    struct.pack_into("<H", header, 32, 6)  # mini sector shift -> 64
+    struct.pack_into("<I", header, 40, 0)  # liczba sektorów katalogu (0 dla v3)
+    struct.pack_into("<I", header, 44, 1)  # liczba sektorów FAT
+    struct.pack_into("<I", header, 48, 1)  # pierwszy sektor katalogu
+    struct.pack_into("<I", header, 56, 0x1000)  # próg mini-strumienia
+    struct.pack_into("<I", header, 60, endofchain)  # brak MiniFAT
+    struct.pack_into("<I", header, 68, endofchain)  # brak DIFAT
+    for i in range(109):
+        struct.pack_into("<I", header, 76 + i * 4, 0 if i == 0 else freesect)
+
+    fat = [freesect] * 128
+    fat[0] = fatsect  # sektor 0 to sam FAT
+    fat[1] = endofchain  # sektor 1 (katalog) to jednosektorowy łańcuch
+    fat_bytes = b"".join(struct.pack("<I", v) for v in fat)
+
+    dirsec = bytearray(512)
+    dirsec[0:128] = _ole_dir_entry("Root Entry", 5, 1, endofchain, 0)
+    dirsec[128:256] = _ole_dir_entry("WordDocument", 1, 0xFFFFFFFF, endofchain, 0)
+    # pozostałe dwa wpisy w sektorze zostają puste (object type 0)
+
+    return bytes(header) + fat_bytes + bytes(dirsec)
+
+
+def test_extract_doc_truncated_after_ole_magic_raises():
+    """Bajty zaczynają się od magii OLE, ale dalej to śmieci — trafia to w
+    konstrukcję ``OleFileIO`` (pierwszy blok ``try``), już wcześniej osłonięty."""
+    magic = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"
+    garbage = magic + b"\x00garbage not a real ole structure\xff" * 20
+    with pytest.raises(ExtractError):
+        extract_doc(garbage, max_chars=100)
+
+
+def test_extract_doc_internal_corruption_raises_extract_error():
+    """Regresja: uszkodzenie ujawniające się dopiero w drugim bloku ``try``
+    (``ole.exists`` / ``ole.openstream(...).read()``) musi też stać się
+    ``ExtractError`` — nie gołym wyjątkiem olefile."""
+    data = _ole_bytes_with_worddocument_as_storage()
+    with pytest.raises(ExtractError) as exc:
+        extract_doc(data, max_chars=100)
     assert "not a readable" in str(exc.value)

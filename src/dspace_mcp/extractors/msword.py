@@ -40,6 +40,14 @@ def extract_doc(data: bytes, *, max_chars: int = 20000) -> dict:
         if not ole.exists("WordDocument"):
             raise ExtractError(_NOT_A_DOC)
         raw = ole.openstream("WordDocument").read()
+    except ExtractError:
+        raise
+    except Exception:
+        # olefile przechodzi łańcuch sektorów OLE leniwie, dopiero przy
+        # odczycie — uszkodzony wewnętrznie plik może więc rzucić tutaj,
+        # a nie przy konstrukcji OleFileIO. Nigdy nie wypuszczamy surowego
+        # wyjątku poza ekstraktor.
+        raise ExtractError(_NOT_A_DOC) from None
     finally:
         ole.close()
 
