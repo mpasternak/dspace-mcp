@@ -1351,3 +1351,60 @@ async def test_stream_bytes_does_not_blame_the_account_after_a_failed_retry(
 
     assert "refused access" not in str(exc.value)
     assert "token" in str(exc.value).lower()
+
+
+@respx.mock
+async def test_login_recovers_when_the_token_arrives_only_with_the_403() -> None:
+    """Instancja wydaje token CSRF leniwie — dopiero odrzucając żądanie.
+
+    Zmierzone na DSpace 9.1 (repozytorium.wsb-nlu.edu.pl): `/authn/status` nie
+    zwraca ani nagłówka `DSPACE-XSRF-TOKEN`, ani żadnego ciasteczka, a POST bez
+    tokenu dostaje 403 z body „Access is denied. Invalid CSRF token." — i
+    dopiero TA odpowiedź niesie token. Na demo (10.1) token przychodzi od razu
+    ze statusu, więc ta ścieżka nigdy się tam nie uruchamia.
+
+    Bez ponowienia serwer meldował użytkownikowi „CSRF token rejected" i kończył
+    pracę, mimo że hasło było poprawne.
+    """
+    respx.get(STATUS_ANON).mock(
+        return_value=httpx.Response(
+            200,
+            json=fixture_json("dspace10_authn_status_anonymous"),
+            headers={"WWW-Authenticate": 'password realm="DSpace REST API"'},
+        )
+    )
+    respx.post(LOGIN).mock(
+        side_effect=[
+            httpx.Response(
+                403,
+                json=fixture_json("dspace9_authn_login_403_csrf"),
+                headers=[
+                    ("DSPACE-XSRF-TOKEN", "late-csrf"),
+                    ("Set-Cookie", "DSPACE-XSRF-COOKIE=late-csrf; Path=/server"),
+                ],
+            ),
+            httpx.Response(200, headers={"Authorization": f"Bearer {jwt()}"}),
+        ]
+    )
+
+    client = account_client()
+    await client.authenticate()
+
+    assert client.auth_state is AuthState.AUTHENTICATED, client.auth_reason
+    logins = [c.request for c in respx.calls if c.request.method == "POST"]
+    assert len(logins) == 2, "dokładnie jedno ponowienie, bez pętli"
+    assert logins[0].headers.get("X-XSRF-TOKEN") is None
+    assert logins[1].headers["X-XSRF-TOKEN"] == "late-csrf"
+
+
+@respx.mock
+async def test_a_403_without_any_token_still_stops_and_asks() -> None:
+    """Ponowienie ma sens tylko wtedy, gdy instancja faktycznie dała token."""
+    mock_status()
+    respx.post(LOGIN).mock(return_value=httpx.Response(403))
+
+    client = account_client()
+    await client.authenticate()
+
+    assert client.auth_state is AuthState.NEEDS_DECISION
+    assert sum(c.request.method == "POST" for c in respx.calls) == 1

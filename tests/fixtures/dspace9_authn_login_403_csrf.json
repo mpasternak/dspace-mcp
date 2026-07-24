@@ -1,0 +1,1 @@
+{"timestamp":"2026-07-24T22:10:50.765+00:00","status":403,"error":"Forbidden","message":"Access is denied. Invalid CSRF token.","path":"/server/api/authn/login"}

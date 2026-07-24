@@ -481,26 +481,47 @@ class DSpaceClient:
                     + ", ".join(self._offered_methods)
                 )
 
-            try:
-                response = await self.http.post(
-                    f"{self._api_url}/authn/login",
-                    data={
-                        "user": self.config.username,
-                        "password": self.config.password,
-                    },
-                    headers={"X-XSRF-TOKEN": csrf} if csrf else None,
-                    # Klient globalnie podąża za przekierowaniami (bez tego nie
-                    # działa /pid/find ani pobieranie plików), ale httpx przy
-                    # 307/308 powtarza metodę RAZEM Z CIAŁEM — hasło wyjechałoby
-                    # wtedy pod adres wskazany przez serwer. Patrz decyzja A2.
-                    follow_redirects=False,
-                )
-            except httpx.HTTPError as exc:
-                raise DSpaceError(
-                    f"Repository unreachable at {self.config.base_url}."
-                ) from exc
+            response = await self._post_credentials(csrf)
+
+            # Część instancji wydaje token CSRF **leniwie**: nie ma go ani w
+            # odpowiedzi `/authn/status`, ani w ciasteczkach, i przychodzi
+            # dopiero razem z odmową 403. Zmierzone na DSpace 9.1; na 10.1
+            # token jest dostępny od razu, więc ta ścieżka się tam nie
+            # uruchamia. Nie rozgałęziamy się po wersji (D8) — reagujemy na to,
+            # co instancja faktycznie odpowiedziała.
+            if response.status_code == 403:
+                late = response.headers.get(
+                    "dspace-xsrf-token"
+                ) or self.http.cookies.get("DSPACE-XSRF-COOKIE")
+                if late and late != csrf:
+                    response = await self._post_credentials(late)
 
             self._adopt_token(response)
+
+    async def _post_credentials(self, csrf: str | None) -> httpx.Response:
+        """Jedyne miejsce w projekcie wywołujące ``self.http.post``.
+
+        Ścieżka jest zaszyta i nie ma parametru adresu, więc żaden kod
+        wywołujący nie skieruje poświadczeń gdzie indziej (decyzja A2).
+        """
+        try:
+            return await self.http.post(
+                f"{self._api_url}/authn/login",
+                data={
+                    "user": self.config.username,
+                    "password": self.config.password,
+                },
+                headers={"X-XSRF-TOKEN": csrf} if csrf else None,
+                # Klient globalnie podąża za przekierowaniami (bez tego nie
+                # działa /pid/find ani pobieranie plików), ale httpx przy
+                # 307/308 powtarza metodę RAZEM Z CIAŁEM — hasło wyjechałoby
+                # wtedy pod adres wskazany przez serwer. Patrz decyzja A2.
+                follow_redirects=False,
+            )
+        except httpx.HTTPError as exc:
+            raise DSpaceError(
+                f"Repository unreachable at {self.config.base_url}."
+            ) from exc
 
     def _adopt_token(self, response: httpx.Response) -> None:
         """Wyciągnij token z odpowiedzi logowania albo powiedz, co poszło nie tak."""

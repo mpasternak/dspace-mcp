@@ -9,6 +9,7 @@ cookies, bez tokenów, bez nagłówka `X-XSRF-TOKEN`), wyłącznie metodą GET.
 | Prefiks | Instancja | `dspaceVersion` | Uwagi |
 |---|---|---|---|
 | `dspace10_` | https://demo.dspace.org/server/api | `DSpace 10.1-SNAPSHOT` | główne źródło fixture'ów |
+| `dspace9_`  | https://repozytorium.wsb-nlu.edu.pl/server/api | `DSpace 9.1` | tylko CSRF — instancja wydająca token **leniwie** |
 | `dspace11_` | https://sandbox.dspace.org/server/api | `DSpace 11.0-SNAPSHOT` | tylko root, do porównania |
 | `dspace8_`  | https://dspace.mit.edu/server/api | `DSpace 8.2` (+ `crisVersion: cris-2024.02.04`) | tylko root — to DSpace-CRIS, nie waniliowy DSpace |
 | `dspace7_`  | https://researchcommons.waikato.ac.nz/server/api | `DSpace 7.6.5` | waniliowy DSpace 7, do porównania kształtu |
@@ -91,3 +92,16 @@ Co z nich wynika dla kodu:
 - Bitstream **nie ma** pola `mimetype` — MIME jest w `/core/bitstreams/{uuid}/format`
   (`embed=format`)
 - `uniqueType` występuje tylko w DSpace 10/11 i DSpace-CRIS — nie ma go w DSpace 7.6/8.4/9.2
+
+## Leniwy token CSRF (DSpace 9.1, zebrane 2026-07-24)
+
+Wariant, którego demo nie pokazuje, a który blokował logowanie do prawdziwego
+repozytorium uczelnianego:
+
+| Plik | Co dokumentuje |
+|---|---|
+| `dspace9_authn_status_headers.txt` | `/authn/status` **bez** `DSPACE-XSRF-TOKEN` i bez `Set-Cookie` |
+| `dspace9_authn_login_403_csrf.json` + `_headers.txt` | `403 "Access is denied. Invalid CSRF token."`, a w nagłówkach **dopiero tu** wystawiony token |
+
+Zebrane POST-em z celowo błędnym hasłem, więc nie ma tu żadnych prawdziwych
+poświadczeń ani tokenu sesji.

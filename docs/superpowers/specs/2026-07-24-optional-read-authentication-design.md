@@ -71,8 +71,10 @@ rzeczywistych odpowiedzi, nie z dokumentacji.
 | GET **publicznego** endpointu z nieważnym tokenem | **`200` i normalne dane anonimowe** — nie `401` |
 | GET endpointu **wymagającego uprawnień** z nieważnym tokenem | `401`, identycznie jak anonimowo |
 | Drugie i trzecie `GET /api/authn/status` w tej samej sesji | **brak** nagłówka `dspace-xsrf-token`; wartość żyje tylko w ciasteczku |
+| `/authn/status` na **DSpace 9.1** (`repozytorium.wsb-nlu.edu.pl`) | **żadnego** tokenu CSRF: ani nagłówka, ani ciasteczka |
+| POST logowania bez tokenu na tej instancji | `403` `"Access is denied. Invalid CSRF token."` — **i dopiero ta odpowiedź niesie token** |
 
-Trzy z tych obserwacji obaliły założenia, na których opierałem wcześniejsze wersje
+Cztery z tych obserwacji obaliły założenia, na których opierałem wcześniejsze wersje
 projektu:
 
 1. Token CSRF **nie jest stały** — rotuje przy logowaniu, więc nie wolno go
@@ -95,6 +97,22 @@ projektu:
    nagłówek. Ujawnił je dopiero test kontraktowy wobec żywej instancji, wykonany
    prawdziwym, długo żyjącym klientem HTTP. Wniosek na przyszłość: przy protokole
    zależnym od stanu sesji `curl` nie jest wiarygodnym modelem klienta.
+
+5. **Nie każda instancja wydaje token CSRF, zanim o niego poprosisz.** Na DSpace
+   9.1 `/authn/status` nie zwraca go w ogóle — ani w nagłówku, ani w ciasteczku —
+   a token przychodzi dopiero razem z odmową `403` na POST logowania. Token jest
+   tam generowany **leniwie**, przy pierwszym żądaniu, które faktycznie go
+   potrzebuje.
+
+   Konsekwencja dla A2: pojedyncze żądanie logowania nie wystarcza. Po `403`
+   sprawdzamy, czy odpowiedź przyniosła token, i jeśli tak — ponawiamy **jeden**
+   raz. Nie rozgałęziamy się przy tym po numerze wersji (D8): reagujemy na to, co
+   instancja odpowiedziała, a nie na to, za jaką się podaje. Ta sama zasada, dla
+   której filtry wyszukiwania wykrywamy, zamiast zakładać.
+
+   Błąd wyszedł od użytkownika, nie z testów: na demo (10.1) ścieżka leniwa nie
+   występuje, więc komplet testów offline i kontraktowych był zielony, a serwer
+   i tak nie potrafił zalogować się do repozytorium uczelni.
 
 Zastrzeżenie do punktu 3: mierzone tokenem o niepoprawnym **podpisie**, nie
 tokenem wygasłym z podpisem poprawnym — sfabrykowanie tego drugiego wymagałoby
