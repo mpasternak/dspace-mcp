@@ -521,6 +521,17 @@ async def test_get_bitstream_text_refuses_oversized_file():
     assert client.streamed == []  # nie pobieramy ani bajta
 
 
+async def test_get_bitstream_text_wraps_extract_error_with_download_link():
+    """Uszkodzony/nie-PDF strumień: ExtractError z ekstraktora ma się zamienić
+    w DSpaceError z linkiem do pliku, nie przeciekać jako surowy wyjątek."""
+    client = FakeClient({f"/core/bitstreams/{ITEM_UUID}": bitstream_raw()})
+    client.stream_payload = b"not a pdf"
+    with pytest.raises(DSpaceError) as exc:
+        await tools.get_bitstream_text(client, ITEM_UUID)
+    assert "Link to the file" in str(exc.value)
+    assert "https://repo.test/server/api/x/content" in str(exc.value)
+
+
 # --- list_facet_values ----------------------------------------------------
 
 
