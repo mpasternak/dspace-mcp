@@ -22,6 +22,13 @@ publish in 2025?"*, *"which authors appear most often in this collection?"*,
 *"summarise the PDF attached to this item"* — and the assistant answers by
 querying the DSpace REST API directly.
 
+It works **anonymously out of the box**: no account, no configuration beyond the
+repository URL, and it sees exactly what any visitor sees. You can **optionally**
+give it a DSpace username and password, and it will then also read what that
+account can read — embargoed items, restricted collections and closed files —
+and can tell you which files the public cannot reach. Logging in is never
+required, and it never grants the ability to change anything.
+
 ## Read-only by construction, not by promise
 
 The server cannot deposit, edit or delete anything. Every request that carries
@@ -140,7 +147,15 @@ mixing them up.
 | `get_bitstream_text` | Extract the text of a bitstream so the assistant can read or summarise it — PDF, Word (.docx/.doc), OpenDocument (.odt/.ods/.odp) and Office XML (.pptx/.xlsx). |
 | `list_facet_values` | Count values of a facet (authors, subjects, years) — the repository does the counting, so no records are downloaded. |
 | `get_item_statistics` | View count of an item. |
-| `get_repository_info` | Name, version, item counts, and which search filters, sort fields and facets this instance actually supports. |
+| `get_repository_info` | Name, version, item counts, which search filters, sort fields and facets this instance actually supports, and whether the server is querying anonymously or as an account. |
+
+Two more tools appear **only if you configure an account** — an anonymous
+install never sees them:
+
+| Tool | What it does |
+|---|---|
+| `compare_access` | Compare what your account can see against what the public can see, for one item. Answers *"the user says files are missing"*. |
+| `continue_anonymously` | Only reachable if the login failed: lets you choose to carry on with public data instead of fixing the credentials. |
 
 ### Two things worth knowing
 
