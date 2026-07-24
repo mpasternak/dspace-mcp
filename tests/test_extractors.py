@@ -386,6 +386,56 @@ def test_dispatch_unknown_type_raises():
     assert "No text extractor" in str(exc.value)
 
 
+# --- dispatch: routing dla wszystkich formatów ZIP+XML -----------------------
+
+_DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+_PPTX_MIME = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+_XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+_ODT_MIME = "application/vnd.oasis.opendocument.text"
+_ODS_MIME = "application/vnd.oasis.opendocument.spreadsheet"
+_ODP_MIME = "application/vnd.oasis.opendocument.presentation"
+
+_ZIP_FORMATS = [
+    pytest.param(_DOCX_MIME, "docx", lambda: docx_bytes(["Hello"]), id="docx"),
+    pytest.param(_PPTX_MIME, "pptx", lambda: pptx_bytes([["Hello"]]), id="pptx"),
+    pytest.param(_XLSX_MIME, "xlsx", lambda: xlsx_bytes([[["Hello"]]]), id="xlsx"),
+    pytest.param(_ODT_MIME, "odt", lambda: odt_bytes(["Hello"]), id="odt"),
+    pytest.param(_ODS_MIME, "ods", lambda: ods_bytes([[["Hello"]]]), id="ods"),
+    pytest.param(_ODP_MIME, "odp", lambda: odp_bytes([["Hello"]]), id="odp"),
+]
+
+
+@pytest.mark.parametrize("mimetype, label, builder", _ZIP_FORMATS)
+def test_dispatch_selects_zip_format_by_mimetype(mimetype, label, builder):
+    result = dispatch(builder(), mimetype=mimetype, filename=None, max_chars=1000)
+    assert result["format"] == label
+
+
+@pytest.mark.parametrize("mimetype, label, builder", _ZIP_FORMATS)
+def test_dispatch_selects_zip_format_by_extension_fallback(mimetype, label, builder):
+    result = dispatch(
+        builder(),
+        mimetype="application/octet-stream",
+        filename=f"x.{label}",
+        max_chars=1000,
+    )
+    assert result["format"] == label
+
+
+def test_dispatch_routes_msword_mimetype_to_doc_extractor():
+    """.doc valid inline nie da się łatwo zbudować — sprawdzamy ROUTING: błąd
+    musi pochodzić z ``extract_doc`` (komunikat o niepoprawnym Wordzie), a nie
+    z generycznej ścieżki „No text extractor"."""
+    with pytest.raises(ExtractError) as exc:
+        dispatch(
+            b"not an ole file",
+            mimetype="application/msword",
+            filename=None,
+            max_chars=1000,
+        )
+    assert "not a readable Word document" in str(exc.value)
+
+
 # --- OOXML: docx, pptx, xlsx -------------------------------------------------
 
 

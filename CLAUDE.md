@@ -32,7 +32,7 @@ and shaped results flow back **outward**. Respect the layer boundaries when edit
 - **`server.py`** — thin MCP adapter. Each tool is a `@_guard`-wrapped async function
   whose **docstring is the model-facing tool description** (that text is what the LLM
   reads to choose a tool — treat it as UX, not comments). Bodies just unwrap the shared
-  client and delegate to `tools.py`. `_guard` turns `DSpaceError`/`PdfError` into a plain
+  client and delegate to `tools.py`. `_guard` turns `DSpaceError` into a plain
   `{"error": "..."}` dict so the model gets an English sentence, never a stack trace.
   A single `DSpaceClient` lives for the whole process via the FastMCP lifespan.
 - **`tools.py`** — all orchestration logic, and it knows **nothing about MCP**. Every
@@ -47,11 +47,16 @@ and shaped results flow back **outward**. Respect the layer boundaries when edit
   are untrusted input, so a missing key or wrong-typed value must yield empty output, not
   an exception (`_as_dict` is the workhorse for this). Tested directly against raw fixtures.
 - **`config.py`** — frozen `Config` dataclass, built from env vars or CLI flags (flag >
-  env > default). `pdf.py` — pure PDF-bytes → text extraction, raises `PdfError`.
+  env > default). **`extractors/`** — a package of pure `bytes → text` extractors
+  (`pdf`, `ooxml` for docx/pptx/xlsx, `opendocument` for odt/ods/odp, `msword` for
+  legacy `.doc`) behind a mimetype→extractor `dispatch()`; all raise `ExtractError`.
+  Non-stdlib deps here are only `olefile` (legacy `.doc`) and `defusedxml`
+  (safe XML parsing of untrusted files); the ZIP+XML formats use `zipfile` +
+  `defusedxml.ElementTree`.
 
 ## Conventions that carry real intent
 
-- **Two error types cross the boundary to the model**: `DSpaceError` and `PdfError`.
+- **Two error types cross the boundary to the model**: `DSpaceError` and `ExtractError`.
   Their `message` is always **English** (this is an international package whose consumer
   is an LLM). When adding failures, raise one of these with an actionable sentence — a
   message the model can turn into a corrected query or a question to the user. Never let a
