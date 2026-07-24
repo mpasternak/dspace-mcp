@@ -1053,7 +1053,9 @@ async def test_token_close_to_expiry_is_replaced_before_the_request(
 
 
 @respx.mock
-async def test_401_triggers_exactly_one_relogin_and_one_retry() -> None:
+async def test_401_triggers_exactly_one_relogin_and_one_retry(
+    instant_refresh: None,
+) -> None:
     mock_status()
     respx.post(LOGIN).mock(
         side_effect=[
@@ -1077,7 +1079,9 @@ async def test_401_triggers_exactly_one_relogin_and_one_retry() -> None:
 
 
 @respx.mock
-async def test_second_401_after_a_successful_relogin_is_not_retried_again() -> None:
+async def test_second_401_after_a_successful_relogin_is_not_retried_again(
+    instant_refresh: None,
+) -> None:
     """Nie twierdzimy nic o uprawnieniach konta — nie zmierzyliśmy tego."""
     mock_status()
     mock_login(jwt())
@@ -1298,3 +1302,52 @@ async def test_csrf_token_is_taken_from_the_cookie_when_the_header_is_gone(
     assert len(logins) == 2
     assert logins[1].headers.get("X-XSRF-TOKEN") == "csrf-1"
     assert client.auth_state is AuthState.AUTHENTICATED
+
+
+@respx.mock
+async def test_a_401_moments_after_logging_in_does_not_trigger_another_login() -> None:
+    """Świeży token nie może być przyczyną 401, więc ponowne logowanie nie pomoże.
+
+    Bez tego bezpiecznika model iterujący po rekordach, na które instancja
+    odpowiada 401 zamiast 403, wywoływałby pełne logowanie przy KAŻDYM z nich —
+    czyli dokładnie scenariusz „natrętny klient → ban IP", przed którym
+    TOKEN_MIN_LOGIN_INTERVAL ma chronić na ścieżce proaktywnej.
+    """
+    mock_status()
+    mock_login(jwt())
+    respx.get(TOP).mock(return_value=httpx.Response(401))
+
+    client = account_client()
+    await client.authenticate()
+    for _ in range(4):
+        with pytest.raises(DSpaceError):
+            await client.get("/core/communities/search/top")
+
+    assert sum(c.request.method == "POST" for c in respx.calls) == 1
+
+
+@respx.mock
+async def test_stream_bytes_does_not_blame_the_account_after_a_failed_retry(
+    instant_refresh: None,
+) -> None:
+    """Ten sam przypadek graniczny co w _request_json — i ta sama powściągliwość.
+
+    Nie zmierzyliśmy, czy DSpace odpowiada zalogowanemu-bez-uprawnień kodem 401
+    czy 403, więc komunikat nie ma prawa twierdzić niczego o uprawnieniach konta.
+    """
+    mock_status()
+    respx.post(LOGIN).mock(
+        side_effect=[
+            httpx.Response(200, headers={"Authorization": f"Bearer {jwt()}"}),
+            httpx.Response(200, headers={"Authorization": f"Bearer {jwt()}"}),
+        ]
+    )
+    respx.get(CONTENT_URL).mock(return_value=httpx.Response(401))
+
+    client = account_client()
+    await client.authenticate()
+    with pytest.raises(DSpaceError) as exc:
+        await client.stream_bytes(CONTENT_URL, max_bytes=ONE_MB)
+
+    assert "refused access" not in str(exc.value)
+    assert "token" in str(exc.value).lower()

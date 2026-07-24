@@ -520,7 +520,8 @@ Poza tym:
   wywołane w `AUTHENTICATED`/`ANONYMOUS` raportuje stan bieżący,
 - po `ANONYMOUS_BY_CHOICE` żądania **nie niosą** `Authorization`,
 - `continue_anonymously` nie jest zarejestrowane, gdy nie podano konta;
-  `compare_access` nie jest zarejestrowane bez udanego logowania,
+  `compare_access` odmawia pracy poza stanem `AUTHENTICATED` (inaczej porównywałoby
+  anonima z anonimem i meldowało „nic nie jest ukryte"),
 - `compare_access`: tor anonimowy nie niesie `Authorization` **w żadnym** żądaniu i
   używa osobnego cookie jar; różnica plików liczona po UUID,
 - instancja bez `password` w `www-authenticate` → `NEEDS_DECISION` bez próby POST-a,

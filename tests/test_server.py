@@ -12,7 +12,7 @@ from types import SimpleNamespace
 import pytest
 
 from dspace_mcp import server
-from dspace_mcp.client import AuthState, DSpaceError
+from dspace_mcp.client import AuthState, DSpaceClient, DSpaceError
 from dspace_mcp.config import Config
 
 EXPECTED_TOOLS = {
@@ -110,6 +110,10 @@ class StubClient:
         self.auth_reason = reason
         self.config = ACCOUNT
         self.accepted = False
+
+    # Prawdziwa implementacja, nie kopia: inaczej test sprawdzałby treść
+    # komunikatu wymyśloną w atrapie, a nie tę, którą dostanie model.
+    decision_question = DSpaceClient.decision_question
 
     def accept_anonymous(self) -> None:
         self.accepted = True

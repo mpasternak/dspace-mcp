@@ -354,9 +354,18 @@ class DSpaceClient:
         Drugiego 401 po **udanym** ponownym logowaniu nie tłumaczymy brakiem
         uprawnień konta — nie zmierzyliśmy, czy DSpace odpowiada wtedy 401 czy
         403, a to API ma historię zaskakujących kodów (401 na zepsuty UUID).
+
+        Świeżo zdobyty token wyklucza się jako przyczyna 401, więc wtedy nie
+        logujemy się ponownie — to samo ograniczenie czasowe, co na ścieżce
+        proaktywnej. Bez niego model iterujący po rekordach, na które instancja
+        odpowiada 401 zamiast 403, wywoływałby pełne logowanie przy KAŻDYM z
+        nich: dokładnie ten natrętny ruch, który kończy się banem IP.
         """
         return (
-            not anonymous and not retried and self.auth_state is AuthState.AUTHENTICATED
+            not anonymous
+            and not retried
+            and self.auth_state is AuthState.AUTHENTICATED
+            and time.time() - self._last_login_at >= TOKEN_MIN_LOGIN_INTERVAL
         )
 
     async def get(
@@ -400,16 +409,28 @@ class DSpaceClient:
         """Metody logowania ogłoszone przez instancję (puste = nie pytaliśmy)."""
         return list(self._offered_methods)
 
+    def decision_question(self) -> str:
+        """Pytanie do użytkownika, które model ma mu zadać (decyzja A3).
+
+        Jedno źródło tej treści: ta sama funkcja obsługuje bramkę w
+        ``server.py`` (stan zastany przed wejściem do narzędzia) i wyjątek
+        ``NeedsDecision`` (logowanie padło w trakcie wywołania). Gdyby tekst żył
+        w dwóch miejscach, to samo zdarzenie z czasem zaczęłoby brzmieć różnie
+        zależnie od tego, którym torem trafiło do modelu.
+        """
+        return (
+            f"Login as {self.config.username} at {self.config.base_url} failed: "
+            f"{self.auth_reason}. Ask the user how to proceed: either correct the "
+            f"username and password in this server's configuration and restart it, "
+            f"or — if they agree to work with public data only — call "
+            f"continue_anonymously."
+        )
+
     def _needs_decision(self, reason: str) -> NeedsDecision:
         self.auth_state = AuthState.NEEDS_DECISION
         self.auth_reason = reason
         self._token = None
-        return NeedsDecision(
-            f"Login as {self.config.username} at {self.config.base_url} failed: "
-            f"{reason}. Ask the user how to proceed: either correct the username "
-            f"and password in this server's configuration and restart it, or — if "
-            f"they agree to work with public data only — call continue_anonymously."
-        )
+        return NeedsDecision(self.decision_question())
 
     async def _csrf_token(self) -> str | None:
         """Token CSRF z ``/authn/status``; przy okazji spisuje metody logowania.
@@ -734,6 +755,15 @@ class DSpaceClient:
                     await self._login(stale=self._token)
                     return await self.stream_bytes(
                         url, max_bytes=max_bytes, anonymous=anonymous, _retried=True
+                    )
+                if response.status_code == 401 and _retried:
+                    # Ta sama powściągliwość co w _request_json: po udanym
+                    # ponownym logowaniu 401 jest anomalią sesji, a o
+                    # uprawnieniach konta nic nie wiemy.
+                    await response.aread()
+                    raise DSpaceError(
+                        f"The repository keeps rejecting this session's token "
+                        f"for {url}."
                     )
                 if response.status_code >= 400:
                     await response.aread()

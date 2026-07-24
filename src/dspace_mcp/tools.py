@@ -505,6 +505,16 @@ async def compare_access(client: DSpaceClient, item: str) -> dict[str, Any]:
     sesji — inaczej „anonim" bywałby po cichu uwierzytelniony i całe porównanie
     nie znaczyłoby nic.
     """
+    # Bez realnej sesji „widok konta" byłby drugim widokiem anonimowym, bo token
+    # doklejamy wyłącznie w stanie AUTHENTICATED. Porównanie anonima z anonimem
+    # zawsze wychodzi „nic nie jest ukryte" — fałszywe zapewnienie w narzędziu
+    # stworzonym po to, żeby odpowiadać na pytanie „czy czegoś brakuje".
+    if getattr(client, "auth_state", None) is not AuthState.AUTHENTICATED:
+        raise DSpaceError(
+            "This server is not logged in, so there is nothing to compare: it "
+            "already sees exactly what the public sees."
+        )
+
     identifier = item.strip()
     uuid = (
         identifier
@@ -518,16 +528,24 @@ async def compare_access(client: DSpaceClient, item: str) -> dict[str, Any]:
     anonymous_files: list[dict] = []
     try:
         await client.get(f"/core/items/{uuid}", anonymous=True)
-    except DSpaceError:
+    except DSpaceError as exc:
+        # Tylko odmowa dostępu znaczy „publiczność tego nie widzi". Timeout,
+        # rate limit czy zerwane połączenie to awaria — zamiana ich na werdykt
+        # o widoczności dałaby odpowiedź fałszywą, a brzmiącą pewnie.
+        if exc.status not in (401, 403, 404):
+            raise
         visible_to_anonymous = False
     else:
         try:
             anonymous_files = (await list_bitstreams(client, uuid, anonymous=True))[
                 "results"
             ]
-        except DSpaceError:
+        except DSpaceError as exc:
             # Rekord publiczny, ale jego pliki już nie — to normalny wynik
-            # porównania (embargo na pełny tekst), nie awaria.
+            # porównania (embargo na pełny tekst), nie awaria. Pozostałe błędy
+            # przechodzą dalej z tego samego powodu, co wyżej.
+            if exc.status not in (401, 403, 404):
+                raise
             anonymous_files = []
 
     public_uuids = {entry.get("uuid") for entry in anonymous_files}
@@ -570,6 +588,15 @@ def _authentication_report(client: DSpaceClient) -> dict[str, Any]:
         return {"mode": "anonymous"}
     if state is AuthState.ANONYMOUS_BY_CHOICE:
         return {"mode": "anonymous_by_choice", "user": client.config.username}
+    if state is AuthState.NEEDS_DECISION:
+        # Bramka w server.py normalnie nie dopuszcza tu wywołania, ale tools.py
+        # ma być poprawny bez warstwy MCP. Zgłoszenie „authenticated" przy
+        # nieudanym logowaniu byłoby zwykłym kłamstwem.
+        return {
+            "mode": "needs_decision",
+            "user": client.config.username,
+            "reason": getattr(client, "auth_reason", ""),
+        }
     report: dict[str, Any] = {"mode": "authenticated", "user": client.config.username}
     offered = getattr(client, "offered_methods", [])
     if offered:

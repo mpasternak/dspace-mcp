@@ -78,7 +78,11 @@ class FakeClient:
         self._record(path, params, anonymous)
         routes = self.anon_routes if anonymous else self.routes
         if path not in routes:
-            raise DSpaceError(f"Not found: no such object at {path}.")
+            # Prawdziwy klient zawsze nadaje `status` (patrz _error_for_status),
+            # a kod wywołujący na nim polega, żeby odróżnić brak dostępu od awarii.
+            missing = DSpaceError(f"Not found: no such object at {path}.")
+            missing.status = 404
+            raise missing
         value = routes[path]
         if isinstance(value, Exception):
             raise value
@@ -923,3 +927,60 @@ async def test_statistics_error_still_says_anonymously_without_an_account():
         await tools.get_item_statistics(client, ITEM_UUID)
 
     assert "anonymously" in str(exc.value)
+
+
+async def test_compare_access_refuses_when_not_actually_logged_in():
+    """Po `continue_anonymously` „widok konta" jest w rzeczywistości anonimowy.
+
+    Bramka w `_guard` blokuje tylko NEEDS_DECISION, a `_auth_headers` dokleja
+    token wyłącznie w stanie AUTHENTICATED — więc bez tej odmowy narzędzie
+    porównałoby anonima z anonimem i z pełnym przekonaniem zameldowało „nic nie
+    jest ukryte". Fałszywe zapewnienie w narzędziu stworzonym dokładnie po to,
+    żeby odpowiadać na pytanie „czy czegoś brakuje".
+    """
+    client = FakeClient(
+        routes={f"/core/items/{ITEM_UUID}": {"uuid": ITEM_UUID}},
+        pages=_two_bundles_with([bitstream_raw("secret.pdf")]),
+        auth_state=AuthState.ANONYMOUS_BY_CHOICE,
+    )
+
+    with pytest.raises(DSpaceError) as exc:
+        await tools.compare_access(client, ITEM_UUID)
+
+    assert "not logged in" in str(exc.value).lower()
+
+
+async def test_compare_access_does_not_turn_a_timeout_into_a_permissions_verdict():
+    """Timeout po stronie anonimowej to awaria, a nie dowód, że rekord jest ukryty."""
+    timeout = DSpaceError("The repository did not respond in time; try narrowing.")
+    client = FakeClient(
+        routes={f"/core/items/{ITEM_UUID}": {"uuid": ITEM_UUID}},
+        pages=_two_bundles_with([bitstream_raw("a.pdf")]),
+        anon_routes={f"/core/items/{ITEM_UUID}": timeout},
+        auth_state=AuthState.AUTHENTICATED,
+    )
+
+    with pytest.raises(DSpaceError) as exc:
+        await tools.compare_access(client, ITEM_UUID)
+
+    assert "did not respond in time" in str(exc.value)
+
+
+async def test_authentication_report_does_not_claim_a_failed_login_succeeded():
+    """`tools.py` ma być poprawny bez warstwy MCP — nie może polegać na bramce."""
+    config = Config(
+        base_url="https://repo.test/server",
+        username="reader@repo.test",
+        password="s3kret",
+    )
+    client = FakeClient(
+        routes={"/discover/search/objects": {}},
+        config=config,
+        auth_state=AuthState.NEEDS_DECISION,
+    )
+    client.auth_reason = "the repository rejected that username or password"
+
+    info = await tools.get_repository_info(client)
+
+    assert info["authentication"]["mode"] != "authenticated"
+    assert "rejected" in info["authentication"]["reason"]

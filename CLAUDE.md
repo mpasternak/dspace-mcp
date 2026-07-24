@@ -39,6 +39,9 @@ and shaped results flow back **outward**. Respect the layer boundaries when edit
   client and delegate to `tools.py`. `_guard` turns `DSpaceError` into a plain
   `{"error": "..."}` dict so the model gets an English sentence, never a stack trace.
   A single `DSpaceClient` lives for the whole process via the FastMCP lifespan.
+  `_guard` is also the gate that blocks every tool after a failed login (decision A3),
+  which is why `continue_anonymously` is the one tool **not** wrapped: guarding the tool
+  that lifts the block would make it unreachable.
 - **`tools.py`** — all orchestration logic, and it knows **nothing about MCP**. Every
   function takes a `DSpaceClient` and returns a plain dict, so tools are tested without
   running a server. List responses use the shared `_envelope(results, total, truncated)`.

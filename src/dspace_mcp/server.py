@@ -41,16 +41,7 @@ def _decision_prompt(client: DSpaceClient) -> dict[str, Any]:
     trakcie już trwającego wywołania). Inaczej to samo zdarzenie raz wyglądałoby
     jak pytanie, a raz jak zwykły błąd.
     """
-    return {
-        "needs_user_decision": True,
-        "error": (
-            f"Login as {client.config.username} at {client.config.base_url} "
-            f"failed: {client.auth_reason}. Ask the user how to proceed: either "
-            f"correct the username and password in this server's configuration "
-            f"and restart it, or — if they agree to work with public data only — "
-            f"call continue_anonymously."
-        ),
-    }
+    return {"needs_user_decision": True, "error": client.decision_question()}
 
 
 def _guard(fn: Callable) -> Callable:
@@ -267,12 +258,26 @@ async def continue_anonymously(ctx: Context) -> dict[str, Any]:
     """
     client = _client(ctx)
     client.accept_anonymous()
-    return {
-        "mode": client.auth_state.value,
-        "message": (
+    # Komunikat musi opisywać stan, w którym faktycznie jesteśmy. Przejście
+    # działa tylko z NEEDS_DECISION, więc wywołane w innym stanie jest no-opem —
+    # stała odpowiedź „pracuję na danych publicznych" przeczyłaby wtedy polu
+    # `mode` w tym samym słowniku.
+    messages = {
+        AuthState.ANONYMOUS_BY_CHOICE: (
             "Working with publicly available data only. Restricted items and "
             "files will not appear in any result."
         ),
+        AuthState.AUTHENTICATED: (
+            "Nothing changed: this server is logged in and working normally."
+        ),
+        AuthState.ANONYMOUS: (
+            "Nothing changed: no account is configured, so this server was "
+            "already working with publicly available data only."
+        ),
+    }
+    return {
+        "mode": client.auth_state.value,
+        "message": messages.get(client.auth_state, ""),
     }
 
 
@@ -280,9 +285,9 @@ async def continue_anonymously(ctx: Context) -> dict[str, Any]:
 async def compare_access(ctx: Context, item: str) -> dict[str, Any]:
     """Compare what this account can see against what the public can see.
 
-    Answers "the user says files are missing": it fetches the item and its
-    files twice — once as the logged-in account, once anonymously — and returns
-    the difference, telling you which files are not publicly available.
+    Answers "the user says files are missing": it lists the item's files as the
+    logged-in account, checks the same item anonymously, and returns the
+    difference — telling you which files are not publicly available.
 
     Args:
         item: UUID, Handle or DOI of the item.
