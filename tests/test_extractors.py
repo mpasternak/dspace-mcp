@@ -16,6 +16,8 @@ import pytest
 
 from dspace_mcp.extractors import ExtractError, dispatch, extract_pdf
 from dspace_mcp.extractors.base import normalize
+from dspace_mcp.extractors.ooxml import extract_docx, extract_pptx, extract_xlsx
+from office_samples import docx_bytes, pptx_bytes, xlsx_bytes
 
 
 def _one_page_pdf(text: str) -> bytes:
@@ -372,3 +374,43 @@ def test_dispatch_unknown_type_raises():
     with pytest.raises(ExtractError) as exc:
         dispatch(b"data", mimetype="image/png", filename="x.png", max_chars=100)
     assert "No text extractor" in str(exc.value)
+
+
+# --- OOXML: docx, pptx, xlsx -------------------------------------------------
+
+
+def test_extract_docx_joins_paragraphs():
+    result = extract_docx(docx_bytes(["First para", "Second para"]), max_chars=1000)
+    assert "First para" in result["text"]
+    assert "Second para" in result["text"]
+    assert result["unit"] == "paragraphs"
+    assert result["units_total"] == 2
+    assert result["truncated"] is False
+
+
+def test_extract_docx_bad_zip_raises():
+    with pytest.raises(ExtractError) as exc:
+        extract_docx(b"not a zip", max_chars=100)
+    assert "not a readable" in str(exc.value)
+
+
+def test_extract_docx_empty_raises():
+    with pytest.raises(ExtractError):
+        extract_docx(docx_bytes([""]), max_chars=100)
+
+
+def test_extract_pptx_reads_slides_in_order():
+    data = pptx_bytes([["Slide one text"], ["Slide two text"]])
+    result = extract_pptx(data, max_chars=1000)
+    assert result["unit"] == "slides"
+    assert result["units_total"] == 2
+    assert result["text"].index("one") < result["text"].index("two")
+
+
+def test_extract_xlsx_flattens_cells_with_shared_strings():
+    data = xlsx_bytes([[["Name", "City"], ["Ada", "London"]]])
+    result = extract_xlsx(data, max_chars=1000)
+    assert "Name" in result["text"] and "London" in result["text"]
+    assert result["unit"] == "sheets"
+    assert result["units_total"] == 1
+    assert "\t" in result["text"]  # kolumny rozdzielone tabem

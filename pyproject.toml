@@ -70,4 +70,4 @@ target-version = "py310"
 select = ["E", "F", "I", "W", "UP", "B"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["dspace_mcp", "conftest"]
+known-first-party = ["dspace_mcp", "conftest", "office_samples"]

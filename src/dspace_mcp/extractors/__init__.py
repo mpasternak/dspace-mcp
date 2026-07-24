@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections.abc import Callable
 
 from .base import ExtractError
+from .ooxml import extract_docx, extract_pptx, extract_xlsx
 from .pdf import extract_pdf
 
 __all__ = ["ExtractError", "dispatch"]
@@ -17,11 +18,28 @@ __all__ = ["ExtractError", "dispatch"]
 #: mimetype → (funkcja ekstraktora, etykieta formatu w wyniku).
 _BY_MIMETYPE: dict[str, tuple[Callable[..., dict], str]] = {
     "application/pdf": (extract_pdf, "pdf"),
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": (
+        extract_docx,
+        "docx",
+    ),
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation": (
+        extract_pptx,
+        "pptx",
+    ),
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": (
+        extract_xlsx,
+        "xlsx",
+    ),
 }
 
 #: rozszerzenie nazwy pliku → mimetype (fallback, gdy mimetype pusty/ogólny).
 _BY_EXTENSION: dict[str, str] = {
     "pdf": "application/pdf",
+    "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "pptx": (
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    ),
+    "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 }
 
 #: mimetypy „nic konkretnego" — wtedy ufamy rozszerzeniu nazwy pliku.
