@@ -14,7 +14,7 @@ import re
 from typing import Any
 
 from .client import DSpaceClient, DSpaceError, is_uuid, require_uuid
-from .pdf import PdfError, extract_text
+from .extractors import ExtractError, extract_pdf
 from .shaping import (
     link_href,
     metadata_value,
@@ -392,8 +392,8 @@ async def get_bitstream_text(
 
     data = await client.stream_bytes(url, max_bytes=client.config.pdf_max_bytes)
     try:
-        extracted = extract_text(data, max_chars=max_chars)
-    except PdfError as exc:
+        extracted = extract_pdf(data, max_chars=max_chars)
+    except ExtractError as exc:
         raise DSpaceError(f"{exc} Link to the file: {url}") from exc
 
     return {

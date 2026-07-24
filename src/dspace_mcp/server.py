@@ -19,7 +19,6 @@ from mcp.server.fastmcp import Context, FastMCP
 from . import tools
 from .client import DSpaceClient, DSpaceError
 from .config import Config, parse_args
-from .pdf import PdfError
 
 
 @dataclass
@@ -44,7 +43,7 @@ def _guard(fn: Callable) -> Callable:
     async def wrapper(*args: Any, **kwargs: Any) -> Any:
         try:
             return await fn(*args, **kwargs)
-        except (DSpaceError, PdfError) as exc:
+        except DSpaceError as exc:
             return {"error": str(exc)}
 
     return wrapper
