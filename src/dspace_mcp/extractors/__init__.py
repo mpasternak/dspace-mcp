@@ -11,6 +11,7 @@ from collections.abc import Callable
 
 from .base import ExtractError
 from .ooxml import extract_docx, extract_pptx, extract_xlsx
+from .opendocument import extract_odp, extract_ods, extract_odt
 from .pdf import extract_pdf
 
 __all__ = ["ExtractError", "dispatch"]
@@ -30,6 +31,9 @@ _BY_MIMETYPE: dict[str, tuple[Callable[..., dict], str]] = {
         extract_xlsx,
         "xlsx",
     ),
+    "application/vnd.oasis.opendocument.text": (extract_odt, "odt"),
+    "application/vnd.oasis.opendocument.spreadsheet": (extract_ods, "ods"),
+    "application/vnd.oasis.opendocument.presentation": (extract_odp, "odp"),
 }
 
 #: rozszerzenie nazwy pliku → mimetype (fallback, gdy mimetype pusty/ogólny).
@@ -40,6 +44,9 @@ _BY_EXTENSION: dict[str, str] = {
         "application/vnd.openxmlformats-officedocument.presentationml.presentation"
     ),
     "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "odt": "application/vnd.oasis.opendocument.text",
+    "ods": "application/vnd.oasis.opendocument.spreadsheet",
+    "odp": "application/vnd.oasis.opendocument.presentation",
 }
 
 #: mimetypy „nic konkretnego" — wtedy ufamy rozszerzeniu nazwy pliku.

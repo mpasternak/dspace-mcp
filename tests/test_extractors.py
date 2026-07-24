@@ -17,7 +17,15 @@ import pytest
 from dspace_mcp.extractors import ExtractError, dispatch, extract_pdf
 from dspace_mcp.extractors.base import normalize
 from dspace_mcp.extractors.ooxml import extract_docx, extract_pptx, extract_xlsx
-from office_samples import docx_bytes, pptx_bytes, xlsx_bytes
+from dspace_mcp.extractors.opendocument import extract_odp, extract_ods, extract_odt
+from office_samples import (
+    docx_bytes,
+    odp_bytes,
+    ods_bytes,
+    odt_bytes,
+    pptx_bytes,
+    xlsx_bytes,
+)
 
 
 def _one_page_pdf(text: str) -> bytes:
@@ -454,3 +462,34 @@ def test_extract_xlsx_reads_inline_string_cell():
     result = extract_xlsx(data, max_chars=1000)
     assert "Direct text" in result["text"]
     assert "Shared text" in result["text"]
+
+
+# --- ODF: odt, ods, odp -------------------------------------------------
+
+
+def test_extract_odt_joins_paragraphs():
+    result = extract_odt(odt_bytes(["Alpha line", "Beta line"]), max_chars=1000)
+    assert "Alpha line" in result["text"] and "Beta line" in result["text"]
+    assert result["unit"] == "paragraphs"
+    assert result["units_total"] == 2
+
+
+def test_extract_ods_flattens_cells():
+    data = ods_bytes([[["Ada", "London"], ["Bob", "Paris"]]])
+    result = extract_ods(data, max_chars=1000)
+    assert "Ada" in result["text"] and "Paris" in result["text"]
+    assert result["unit"] == "sheets"
+    assert result["units_total"] == 1
+
+
+def test_extract_odp_reads_pages():
+    data = odp_bytes([["First slide"], ["Second slide"]])
+    result = extract_odp(data, max_chars=1000)
+    assert result["unit"] == "slides"
+    assert result["units_total"] == 2
+    assert "First slide" in result["text"]
+
+
+def test_extract_odt_bad_zip_raises():
+    with pytest.raises(ExtractError):
+        extract_odt(b"not a zip", max_chars=100)
