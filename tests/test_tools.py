@@ -502,13 +502,28 @@ async def test_list_bitstreams_reports_missing_bundle():
 # --- get_bitstream_text ---------------------------------------------------
 
 
-async def test_get_bitstream_text_refuses_non_pdf():
+async def test_get_bitstream_text_refuses_unmapped_mimetype():
+    """Mimetype, dla którego nie ma ekstraktora: komunikat dispatchu, nie „not
+    a PDF" — a link do pliku i tak ma trafić do modelu."""
     raw = bitstream_raw("data.csv", "text/csv")
     client = FakeClient({f"/core/bitstreams/{ITEM_UUID}": raw})
     with pytest.raises(DSpaceError) as exc:
         await tools.get_bitstream_text(client, ITEM_UUID)
+    assert "No text extractor" in str(exc.value)
     assert "text/csv" in str(exc.value)
     assert "content" in str(exc.value)  # link musi trafić do modelu
+
+
+async def test_get_bitstream_text_falls_back_to_extension_for_generic_mimetype():
+    """Instancja oddaje `application/octet-stream`, ale nazwa zdradza PDF."""
+    from test_extractors import _one_page_pdf
+
+    raw = bitstream_raw("report.pdf", "application/octet-stream")
+    client = FakeClient({f"/core/bitstreams/{ITEM_UUID}": raw})
+    client.stream_payload = _one_page_pdf("Hello")
+    result = await tools.get_bitstream_text(client, ITEM_UUID)
+    assert result["format"] == "pdf"
+    assert "Hello" in result["text"]
 
 
 async def test_get_bitstream_text_refuses_oversized_file():

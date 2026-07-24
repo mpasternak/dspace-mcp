@@ -14,7 +14,7 @@ import re
 from typing import Any
 
 from .client import DSpaceClient, DSpaceError, is_uuid, require_uuid
-from .extractors import ExtractError, extract_pdf
+from .extractors import ExtractError, dispatch
 from .shaping import (
     link_href,
     metadata_value,
@@ -361,8 +361,9 @@ async def list_bitstreams(
 async def get_bitstream_text(
     client: DSpaceClient, bitstream: str, max_chars: int = 20000
 ) -> dict[str, Any]:
-    """Tekst z PDF-a. Rozmiar i typ bierzemy z metadanych, ale limit egzekwuje
-    strumień — `sizeBytes` bywa niezgodne z rzeczywistością."""
+    """Tekst z pliku. Rozmiar i typ bierzemy z metadanych, ale limit egzekwuje
+    strumień — `sizeBytes` bywa niezgodne z rzeczywistością. O tym, który
+    ekstraktor zadziała, decyduje `extractors.dispatch` po mimetypie."""
     if max_chars <= 0:
         raise DSpaceError("max_chars must be greater than zero.")
 
@@ -370,35 +371,32 @@ async def get_bitstream_text(
     raw = await client.get(f"/core/bitstreams/{uuid}", {"embed": "format"})
     fmt = raw.get("_embedded", {}).get("format", {})
     mimetype = fmt.get("mimetype")
+    name = raw.get("name")
     url = link_href(raw, "content")
     size = raw.get("sizeBytes")
-    limit_mb = client.config.pdf_max_mb
+    limit_mb = client.config.extract_max_mb
 
     if not url:
         raise DSpaceError("This bitstream has no downloadable content.")
 
-    if mimetype and "pdf" not in mimetype.lower():
-        raise DSpaceError(
-            f"This file is {mimetype}, not a PDF, so no text can be extracted. "
-            f"Give the user this link instead: {url}"
-        )
-
-    if size and size > client.config.pdf_max_bytes:
+    if size and size > client.config.extract_max_bytes:
         mb = size / (1024 * 1024)
         raise DSpaceError(
             f"This file is {mb:.1f} MB, above the {limit_mb} MB limit. "
             f"Give the user this link instead: {url}"
         )
 
-    data = await client.stream_bytes(url, max_bytes=client.config.pdf_max_bytes)
+    data = await client.stream_bytes(url, max_bytes=client.config.extract_max_bytes)
     try:
-        extracted = extract_pdf(data, max_chars=max_chars)
+        extracted = dispatch(
+            data, mimetype=mimetype, filename=name, max_chars=max_chars
+        )
     except ExtractError as exc:
         raise DSpaceError(f"{exc} Link to the file: {url}") from exc
 
     return {
         "bitstream": uuid,
-        "name": raw.get("name"),
+        "name": name,
         "mimetype": mimetype,
         "size_bytes": size,
         "download_url": url,

@@ -14,7 +14,7 @@ from collections.abc import Sequence
 import pypdf
 import pytest
 
-from dspace_mcp.extractors import ExtractError, extract_pdf
+from dspace_mcp.extractors import ExtractError, dispatch, extract_pdf
 from dspace_mcp.extractors.base import normalize
 
 
@@ -332,3 +332,43 @@ def test_extract_pdf_errors_do_not_leak_pypdf_traceback(data: bytes | None) -> N
         extract_pdf(payload)
     assert excinfo.value.__cause__ is None
     assert "pypdf" not in str(excinfo.value)
+
+
+# --- dispatch: rejestr formatów, fallback po rozszerzeniu -------------------
+
+
+def test_dispatch_selects_pdf_by_mimetype():
+    result = dispatch(
+        _one_page_pdf("Hello"),
+        mimetype="application/pdf",
+        filename="paper.pdf",
+        max_chars=1000,
+    )
+    assert result["format"] == "pdf"
+    assert "Hello" in result["text"]
+
+
+def test_dispatch_falls_back_to_extension_for_generic_mimetype():
+    result = dispatch(
+        _one_page_pdf("Hello"),
+        mimetype="application/octet-stream",
+        filename="paper.PDF",
+        max_chars=1000,
+    )
+    assert result["format"] == "pdf"
+
+
+def test_dispatch_strips_mimetype_parameters():
+    result = dispatch(
+        _one_page_pdf("Hello"),
+        mimetype="application/pdf; charset=binary",
+        filename=None,
+        max_chars=1000,
+    )
+    assert result["format"] == "pdf"
+
+
+def test_dispatch_unknown_type_raises():
+    with pytest.raises(ExtractError) as exc:
+        dispatch(b"data", mimetype="image/png", filename="x.png", max_chars=100)
+    assert "No text extractor" in str(exc.value)
