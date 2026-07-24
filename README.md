@@ -76,7 +76,7 @@ mixing them up.
 | `list_communities` | Walk the community tree (up to 3 levels). |
 | `list_collections` | List collections, of one community or of the whole repository. |
 | `list_bitstreams` | List an item's files with sizes, MIME types, checksums and download URLs. |
-| `get_bitstream_text` | Extract the text of a PDF so the assistant can read or summarise it. |
+| `get_bitstream_text` | Extract the text of a bitstream so the assistant can read or summarise it — PDF, Word (.docx/.doc), OpenDocument (.odt/.ods/.odp) and Office XML (.pptx/.xlsx). |
 | `list_facet_values` | Count values of a facet (authors, subjects, years) — the repository does the counting, so no records are downloaded. |
 | `get_item_statistics` | View count of an item. |
 | `get_repository_info` | Name, version, item counts, and which search filters, sort fields and facets this instance actually supports. |
@@ -99,10 +99,14 @@ instead of downloading records and counting them.
 | `DSPACE_BASE_URL` | *(required)* | REST API root, e.g. `https://demo.dspace.org/server` |
 | `DSPACE_TIMEOUT` | `15` | seconds per HTTP request |
 | `DSPACE_MAX_RESULTS` | `50` | hard ceiling on how many records any tool may return |
-| `DSPACE_PDF_MAX_MB` | `20` | refuse to download PDFs larger than this |
+| `DSPACE_EXTRACT_MAX_MB` | `20` | refuse to download bitstreams larger than this for text extraction |
 
 Every variable has a matching flag: `--base-url`, `--timeout`,
-`--max-results`, `--pdf-max-mb`.
+`--max-results`, `--extract-max-mb`.
+
+`DSPACE_PDF_MAX_MB` / `--pdf-max-mb` still work as backward-compatible aliases
+for `DSPACE_EXTRACT_MAX_MB` / `--extract-max-mb` from before text extraction
+covered more than PDF.
 
 ## Compatibility
 

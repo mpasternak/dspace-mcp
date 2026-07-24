@@ -787,6 +787,10 @@ async def test_client_only_ever_sends_get() -> None:
         return_value=httpx.Response(200, json=fixture_json("dspace10_facets_author"))
     )
     respx.get(CONTENT_URL).mock(return_value=httpx.Response(200, content=b"%PDF-1.4"))
+    docx_url = f"{API}/core/bitstreams/{VALID_UUID}/content"
+    respx.get(docx_url).mock(
+        return_value=httpx.Response(200, content=b"PK\x03\x04docx-bytes")
+    )
 
     client = make_client()
     await client.probe()
@@ -795,6 +799,7 @@ async def test_client_only_ever_sends_get() -> None:
     await client.get_page("/core/communities/search/top", key="communities")
     await client.get_all("/discover/facets/author", key="values", limit=3)
     await client.stream_bytes(CONTENT_URL, max_bytes=ONE_MB)
+    await client.stream_bytes(docx_url, max_bytes=ONE_MB)
 
     assert len(respx.calls) > 0
     assert {call.request.method for call in respx.calls} == {"GET"}

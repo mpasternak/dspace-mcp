@@ -19,6 +19,7 @@ ENV_VARS = (
     "DSPACE_TIMEOUT",
     "DSPACE_MAX_RESULTS",
     "DSPACE_PDF_MAX_MB",
+    "DSPACE_EXTRACT_MAX_MB",
 )
 
 
@@ -89,9 +90,18 @@ def test_config_api_url() -> None:
     assert config.api_url == "https://demo.dspace.org/server/api"
 
 
-def test_config_pdf_max_bytes() -> None:
-    assert Config(base_url="https://x.org").pdf_max_bytes == 20 * 1024 * 1024
-    assert Config(base_url="https://x.org", pdf_max_mb=1).pdf_max_bytes == 1048576
+def test_config_extract_max_bytes() -> None:
+    assert Config(base_url="https://x.org").extract_max_bytes == 20 * 1024 * 1024
+    assert (
+        Config(base_url="https://x.org", extract_max_mb=1).extract_max_bytes == 1048576
+    )
+
+
+def test_config_pdf_max_aliases_mirror_extract_max() -> None:
+    """Aliasy wsteczne: `pdf_max_*` czyta się tak samo jak `extract_max_*`."""
+    config = Config(base_url="https://x.org", extract_max_mb=1)
+    assert config.pdf_max_mb == 1
+    assert config.pdf_max_bytes == 1048576
 
 
 def test_config_is_frozen() -> None:
@@ -326,4 +336,91 @@ def test_parse_args_help_is_english(capsys: pytest.CaptureFixture[str]) -> None:
     assert excinfo.value.code == 0
     out = capsys.readouterr().out
     assert "--base-url" in out
+    assert "--extract-max-mb" in out
     assert "--pdf-max-mb" in out
+
+
+# --- extract_max_mb: nowa nazwa i alias wsteczny pdf_max_mb -----------------
+
+
+def test_extract_max_mb_from_new_env() -> None:
+    cfg = config_from_env(
+        {"DSPACE_BASE_URL": "https://x/server", "DSPACE_EXTRACT_MAX_MB": "5"}
+    )
+    assert cfg.extract_max_mb == 5
+    assert cfg.extract_max_bytes == 5 * 1024 * 1024
+
+
+def test_pdf_max_mb_env_is_backward_compatible_alias() -> None:
+    cfg = config_from_env(
+        {"DSPACE_BASE_URL": "https://x/server", "DSPACE_PDF_MAX_MB": "7"}
+    )
+    assert cfg.extract_max_mb == 7
+    # aliasy nadal odczytywalne
+    assert cfg.pdf_max_mb == 7
+    assert cfg.pdf_max_bytes == 7 * 1024 * 1024
+
+
+def test_new_env_wins_over_alias() -> None:
+    cfg = config_from_env(
+        {
+            "DSPACE_BASE_URL": "https://x/server",
+            "DSPACE_EXTRACT_MAX_MB": "5",
+            "DSPACE_PDF_MAX_MB": "7",
+        }
+    )
+    assert cfg.extract_max_mb == 5
+
+
+def test_extract_max_mb_cli_flag() -> None:
+    cfg = parse_args(["--base-url", "https://x/server", "--extract-max-mb", "9"])
+    assert cfg.extract_max_mb == 9
+
+
+def test_pdf_max_mb_cli_flag_still_works() -> None:
+    cfg = parse_args(["--base-url", "https://x/server", "--pdf-max-mb", "3"])
+    assert cfg.extract_max_mb == 3
+
+
+# --- extract_max_mb: alias nie może być czytany zachłannie ------------------
+#
+# Regresja: alias `DSPACE_PDF_MAX_MB` był wcześniej czytany bezwarunkowo jako
+# wyrażenie domyślne (eagerly), więc zepsuty alias psuł wywołania, które w
+# ogóle go nie potrzebowały. Każde źródło ma być czytane leniwie - tylko to,
+# które faktycznie wygrywa, wolno mu zgłosić błąd.
+
+
+def test_config_from_env_canonical_wins_even_when_alias_is_malformed() -> None:
+    cfg = config_from_env(
+        {
+            "DSPACE_BASE_URL": "https://x/server",
+            "DSPACE_EXTRACT_MAX_MB": "5",
+            "DSPACE_PDF_MAX_MB": "garbage",
+        }
+    )
+    assert cfg.extract_max_mb == 5
+
+
+def test_config_from_env_alias_malformed_raises_naming_alias() -> None:
+    """Alias jest jedynym źródłem - kanoniczna zmienna nie jest w ogóle ustawiona."""
+    with pytest.raises(ValueError) as excinfo:
+        config_from_env(
+            {"DSPACE_BASE_URL": "https://x/server", "DSPACE_PDF_MAX_MB": "garbage"}
+        )
+    assert "DSPACE_PDF_MAX_MB" in str(excinfo.value)
+
+
+def test_config_from_env_canonical_malformed_raises_naming_canonical() -> None:
+    with pytest.raises(ValueError) as excinfo:
+        config_from_env(
+            {"DSPACE_BASE_URL": "https://x/server", "DSPACE_EXTRACT_MAX_MB": "garbage"}
+        )
+    assert "DSPACE_EXTRACT_MAX_MB" in str(excinfo.value)
+
+
+def test_parse_args_flag_wins_even_when_alias_env_is_malformed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("DSPACE_PDF_MAX_MB", "garbage")
+    cfg = parse_args(["--base-url", "https://x/server", "--extract-max-mb", "9"])
+    assert cfg.extract_max_mb == 9

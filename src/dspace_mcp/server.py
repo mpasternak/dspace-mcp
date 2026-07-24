@@ -19,7 +19,6 @@ from mcp.server.fastmcp import Context, FastMCP
 from . import tools
 from .client import DSpaceClient, DSpaceError
 from .config import Config, parse_args
-from .pdf import PdfError
 
 
 @dataclass
@@ -44,7 +43,7 @@ def _guard(fn: Callable) -> Callable:
     async def wrapper(*args: Any, **kwargs: Any) -> Any:
         try:
             return await fn(*args, **kwargs)
-        except (DSpaceError, PdfError) as exc:
+        except DSpaceError as exc:
             return {"error": str(exc)}
 
     return wrapper
@@ -151,10 +150,13 @@ async def list_bitstreams(
 async def get_bitstream_text(
     ctx: Context, bitstream: str, max_chars: int = 20000
 ) -> dict[str, Any]:
-    """Extract the text of a PDF file so you can read or summarise it.
+    """Extract the text of a document so you can read or summarise it.
 
-    Only works for PDFs that carry a text layer; scans without OCR, encrypted
-    files and oversized files come back as a clear error with a download link.
+    Supports PDF, Word (.docx, legacy .doc), OpenDocument (.odt, .ods, .odp)
+    and Office Open XML (.pptx, .xlsx). The result reports which `format` was
+    read and, where meaningful, how many pages, slides or sheets it processed.
+    Scans without OCR, encrypted files, unsupported types and oversized files
+    come back as a clear error with a download link.
 
     Args:
         bitstream: UUID of the bitstream (get it from list_bitstreams).

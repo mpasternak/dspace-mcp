@@ -12,7 +12,6 @@ import pytest
 from dspace_mcp import server
 from dspace_mcp.client import DSpaceError
 from dspace_mcp.config import Config
-from dspace_mcp.pdf import PdfError
 
 EXPECTED_TOOLS = {
     "search_items",
@@ -66,14 +65,6 @@ async def test_guard_turns_dspace_error_into_answer():
         raise DSpaceError("Not found: no such object.")
 
     assert await failing() == {"error": "Not found: no such object."}
-
-
-async def test_guard_turns_pdf_error_into_answer():
-    @server._guard
-    async def failing():
-        raise PdfError("This PDF is password-protected.")
-
-    assert await failing() == {"error": "This PDF is password-protected."}
 
 
 async def test_guard_lets_real_bugs_through():
